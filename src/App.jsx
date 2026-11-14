@@ -9,6 +9,7 @@ import {
 } from "./lib/content.js";
 import { percent, hours, timeAt } from "./lib/analysis.mjs";
 import ArrivalComparison from "./components/ArrivalComparison.jsx";
+import ArrivalSeries from "./components/ArrivalSeries.jsx";
 import HomeV2 from "./pages/HomeV2.jsx";
 import Review from "./pages/Review.jsx";
 import SimulatorV2 from "./pages/SimulatorV2.jsx";
@@ -507,6 +508,15 @@ function Compare({ dataset, settings, setters, setIndex, mode }) {
                 go("simulator");
               }}
             />
+            <ArrivalSeries
+              siteData={sites[settings.siteId]}
+              siteName={manifest.sites.find((s) => s.id === settings.siteId)?.name}
+              period={manifest.period}
+              height={Number(settings.height)}
+              days={Number(settings.days)}
+              selectedDate={settings.date}
+              onSelect={setters.setDate}
+            />
           </div>
         </div>
       ) : null}
@@ -941,7 +951,7 @@ export default function App() {
             </main>
           }
         >
-          <Learn onStartTour={startTour} onOpen={go} />
+          <Learn onStartTour={startTour} onOpen={go} dataset={dataset} />
         </Suspense>
       ) : route === "mission" ? (
         <Mission

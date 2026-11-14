@@ -487,7 +487,63 @@ function Stepper({ onOpen }) {
   );
 }
 
-export default function Learn({ onStartTour, onOpen }) {
+
+/* Worked example with REAL dataset values (not a cartoon). */
+function WorkedExample({ dataset }) {
+  const id = "malapert-massif";
+  const data = dataset?.sites?.[id];
+  const point = dataset?.manifest?.sites?.find((s) => s.id === id);
+  const period = dataset?.manifest?.period;
+  if (!data?.metrics?.["1"] || !data?.metrics?.["5"] || !point || !period)
+    return (
+      <p role="status" className="caption">
+        The real worked example appears when the documented dataset has loaded.
+      </p>
+    );
+  const m1 = data.metrics["1"],
+    m5 = data.metrics["5"];
+  const h = (v, c) => (c ? "≥ " : "") + v.toFixed(0) + " h";
+  const pc = (v) => (v * 100).toFixed(0) + "%";
+  const rows = [
+    ["Longest period without direct Sun", h(m1.longestNoDirectSunH, m1.longestNoDirectSunCensored), h(m5.longestNoDirectSunH, m5.longestNoDirectSunCensored)],
+    ["Mean visible solar disc", pc(m1.meanSunVisibleFraction), pc(m5.meanSunVisibleFraction)],
+    ["Time with any direct Sun", pc(m1.sunlitTimeFraction), pc(m5.sunlitTimeFraction)],
+    ["Time with Earth above the terrain horizon", pc(m1.earthVisibleTimeFraction), pc(m5.earthVisibleTimeFraction)],
+  ];
+  return (
+    <div className="learn-worked learn-card">
+      <span className="learn-worked-label">Real data · not a cartoon</span>
+      <h3>Worked example: {point.name.split(" (")[0]}, 1 m versus 5 m</h3>
+      <p>
+        Same point ({point.latitudeDeg.toFixed(2)}°, {point.longitudeEastDeg.toFixed(2)}° E), same dates (
+        {period.startUtc.slice(0, 10)} to {period.endUtc.slice(0, 10)} UTC). Only the observer height changes.
+      </p>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr><th scope="col">Whole computed period</th><th scope="col">1 m</th><th scope="col">5 m</th></tr>
+          </thead>
+          <tbody>
+            {rows.map(([k, a, b]) => (
+              <tr key={k}><th scope="row">{k}</th><td>{a}</td><td>{b}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p>
+        <strong>In one sentence:</strong> raising the eyes 4 m lets them look over nearby bumps, so the Sun is hidden for a
+        much shorter stretch. Near the pole the Sun stays close to the horizon, so small terrain matters.
+      </p>
+      <p className="caption">
+        Values read at run time from data/sites/{id}.json (metrics on a 5-minute grid; “≥” means the period touches the
+        edge of the computed window). Geometry only: not power, battery or communication sizing. The point is from a
+        published LOLA study area and is not a selected landing site.
+      </p>
+    </div>
+  );
+}
+
+export default function Learn({ onStartTour, onOpen, dataset }) {
   const open = (route) => onOpen && onOpen(route);
   return (
     <main id="main" tabIndex={-1} className="page learn-page">
@@ -543,6 +599,7 @@ export default function Learn({ onStartTour, onOpen }) {
 
       <Module id="raise" number={1} title={raise.title} intro={raise.intro}>
         <RaiseObserver />
+        <WorkedExample dataset={dataset} />
         <Details summary="Going deeper">{raise.detail}</Details>
       </Module>
 

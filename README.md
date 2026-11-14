@@ -61,8 +61,7 @@ AI-assisted research, code, explanatory text, documentation and verification are
 - [Scientific checkpoint](scientific/PROGRESS.md)
 - [Test checkpoint](tests/PROGRESS.md)
 - [Design rationale](docs/DESIGN.md)
-- [Lessons applied from four global-winner repositories](docs/WINNER-LESSONS.md)
-- [Independent review of those changes](docs/review-winners-transfer.md)
+- [Lessons from 24 previous global winners and what we applied](docs/WINNER-LESSONS.md)
 
 ## Limits
 

@@ -209,6 +209,61 @@ export const researchProjects = [
     "Inspectable methods and carefully defined metrics",
   ],
   [
+    "Lunar Trek (LunarTech Ensemble, 2023)",
+    "https://github.com/yousefkotp/Lunar-Trek",
+    "Time series as a second reading of the data; candidate repository, ideas only",
+  ],
+  [
+    "Storm Prophet (2023)",
+    "https://github.com/Wizard2007/storm-prophet",
+    "Name exactly what a metric measures; candidate repository, ideas only",
+  ],
+  [
+    "Eco-Metropolis (2024)",
+    "https://github.com/RikzahK/Eco-Metropolis-Sustainable-City-Simulation---NASA-Space-App",
+    "Role-based entry points; candidate repository, ideas only",
+  ],
+  [
+    "TerraTales (2024)",
+    "https://github.com/habibaalaa123/TerraTales-NasaSpaceAppsChallenge",
+    "Places compared as stories; candidate repository, ideas only",
+  ],
+  [
+    "Gaia+LEO (2025)",
+    "https://github.com/stayingfoolish/gaia-LEO",
+    "Reproducibility from published files; ideas only",
+  ],
+  [
+    "Zumorroda-X / Henry's Farm Adventures (2025)",
+    "https://github.com/esralsayed/test_farmy",
+    "Before/after comparison; ideas only",
+  ],
+  [
+    "SkyShield, WMPGang (2024) — university report",
+    "https://news.westernu.ca/2025/01/western-students-win-nasa-challenge-with-app-shows-risks-to-space-infrastructure/",
+    "A well-justified scientific step beyond the brief",
+  ],
+  [
+    "2024 global winners — NASA announcement (Waterwise, 2plant, Landsat Connect, Asteroid Destroyer, G.R.O.W.)",
+    "https://www.nasa.gov/learning-resources/stem-engagement-at-nasa/nasa-international-space-apps-challenge-announces-2024-global-winners/",
+    "User constraints, next-pass timing, readable specialist data",
+  ],
+  [
+    "2025 global winners — official list (SpaceGenes+, Astro Sweepers, HerCode Space, Photonics Odyssey, QUEÑARIS, Resonant Exoplanets, Twisters)",
+    "https://www.spaceappschallenge.org/2025/awards/global-winners/",
+    "Named datasets, negative controls, worked examples, no opaque scores",
+  ],
+  [
+    "2023 global winners — official list (Space Quest Maidens and others)",
+    "https://www.spaceappschallenge.org/2023/awards/global-winners/",
+    "Simple geometric explanations for a defined audience",
+  ],
+  [
+    "Full mapping of 24 lessons to actions",
+    "https://github.com/Andre1B/lunar-navigator-spaceapps-2026/blob/main/docs/WINNER-LESSONS.md",
+    "Evidence level, lesson and action for each winner",
+  ],
+  [
     "CLPS Lunar Mission Browser",
     "https://github.com/EmanuelAbasto/CLPS-Lunar-Mission-Browser",
     "Related lunar-tool research",

@@ -2041,3 +2041,72 @@
     display: none;
   }
 }
+/* U3 arrival-date series */
+.arrival-series-chart {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 12px 0;
+}
+.arrival-series-label,
+.arrival-series-axis {
+  fill: var(--muted);
+  font-size: 11px;
+}
+.arrival-series-dark {
+  fill: #f0c978;
+}
+.arrival-series-dark.is-censored {
+  fill: none;
+  stroke: #f0c978;
+  stroke-width: 1.5;
+  stroke-dasharray: 3 2;
+}
+.arrival-series-earth {
+  fill: #80c5f7;
+}
+.arrival-series-marker {
+  fill: rgba(255, 255, 255, 0.08);
+  stroke: #ffffff;
+  stroke-width: 1;
+}
+.arrival-series-table summary {
+  cursor: pointer;
+  margin: 8px 0;
+}
+.arrival-series-table tr[aria-current="true"] th {
+  color: #f0c978;
+}
+/* U9 textual sky description */
+.sky-description {
+  padding: 16px 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  grid-column: 1/-1;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.sky-description-title {
+  margin: 0 0 6px;
+  font-size: 16px;
+}
+.sky-description-note {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 6px 0 0;
+}
+/* U6 worked example */
+.learn-worked table {
+  margin: 12px 0;
+}
+.learn-worked .learn-worked-label {
+  display: inline-block;
+  font-size: 12px;
+  color: #f0c978;
+  border: 1px solid #f0c978;
+  padding: 1px 6px;
+  margin-bottom: 8px;
+}
+.arrival-series .table-wrap {
+  position: relative;
+}

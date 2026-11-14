@@ -603,18 +603,30 @@ export default function SpaceSceneV2({
               angularRadius = THREE.MathUtils.radToDeg(
                 Math.asin(radius / distance),
               );
-            return visibleDiskFraction(
-              elevation,
-              horizonAt(profile, azimuth),
-              angularRadius,
-            );
+            const horizon = horizonAt(profile, azimuth);
+            return {
+              fraction: visibleDiskFraction(elevation, horizon, angularRadius),
+              elevationDeg: elevation,
+              azimuthDeg: (azimuth + 360) % 360,
+              horizonDeg: horizon,
+            };
           };
+          const sunDetail = disc(sun, sun.scale.x),
+            earthDetail = disc(earth, earth.scale.x);
           currentObservation = {
             siteId: site.id,
             index: i,
             height,
-            sun: disc(sun, sun.scale.x),
-            earth: disc(earth, earth.scale.x),
+            sun: sunDetail.fraction,
+            earth: earthDetail.fraction,
+            // Same interpolated geometry as the fractions; used for the text description.
+            sunDetail,
+            earthDetail,
+            frozen: Boolean(
+              freeze.moonRotation !== undefined ||
+                freeze.sunPosition !== undefined ||
+                freeze.earthPosition !== undefined,
+            ),
           };
           observationKey = observationId;
           latest.current.onObservation?.(currentObservation);

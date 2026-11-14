@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import Timeline from "../components/TimelineV2.jsx";
 import NextEvents from "../components/NextEvents.jsx";
+import SkyDescription from "../components/SkyDescription.jsx";
 import { percent, timeAt } from "../lib/analysis.mjs";
 const Scene = lazy(() => import("../components/SpaceSceneV2.jsx"));
 const cameras = [
@@ -440,6 +441,17 @@ export default function SimulatorV2({
                 period={manifest.period}
                 index={index}
                 height={height}
+              />
+            ) : null}
+            {mode === "faithful" && data && manifest ? (
+              <SkyDescription
+                observation={observation}
+                siteId={siteId}
+                siteName={name(site)}
+                height={height}
+                index={index}
+                period={manifest.period}
+                playing={playing}
               />
             ) : null}
             <section className="explorer-prompt">

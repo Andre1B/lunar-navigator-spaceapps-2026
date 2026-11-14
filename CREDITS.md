@@ -40,7 +40,7 @@ Additional source inspection on 2026-11-14 (ideas only; no competitor code or as
 - Connected Earth Museum: inspected the 2024-window revision `e2fc8e0b509e64d68ffc364c2b42d606d88a139f` separately from its 2025 rewrite. The exact judged revision is not established. Camera stops informed the idea of a short, navigable review.
 - PureFlow 2025, revision `df234861e4710bf463595396f4c85b8b58574a89`: immediate quantified consequences informed our constraint feedback and downloadable comparison record.
 
-No root licence was found in the inspected competition-era revisions of these four repositories. We learned presentation and architecture principles and implemented our own code. Inspection does not establish the judges' reasons for an award. See [docs/WINNER-LESSONS.md](docs/WINNER-LESSONS.md).
+We studied 24 previous global winners (repositories where observed, otherwise official pages, live demos or news). Licences differ: several competition-window commits had no root licence, one (Storm Prophet) was MIT. We learned presentation and architecture principles and implemented our own code; no competitor code or assets are included. This is inspiration, not a dependency, and does not establish the judges' reasons for an award. Every source and repository is linked in [docs/WINNER-LESSONS.md](docs/WINNER-LESSONS.md).
 
 Research considered prior winners and related tools. No competitor code was copied into this implementation. If any future reuse occurs, record the exact repository, revision, files and license here before publication. Inspiration is distinct from a dependency or validated scientific reference.
 

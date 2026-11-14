@@ -69,3 +69,12 @@ Explicit new request: study more than20 projects and transfer applicable strengt
 24 dossiers completed,10 public repositories inspected with association/version caveats. The expanded private studies have been appended to the existing TXT. U1/U2/U4/U5/U7/U10 integrated;121 unit/data/integrity tests and directed A/B10/10 passed. The single mobile summary target was fixed to36px and rechecked; no broad rerun is claimed. Sol high source gate found no evidenced blocker. New science/UI source and tests are checkpointed together; production remains pending.
 Claude feb63b33 now owns integration, following the accepted handoff; tests stay with df6de34e. Remaining compatible U3/U6/U9 plus24-project mapping, docs and production gates are assigned. Private task handoff contains exact commands/ownership/evidence. No reset used; tool cannot consume them. No source or hosting changes to any other project are authorized. Preserve eligibility transparency and use a candidate tag, never a submission claim.
 
+
+## 2026-11-14 · Claude integration after handoff (base a7ab3f6)
+
+- **U3:** arrival-date series in Compare (`src/lib/arrivalSeries.mjs`, `src/components/ArrivalSeries.jsx`). Same `eventSummary` as the table; lower bounds visible; "Use as arrival" sets the date; no ranking.
+- **U6:** real worked example in Learn, Malapert at 1 m versus 5 m, read at run time from `sites/malapert-massif.json` metrics.
+- **U9:** `SkyDescription` (Faithful only). It uses the same interpolated observation as the on-screen percentages; `SpaceSceneV2` now also emits `sunDetail`, `earthDetail` and `frozen`. The polite live region updates only after time settles.
+- **Docs:** `docs/WINNER-LESSONS.md` now covers all 24 winners, with evidence, lesson and action (or the reason for not adopting). It supersedes and removes `review-winners-transfer.md`. Also updated: CREDITS, the visible research links (`content.js`), the summary HTML and TXT, and demo slide 3 (its screenshot is now labelled as an earlier version).
+- **Checks:** `npm run build` passes, `npm test` reports 0 failures and `check:data` reports 8 files valid. Browser checks of U3, U6 and U9 are requested from the test agent df6de34e.
+- **Next:** test results, then commit, push and a release-candidate tag, then a clean build, deployment of `lunar-navigator-2026` only, and production QA with Lighthouse.
