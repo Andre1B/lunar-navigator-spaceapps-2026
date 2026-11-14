@@ -8,8 +8,8 @@ const cameras = [
   ["overview", "Moon orbit", "Inspect the lunar globe"],
   ["earth", "Earth", "Inspect our home planet"],
   ["south", "South pole", "Look down on the region"],
-  ["sky", "Surface sky", "Look above the terrain"],
-  ["terrain", "Local terrain", "Explore a 20 km window"],
+  ["sky", "Surface sky", "Horizon diagram: what blocks your view"],
+  ["terrain", "Local terrain", "Real 3D terrain, light and shadows"],
   ["pair", "Earth–Moon scale", "See the real separation"],
   ["system", "Solar system", "True sizes and distances"],
 ];
@@ -22,6 +22,7 @@ export default function SimulatorV2({
   mode,
   setMode,
   siteId,
+  inspecting = false,
   setSiteId,
   height,
   setHeight,
@@ -53,6 +54,16 @@ export default function SimulatorV2({
   clock.current = index;
   const site = manifest?.sites.find((s) => s.id === siteId),
     data = sites[siteId];
+  const atEnd = !!manifest && index >= manifest.period.sampleCount - 1;
+  function restart(play = false) {
+    clock.current = 0;
+    setIndex(0);
+    setPlaying(play);
+  }
+  function togglePlayback() {
+    if (atEnd && !playing) restart(true);
+    else setPlaying((v) => !v);
+  }
   useEffect(() => {
     const f = (e) => {
       if (e.key === "Escape") setImmersive(false);
@@ -107,10 +118,10 @@ export default function SimulatorV2({
     >
       <div className="explorer-heading">
         <div>
-          <h1>Lunar sunlight & visibility simulator</h1>
+          <h1>See what the lunar terrain hides.</h1>
           <p>
-            Choose a viewpoint, move time, then compare sunlight and Earth
-            visibility at four lunar study points.
+            Press Play to move time. Does the Sun clear the hills? Can this
+            place see Earth? Change the height, then compare an arrival delay.
           </p>
         </div>
         <div className="explorer-actions">
@@ -127,6 +138,12 @@ export default function SimulatorV2({
         </div>
       </div>
       <div className="explorer-layout">
+        {inspecting ? (
+          <p className="inspection-note">
+            Inspecting a comparison snapshot. Your original location and dates
+            are preserved. <a href="#/compare">Return to your comparison →</a>
+          </p>
+        ) : null}
         <aside
           className={"explorer-setup " + (setupOpen ? "" : "setup-collapsed")}
         >
@@ -171,6 +188,13 @@ export default function SimulatorV2({
               ))}
             </select>
           </div>
+          <p className="height-explainer">
+            Height of your eyes, camera or antenna above the ground — not the 3D
+            camera altitude. Small height changes can clear a nearby ridge.
+            {height < 1
+              ? " At 0.5 m, unresolved ground details can strongly affect the result."
+              : ""}
+          </p>
           <div className="camera-presets" data-tour="camera-presets">
             <h3>Camera</h3>
             <label className="sr-only" htmlFor="explorer-view">
@@ -212,13 +236,13 @@ export default function SimulatorV2({
                 aria-pressed={mode === "faithful"}
                 onClick={() => changeMode("faithful")}
               >
-                Faithful Mode <small>One astronomical clock</small>
+                Faithful Mode <small>Real positions, one shared time</small>
               </button>
               <button
                 aria-pressed={mode === "free"}
                 onClick={() => changeMode("free")}
               >
-                Free Mode <small>Your deliberate experiment</small>
+                Free Mode <small>Freeze individual motions</small>
               </button>
             </div>
             <span className="explorer-mode-note">
@@ -288,7 +312,7 @@ export default function SimulatorV2({
               </span>
               <span>
                 {view === "sky"
-                  ? "True apparent sizes · terrain horizon"
+                  ? "Horizon diagram · true apparent sizes"
                   : view === "terrain"
                     ? "20 km terrain window · visual geometry"
                     : "Physical sizes & distances · camera zoom only"}
@@ -303,7 +327,7 @@ export default function SimulatorV2({
               <div className="world-reading">
                 <span>
                   <i className="sun-dot" />
-                  Sun disc{" "}
+                  Sun in view{" "}
                   <strong>
                     {percent(
                       observation?.siteId === siteId &&
@@ -316,7 +340,7 @@ export default function SimulatorV2({
                 </span>
                 <span>
                   <i className="earth-dot" />
-                  Earth disc{" "}
+                  Earth in view{" "}
                   <strong>
                     {percent(
                       observation?.siteId === siteId &&
@@ -367,15 +391,63 @@ export default function SimulatorV2({
               </>
             ) : null}
           </section>
+          {!immersive && mode === "faithful" ? (
+            <p className="readout-guide">
+              Sun / Earth in view: the percentage of each disc above the hills{" "}
+              <strong>at this instant</strong>. 100% means the whole disc; 0%
+              means hidden. These are not percentages of time or power.
+            </p>
+          ) : null}
+          {view === "sky" ? (
+            <aside className="sky-view-guide">
+              <div>
+                <strong>
+                  This is a horizon diagram, not a photograph of the ground.
+                </strong>
+                <p>
+                  Grey means terrain blocks that part of the sky. It does not
+                  mean the ground is dark. The Sun is small because its apparent
+                  size is real. Use “Look at Sun” to find it.
+                </p>
+                {mode === "faithful" &&
+                observation?.siteId === siteId &&
+                observation?.height === height &&
+                observation?.index === index ? (
+                  <p>
+                    {observation.sun > 0
+                      ? "Some direct sunlight reaches this observer now."
+                      : "The terrain hides the Sun from this observer now."}{" "}
+                    {observation.earth > 0
+                      ? "Earth is also in view."
+                      : "Earth is out of view."}
+                  </p>
+                ) : null}
+              </div>
+              <button onClick={() => setView("terrain")}>
+                See sunlit terrain
+              </button>
+            </aside>
+          ) : null}
+          {view === "terrain" ? (
+            <p className="view-explainer">
+              Real elevation data, with sunlight from the selected time. This is
+              an overhead view of a 20 km patch. For what an observer at{" "}
+              {height} m can see over all the hills, choose Surface sky.
+            </p>
+          ) : null}
           <section className="explorer-time" data-tour="time-controls">
             <div className="playback">
               <div className="playback-buttons">
                 <button
                   className="button play-button"
-                  disabled={!manifest}
-                  onClick={() => setPlaying((v) => !v)}
+                  disabled={!manifest || !data}
+                  aria-pressed={playing}
+                  onClick={togglePlayback}
                 >
-                  {playing ? "Pause" : "Play"}
+                  {playing ? "Pause" : atEnd ? "Replay from start" : "Play"}
+                </button>
+                <button disabled={!manifest} onClick={() => restart(false)}>
+                  Restart
                 </button>
                 <button
                   disabled={
@@ -415,6 +487,13 @@ export default function SimulatorV2({
                 </select>
               </label>
             </div>
+            <p className="playback-status" role="status">
+              {playing
+                ? `Playing · ${speed} simulated hours per second. Press Pause to inspect a moment.`
+                : atEnd
+                  ? "End of the calculated period. Replay starts again on 1 March 2027."
+                  : "Paused. Press Play, step one hour, or drag the time slider."}
+            </p>
             <div data-tour="light-tracks">
               {manifest ? (
                 <Timeline
@@ -423,7 +502,11 @@ export default function SimulatorV2({
                   height={height}
                   period={manifest.period}
                   index={index}
-                  onChange={setIndex}
+                  onChange={(value) => {
+                    setPlaying(false);
+                    clock.current = value;
+                    setIndex(value);
+                  }}
                 />
               ) : (
                 <p role="status">
@@ -434,6 +517,12 @@ export default function SimulatorV2({
               )}
             </div>
           </section>
+          <p className="simulator-next">
+            <a href="#/compare">
+              What if arrival is delayed? Compare the results →
+            </a>
+            <a href="#/learn">Explain these measurements</a>
+          </p>
           <div className="explorer-bottom">
             {mode === "faithful" && data && manifest ? (
               <NextEvents

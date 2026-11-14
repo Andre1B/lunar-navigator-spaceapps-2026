@@ -3,10 +3,10 @@ import { useMemo } from "react";
 import { nextEvents, EVENT_METHOD } from "../lib/nextEvents.mjs";
 
 const NAMES = {
-  sunrise: "Sunrise",
-  sunset: "Sunset",
-  earthrise: "Earthrise",
-  earthset: "Earthset",
+  sunrise: "Sun comes into view",
+  sunset: "Sun leaves view",
+  earthrise: "Earth comes into view",
+  earthset: "Earth leaves view",
 };
 
 export default function NextEvents({ siteData, period, index, height }) {
@@ -17,7 +17,7 @@ export default function NextEvents({ siteData, period, index, height }) {
   return (
     <section className="next-events" aria-labelledby="next-events-title">
       <h3 id="next-events-title" className="next-events-title">
-        Next transitions above the terrain horizon
+        Next changes in the sky
       </h3>
       {result.status !== "ok" ? (
         <p className="next-events-unavailable" role="status">

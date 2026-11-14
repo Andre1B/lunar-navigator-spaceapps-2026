@@ -78,3 +78,7 @@ No NASA approval, certification or endorsement is claimed. NASA protected identi
 Official Space Apps logo: original **Logo Geral - Branco.png**, supplied in the [Campinas organizer folder](https://drive.google.com/drive/folders/1oEYEEhBYOhOAP3cxB3eObGyAclqgAGnO), file ID 1UP7H6w3Te5Ja4n0vscKjWot2buCc-FqT, downloaded 2026-11-14 without alteration. Used only to identify participation, with clear space; not the app identity and not an endorsement. Brand rights remain with their owner, outside the Apache-2.0 code license.
 
 Mobile texture derivatives (Moon, Earth, clouds, ocean mask and stars): Lanczos 1024 x 512 conversions of the credited parent assets. Parent/output hashes and inherited licences are in public/data/globe/mobile-textures.json. No source elevations or numerical visibility products were changed.
+
+## Additional comprehension research (no code or assets reused)
+
+Cambridge Asteroids / Voxsteroid (2021), https://github.com/Laurence-Cullen/Asteroids, and Change Maker / SHINE (2021), https://github.com/ChangeMakerGroupEdition/Sunshine: selected source files were inspected to study input/output explanations and onboarding. Ideas were independently applied; no code was copied or executed. Official award sources, inspected commits, limitations and applied suggestions are recorded in [CLARITY-CORRECTIONS.md](docs/CLARITY-CORRECTIONS.md). The same document records additional narrative research on the Brazilian Greetings from Earth!! and Oogway Comics (2023), using the NASA announcement rather than claiming a live-app inspection.

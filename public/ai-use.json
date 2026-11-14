@@ -12,7 +12,8 @@
         "explanatory copy",
         "documentation",
         "integration",
-        "verification"
+        "verification",
+        "five-height scientific generator extension and bounded review after a Claude rate limit"
       ]
     },
     {
@@ -31,6 +32,14 @@
       "effort": "medium",
       "uses": [
         "bounded visual art direction and review"
+      ]
+    },
+    {
+      "name": "Codex",
+      "configuredModel": "GPT-6 Luna",
+      "effort": "high",
+      "uses": [
+        "independent regression and browser tests during the clarity correction round after a Claude rate limit"
       ]
     }
   ],

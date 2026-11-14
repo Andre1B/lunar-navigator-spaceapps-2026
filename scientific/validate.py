@@ -207,9 +207,21 @@ def v5_sanity(models, mid, far):
     rows = []
     ok = True
     for m in models:
-        mono_h = bool(np.all(m.horizon[5] <= m.horizon[1] + 1e-9))
-        ok &= mono_h
-        rows.append({"site": m.site["id"], "horizon5mNotAbove1m": mono_h})
+        with open(os.path.join(B.OUT, "sites", m.site["id"] + ".json"), encoding="utf-8") as f:
+            generated = json.load(f)
+        pairs = []
+        for lower, upper in zip(B.OBSERVER_HEIGHTS_M, B.OBSERVER_HEIGHTS_M[1:]):
+            mono_h = bool(np.all(m.horizon[upper] <= m.horizon[lower] + 1e-9))
+            fractions = {}
+            for body in ("sun", "earth"):
+                lo = np.asarray(generated[body]["visibleFraction"][str(lower)])
+                hi = np.asarray(generated[body]["visibleFraction"][str(upper)])
+                fractions[body] = bool(np.all(hi >= lo - 1e-12))
+            ok &= mono_h and all(fractions.values())
+            pairs.append({"lowerM": lower, "upperM": upper,
+                          "higherHorizonNotAboveLower": mono_h,
+                          "higherVisibleFractionNotBelowLower": fractions})
+        rows.append({"site": m.site["id"], "adjacentHeightPairs": pairs})
     # Permanently shadowed pixel inside Shackleton (PDS LPSR_85S_060M = 1).
     lpsr = g.load_pds_polar_map(os.path.join(B.CACHE, "dem", "LPSR_85S_060M_201608.IMG"))
     lat, lon = -89.67, 129.78
@@ -228,7 +240,7 @@ def v5_sanity(models, mid, far):
                               "maxSunFraction2024to2026": round(float(frac.max()), 4)}})
     return test(
         "V5", "Sanity: height monotonicity and a permanently shadowed pixel",
-        "Horizon at 5 m must not exceed horizon at 1 m; a pixel flagged permanently shadowed in PDS LPSR_85S_060M (Shackleton floor, 80 m DEM near field) must receive no direct sunlight hourly over 2024-2026.",
+        "For every adjacent pair of observer heights (0.5, 1, 2, 5, 10 m), the higher horizon must not exceed the lower and generated hourly Sun/Earth visible fractions must not decrease; a pixel flagged permanently shadowed in PDS LPSR_85S_060M (Shackleton floor, 80 m DEM near field) must receive no direct sunlight hourly over 2024-2026.",
         "booleans; max solar-disk fraction at PSR pixel", "all true; PSR max fraction = 0",
         rows, "pass" if ok else "fail", "scientific/validate.py v5_sanity",
         "PSR test uses the 80 m DEM as near field (no 5 m PGDA tile covers this pixel).")

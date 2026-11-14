@@ -1,13 +1,13 @@
 {
  "schemaVersion": "1.0.0",
  "purpose": "Identify the exact derived dataset used by the app and by downloaded comparison reports. Hashes cover the files' current bytes; input data hashes are in manifest.provenance.",
- "hashedAtUtc": "2026-11-14T19:58:30Z",
- "manifestGeneratedAtUtc": "2026-11-14T13:09:37Z",
+ "hashedAtUtc": "2026-11-14T22:33:38Z",
+ "manifestGeneratedAtUtc": "2026-11-14T22:32:47Z",
  "files": [
   {
    "file": "manifest.json",
-   "bytes": 7973,
-   "sha256": "f297e7ab6fb206012742e02922ee16c7a62e775f5c996ff2179379e8adba181d"
+   "bytes": 8434,
+   "sha256": "8335d9c20eb34ddf83204ff812f5392f2bdb9ef76c11fd76192ef5a453d282db"
   },
   {
    "file": "sky.json",
@@ -21,28 +21,28 @@
   },
   {
    "file": "validation.json",
-   "bytes": 6631,
-   "sha256": "a4d88219434a0511d2586582582bc4ba3f52d939177400a34dc1e2f55ad1dfae"
+   "bytes": 9971,
+   "sha256": "683c49930423fb796de83de5263bfaf9281b6b380468c9f4e74cec346e50be24"
   },
   {
    "file": "sites/connecting-ridge.json",
-   "bytes": 128872,
-   "sha256": "2506db3a3477ea57835405cea51cad87ce3d1eafec395519cf889a8cb981599b"
+   "bytes": 186457,
+   "sha256": "f23dbf01160bf24d03e58c42e43d18dbd578887e30b8db7d518abd606c4ee458"
   },
   {
    "file": "sites/shackleton-rim.json",
-   "bytes": 128602,
-   "sha256": "bd9f7aac0f268827ca98536261724c87d366a92168fb02b3199fde51ceccf823"
+   "bytes": 187820,
+   "sha256": "5203fe1566e608bb8ef6c78bddac9010b935dfd380be3e3753849c2ac59a5221"
   },
   {
    "file": "sites/nobile-rim-1.json",
-   "bytes": 124579,
-   "sha256": "d77ca6861aba015addb6eecd2cca794668c49b00188179f500d0817781dca2cc"
+   "bytes": 179872,
+   "sha256": "d20eac1e2c7d47840f403137f8675d9a60dccb395af0ef991ba94a2ac32b80c0"
   },
   {
    "file": "sites/malapert-massif.json",
-   "bytes": 123418,
-   "sha256": "60643c2817c13de82557360b397d44962ab4e95f23a6647890f1f76a6d3913f5"
+   "bytes": 180352,
+   "sha256": "074f0de71f4e303406468ca9adee7e984dd58cbbd3533fa2c5e8806beb69c3be"
   }
  ],
  "generator": "scientific/hash_dataset.py"

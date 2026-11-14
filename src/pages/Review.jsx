@@ -12,13 +12,14 @@ export default function Review({ dataset, settings }) {
     <main id="main" tabIndex={-1} className="page review-page">
       <p className="section-label">Review in three minutes</p>
       <h1>
-        A changed arrival date.
-        <br />A decision you can inspect.
+        If a Moon landing is delayed,
+        <br />
+        how does sunlight change?
       </h1>
       <p className="lead">
-        At the lunar south pole, a small ridge can hide the low Sun. A delay
-        changes the sky. Does your original point still meet the conditions you
-        chose?
+        This tool compares how long a lunar place can see the Sun and Earth.
+        Choose a place, arrival date and observer height. Compare the original
+        arrival, a delay and another place; use the 3D simulator to see why.
       </p>
       <nav className="review-jumps" aria-label="Review steps">
         <a href="#/simulator">Inspect the simulator</a>
@@ -32,10 +33,10 @@ export default function Review({ dataset, settings }) {
           <h2>Terrain and time decide what you can see.</h2>
           <p>
             Choose one of four points within published LOLA polar study regions
-            and an observer height of 1 or 5 metres. Two points are published
-            region centroids; we selected the other two from the published
-            illumination map. Their exact coordinates and selection methods are
-            public.
+            and an observer height of 0.5, 1, 2, 5 or 10 metres. Two points are
+            published region centroids; we selected the other two from the
+            published illumination map. Their exact coordinates and selection
+            methods are public.
           </p>
           <p>
             Move one astronomical clock in Faithful Mode, inspect the terrain
@@ -66,11 +67,11 @@ export default function Review({ dataset, settings }) {
                   </p>
                   <dl>
                     <div>
-                      <dt>Mean visible Sun</dt>
-                      <dd>{percent(r.summary?.meanSun)}</dd>
+                      <dt>Time with some sunlight</dt>
+                      <dd>{percent(r.summary?.sunlitFraction)}</dd>
                     </div>
                     <div>
-                      <dt>Longest darkness</dt>
+                      <dt>Longest time without Sun</dt>
                       <dd>{hours(r.summary?.dark)}</dd>
                     </div>
                     <div>
@@ -85,9 +86,10 @@ export default function Review({ dataset, settings }) {
             )}
           </div>
           <p className="caption">
-            A ≥ value is a lower bound. Mean Sun is an hourly approximation;
-            duration events use a 5-minute search refined to at most 1 minute.
-            Shorter events can be missed.
+            The percentages describe the share of your stay. A ≥ value means the
+            period continues beyond your window, so its full length may be
+            longer. Duration events use a 5-minute search refined to at most 1
+            minute. Shorter events can be missed.
           </p>
           <a className="button" href="#/compare">
             Change the inputs & download the result
@@ -117,7 +119,9 @@ export default function Review({ dataset, settings }) {
               </small>
             </div>
             <div>
-              <strong>1 & 5 m</strong>
+              <strong>
+                {dataset.manifest?.observerHeightsM.length ?? "—"}
+              </strong>
               <span>observer heights, with executed sensitivity checks</span>
               <small>
                 See V2–V5, including the exploratory-target caveat in V2.

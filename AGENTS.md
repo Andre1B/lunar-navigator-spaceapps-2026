@@ -2,7 +2,7 @@
 
 Human-approved direction: Guided Mission (~10 minutes), Open Workspace (all stages available immediately), Faithful Mode (shared physical time), Free Mode (clearly labeled artificial freezes). English throughout. Public site and open-source repository. Do not touch any other Cloudflare project or Casa Bom Dia.
 
-Current explicit handoff (2026-11-14): Claude feb63b33 owns frontend, root configuration, docs, scientific/ and public/data/ integration while Codex approaches its usage limit. Codex is read/review only until ownership is handed back. Independent test agent df6de34e owns tests/ only. Coordinate before crossing ownership. The private task handoff and docs/PROGRESS.md record the current checkpoint.
+Current explicit handback (2026-11-14, clarity/bug-fix round): Codex c7a52caa owns frontend, root configuration, docs and deploy. Partner feb63b33 owns scientific/ and public/data/ only. Independent test agent df6de34e owns tests/ only. The Claude agents temporarily use Codex models because of the Claude rate limit. Coordinate before crossing ownership. Record the current checkpoint in docs/PROGRESS.md.
 
 Run npm run build, npm test and npm run credits. Production Lighthouse >=90, keyboard, reduced-motion, responsive and core workflow checks are required. Record actual evidence; pending is not passed.
 

@@ -264,6 +264,21 @@ export const researchProjects = [
     "Evidence level, lesson and action for each winner",
   ],
   [
+    "Cambridge Asteroids / Voxsteroid (2021)",
+    "https://github.com/Laurence-Cullen/Asteroids",
+    "Input-to-output experiment and explicit aiming controls; research only, no code copied",
+  ],
+  [
+    "Change Maker / SHINE (2021)",
+    "https://github.com/ChangeMakerGroupEdition/Sunshine",
+    "Purpose, audience and explanations beside results; research only, no code copied",
+  ],
+  [
+    "Clarity corrections and additional winner research",
+    "https://github.com/Andre1B/lunar-navigator-spaceapps-2026/blob/main/docs/CLARITY-CORRECTIONS.md",
+    "User feedback, observed features, suggestions and the changes actually applied",
+  ],
+  [
     "CLPS Lunar Mission Browser",
     "https://github.com/EmanuelAbasto/CLPS-Lunar-Mission-Browser",
     "Related lunar-tool research",

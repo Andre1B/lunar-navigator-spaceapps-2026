@@ -46,10 +46,10 @@ export const tourSteps = [
   },
   {
     route: "compare",
-    target: '[data-tour="scenario-table"]',
+    target: '[data-tour="comparison-answer"]',
     title: "Compare three versions of a plan.",
     body: "The original arrival, the same location after a delay and an alternative location use the same operating duration and observer height.",
-    try: "Compare the sunlight and the longest darkness. There is no universally best location.",
+    try: "Read the longest stretch without sunlight, then the share of time with Sun or Earth in view. The detailed table is optional.",
   },
   {
     route: "compare",

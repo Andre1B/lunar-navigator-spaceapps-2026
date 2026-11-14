@@ -61,3 +61,18 @@ PYTHONPATH=. python -P validate.py --horizons
 - Mobile textures: build_mobile_textures.py makes 1024x512 Lanczos variants (moon colour, earth ground, clouds, specular, starmap) from the local 2k files, plus globe/mobile-textures.json (parents, hashes). Requested for the 148 ms texture-upload bottleneck on mobile.
 - Winners study: tmp/winners-study-2026-11-14.txt covers 4 global winners cloned without execution (Spacebee 2023, QuakeHeroes 2024, Connected Earth 2024, PureFlow 2025). Correction found: the earlier notes on Connected Earth read 2025 rewrite files, not the judged commit e2fc8e0.
 - integrity: hash_dataset.py (stdlib only) writes public/data/integrity.json with the SHA-256 of manifest, sky, planets, validation and the 4 site files as they are now, plus manifestGeneratedAtUtc. No data was regenerated.
+
+
+## 2026-11-14 ? five observer heights (Sol medium, no commit)
+
+Accepted contract: 0.5, 1, 2, 5, 10 m above the DEM surface; separately calculated horizons, observer positions, visible fractions, refined events and metrics at every height. Shared geometry arrays explicitly retain the 1 m reference. The period, source inputs and sampling/refinement methods are unchanged. Low-height sensitivity is disclosed; 0.5 m is not a terrain accuracy claim.
+
+- `python -u build_scenes.py`: exit 0, four sites generated.
+- `python -u validate.py --horizons`: exit 0; V1/V2/V3/V4/V5 pass, V4b informational. V5 checks unrounded horizons and generated hourly Sun/Earth fractions for all four adjacent height pairs at every site, plus the existing PSR check.
+- Regression against the pre-generation snapshot at `scientific/cache/height-baseline/` (ignored): restricting each site document to its original 1/5 m horizon, fractions, metrics and events yields the entire original compact JSON byte for byte; all four sites pass. `sky.json` also byte-identical. No original numeric values changed.
+- `python scientific/hash_dataset.py`, then `npm run check:data`: 8/8 files verified. Changed JSON files contain no CRLF.
+- Four site files: 505471 -> 734501 bytes total (uncompressed).
+- `npm run build` passed (existing large-chunk warning); `npm run credits` verified 163 package records, zero missing repository URLs. Its generated timestamp-only diff was reverted.
+- Existing `npm test` after hashing: 122 pass / 6 fail. Five failures hardcode the old [1,5] height contract. One event test incorrectly assumes no second transition before the next hourly sample: Connecting ridge at 2 m on March 3 sets at 15:02:39, rises at 15:25:28, and sets at 17:10:28, so 16:00 legitimately has a visible fraction of 0.003. Independent tests owner notified to update the contract and test the intervening event sequence; no tolerance relaxation requested. Updated independent tests remain pending at this checkpoint.
+
+Frontend, root configuration, docs and deploy belong to coordinator c7a52caa; only scientific/ and public/data/ are included in this handoff. No commit or deploy performed. Production, keyboard, reduced-motion and Lighthouse checks belong to the integration/QA stage and were not claimed for this dataset change.

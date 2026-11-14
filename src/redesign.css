@@ -1,6 +1,9 @@
 /* V2: a scene-first scientific explorer, with restrained aerospace color. */
 /* A short review and audit trail share the simulator's visual language. */
-.scene-method > summary { min-height:36px; padding:10px 0; }
+.scene-method > summary {
+  min-height: 36px;
+  padding: 10px 0;
+}
 .metric-product {
   display: block;
   font-size: 12px;
@@ -2109,4 +2112,293 @@
 }
 .arrival-series .table-wrap {
   position: relative;
+}
+/* Clarity round: keep the existing visual system; answer before technical detail. */
+.home-v2 .home-copy h1 {
+  font-size: clamp(36px, 4.2vw, 64px);
+  max-width: 800px;
+  line-height: 1.08;
+}
+.home-v2 .home-actions {
+  flex-wrap: wrap;
+}
+.home-v2 .home-actions .button {
+  min-width: 0;
+  text-decoration: none;
+  flex: 0 1 auto;
+}
+.home-v2 .home-actions .button small {
+  display: block;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.home-v2 .home-scope {
+  font-size: 14px;
+  line-height: 1.6;
+  max-width: 650px;
+}
+.height-explainer {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 8px 0 18px;
+}
+.comparison-answer {
+  padding: 0 0 28px;
+  border-bottom: 1px solid var(--line);
+}
+.comparison-answer h2 {
+  font-size: 27px;
+  margin: 0 0 12px;
+}
+.answer-explanation {
+  font-size: 18px;
+  line-height: 1.6;
+  max-width: 850px;
+  margin: 0 0 24px;
+}
+.answer-scenarios {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.answer-scenario {
+  padding: 22px;
+  min-width: 0;
+}
+.answer-scenario + .answer-scenario {
+  border-left: 1px solid var(--line);
+}
+.answer-scenario h3 {
+  font-size: 19px;
+  margin: 0 0 8px;
+}
+.answer-context {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--muted);
+  min-height: 48px;
+}
+.answer-scenario dl {
+  margin: 20px 0;
+}
+.answer-scenario dl > div {
+  margin-bottom: 20px;
+}
+.answer-scenario dt {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.answer-scenario dd {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.4;
+  color: #f6c36f;
+  font-weight: 600;
+}
+.answer-scenario dl > div:nth-child(3) dd {
+  color: #80d6e8;
+}
+.answer-inspect {
+  font-size: 13px;
+  min-height: 40px;
+  width: 100%;
+  padding: 9px;
+}
+.answer-meaning {
+  font-size: 15px;
+  line-height: 1.7;
+  margin: 20px 0;
+}
+.plain-help,
+.comparison-details {
+  border-top: 1px solid var(--line);
+  padding: 18px 0;
+}
+.plain-help summary,
+.comparison-details > summary {
+  font-size: 16px;
+  min-height: 40px;
+  padding: 8px 0;
+  cursor: pointer;
+  color: #9bcfff;
+  font-weight: 600;
+}
+.plain-help dl > div {
+  margin: 16px 0;
+}
+.plain-help dt {
+  font-weight: 600;
+  line-height: 1.5;
+}
+.plain-help dd {
+  color: var(--muted);
+  margin: 6px 0;
+  line-height: 1.7;
+}
+.comparison-details > section {
+  margin-top: 24px;
+}
+.comparison-details > p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+.sky-view-guide {
+  background: #172337;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  border-top: 1px solid #697481;
+}
+.sky-view-guide strong {
+  font-size: 15px;
+  line-height: 1.5;
+}
+.sky-view-guide p {
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 6px 0 0;
+  color: #d2dbe7;
+}
+.sky-view-guide button {
+  flex-shrink: 0;
+  min-height: 44px;
+  font-size: 14px;
+}
+.view-explainer {
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 14px 20px;
+  margin: 0;
+  background: var(--surface);
+}
+.playback-status {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin: 14px 0;
+}
+.playback {
+  flex-wrap: wrap;
+}
+.playback-buttons {
+  flex-wrap: wrap;
+}
+.simulator-next {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 15px;
+  line-height: 1.6;
+  padding: 12px 0;
+}
+.simulator-next a {
+  padding: 8px 0;
+  min-height: 36px;
+}
+.camera-controls {
+  flex-wrap: wrap;
+  max-width: calc(100% - 24px);
+}
+.camera-controls button {
+  min-height: 36px;
+}
+.world-reading {
+  pointer-events: none;
+}
+@media (max-width: 1100px) {
+  .answer-scenarios {
+    grid-template-columns: 1fr;
+  }
+  .answer-scenario + .answer-scenario {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+  .answer-scenario dl {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+  .answer-context {
+    min-height: 0;
+  }
+  .answer-scenario dd {
+    font-size: 20px;
+  }
+}
+@media (max-width: 720px) {
+  .answer-scenario {
+    padding: 18px;
+  }
+  .answer-scenario dl {
+    grid-template-columns: 1fr 1fr;
+  }
+  .answer-scenario dl > div:first-child {
+    grid-column: 1/-1;
+  }
+  .answer-scenario dl > div {
+    margin-bottom: 8px;
+  }
+  .answer-explanation {
+    font-size: 17px;
+  }
+  .sky-view-guide {
+    display: block;
+    padding: 16px;
+  }
+  .sky-view-guide button {
+    margin-top: 12px;
+  }
+  .camera-controls {
+    left: 10px;
+    right: 10px;
+    justify-content: flex-start;
+    gap: 6px;
+  }
+  .camera-controls select {
+    max-width: 165px;
+  }
+  .playback-buttons button {
+    min-height: 42px;
+    font-size: 13px;
+  }
+  .explorer-time .playback > .inline,
+  .explorer-time select {
+    font-size: 13px;
+  }
+  .comparison-details > summary {
+    font-size: 15px;
+  }
+  .home-v2 .home-copy h1 {
+    font-size: 38px;
+  }
+}
+.inspection-note {
+  grid-column: 1/-1;
+  margin: 0;
+  padding: 12px 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  font-size: 14px;
+  line-height: 1.7;
+}
+.inspection-note a {
+  display: inline-block;
+  min-height: 36px;
+  padding: 6px 0;
+}
+.readout-guide {
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0;
+  padding: 12px 20px;
+  background: var(--surface);
+  color: var(--muted);
 }

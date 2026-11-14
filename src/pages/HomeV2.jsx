@@ -4,37 +4,44 @@ export default function HomeV2({ onStart, onTour }) {
       <section className="home-intro" data-tour="purpose">
         <div className="home-copy">
           <h1>
-            Simulate the lunar sky.
+            A Moon landing is delayed.
             <br />
-            <span>See what a delay changes.</span>
+            <span>What changes on the ground?</span>
           </h1>
           <p className="lead">
-            Will there be sunlight? Can the location see Earth? What changes if
-            arrival is delayed?
+            Compare how long a place on the Moon can see the Sun and Earth
+            before and after an arrival delay.
           </p>
           <p>
-            See how lunar terrain and time change the answer. Explore a real
-            sky, compare four south-pole locations and build a plan you can
-            explain.
+            Choose a place, a date and the height of a camera or antenna above
+            the ground. We show the changes. The 3D simulator helps you see why.
           </p>
           <div className="home-actions">
-            <button className="button" onClick={() => onStart("faithful")}>
-              Open the simulator{" "}
-              <small>Physical scale · shared astronomical time</small>
-            </button>
+            <a className="button" href="#/compare">
+              Compare a landing delay
+              <small>A ready-to-use example · change any setting</small>
+            </a>
             <button
               className="button secondary"
-              onClick={() => onStart("free")}
+              onClick={() => onStart("faithful")}
             >
-              Free experiment <small>Open workspace · artificial freezes</small>
+              Open the simulator
+              <small>Explore the Moon, sunlight and shadows in 3D</small>
             </button>
           </div>
           <div className="home-help">
+            <button className="text-action" onClick={() => onStart("free")}>
+              Free experiment · freeze individual motions
+            </button>
             <button onClick={onTour} data-tour-start>
               Show me how · interactive tour
             </button>
             <a href="#/learn">How it works</a>
           </div>
+          <p className="home-scope">
+            For learning and comparing lunar conditions. Four south-pole study
+            points · March–April 2027. This is not a certified landing plan.
+          </p>
           <a className="quick-review" href="#/review">
             Just evaluating? Review the project in 3 minutes →
           </a>

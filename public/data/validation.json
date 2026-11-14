@@ -1,6 +1,6 @@
 {
  "schemaVersion": "1.0.0",
- "generatedAtUtc": "2026-11-14T13:10:08Z",
+ "generatedAtUtc": "2026-11-14T22:33:29Z",
  "tests": [
   {
    "id": "V1",
@@ -203,25 +203,173 @@
   {
    "id": "V5",
    "title": "Sanity: height monotonicity and a permanently shadowed pixel",
-   "method": "Horizon at 5 m must not exceed horizon at 1 m; a pixel flagged permanently shadowed in PDS LPSR_85S_060M (Shackleton floor, 80 m DEM near field) must receive no direct sunlight hourly over 2024-2026.",
+   "method": "For every adjacent pair of observer heights (0.5, 1, 2, 5, 10 m), the higher horizon must not exceed the lower and generated hourly Sun/Earth visible fractions must not decrease; a pixel flagged permanently shadowed in PDS LPSR_85S_060M (Shackleton floor, 80 m DEM near field) must receive no direct sunlight hourly over 2024-2026.",
    "metric": "booleans; max solar-disk fraction at PSR pixel",
    "target": "all true; PSR max fraction = 0",
    "result": [
     {
      "site": "connecting-ridge",
-     "horizon5mNotAbove1m": true
+     "adjacentHeightPairs": [
+      {
+       "lowerM": 0.5,
+       "upperM": 1,
+       "higherHorizonNotAboveLower": true,
+       "higherVisibleFractionNotBelowLower": {
+        "sun": true,
+        "earth": true
+       }
+      },
+      {
+       "lowerM": 1,
+       "upperM": 2,
+       "higherHorizonNotAboveLower": true,
+       "higherVisibleFractionNotBelowLower": {
+        "sun": true,
+        "earth": true
+       }
+      },
+      {
+       "lowerM": 2,
+       "upperM": 5,
+       "higherHorizonNotAboveLower": true,
+       "higherVisibleFractionNotBelowLower": {
+        "sun": true,
+        "earth": true
+       }
+      },
+      {
+       "lowerM": 5,
+       "upperM": 10,
+       "higherHorizonNotAboveLower": true,
+       "higherVisibleFractionNotBelowLower": {
+        "sun": true,
+        "earth": true
+       }
+      }
+     ]
     },
     {
      "site": "shackleton-rim",
-     "horizon5mNotAbove1m": true
+     "adjacentHeightPairs": [
+      {
+       "lowerM": 0.5,
+       "upperM": 1,
+       "higherHorizonNotAboveLower": true,
+       "higherVisibleFractionNotBelowLower": {
+        "sun": true,
+        "earth": true
+       }
+      },
+      {
+       "lowerM": 1,
+       "upperM": 2,
+       "higherHorizonNotAboveLower": true,
+       "higherVisibleFractionNotBelowLower": {
+        "sun": true,
+        "earth": true
+       }
+      },
+      {
+       "lowerM": 2,
+       "upperM": 5,
+       "higherHorizonNotAboveLower": true,
+       "higherVisibleFractionNotBelowLower": {
+        "sun": true,
+        "earth": true
+       }
+      },
+      {
+       "lowerM": 5,
+       "upperM": 10,
+       "higherHorizonNotAboveLower": true,
+       "higherVisibleFractionNotBelowLower": {
+        "sun": true,
+        "earth": true
+       }
+      }
+     ]
     },
     {
      "site": "nobile-rim-1",
-     "horizon5mNotAbove1m": true
+     "adjacentHeightPairs": [
+      {
+       "lowerM": 0.5,
+       "upperM": 1,
+       "higherHorizonNotAboveLower": true,
+       "higherVisibleFractionNotBelowLower": {
+        "sun": true,
+        "earth": true
+       }
+      },
+      {
+       "lowerM": 1,
+       "upperM": 2,
+       "higherHorizonNotAboveLower": true,
+       "higherVisibleFractionNotBelowLower": {
+        "sun": true,
+        "earth": true
+       }
+      },
+      {
+       "lowerM": 2,
+       "upperM": 5,
+       "higherHorizonNotAboveLower": true,
+       "higherVisibleFractionNotBelowLower": {
+        "sun": true,
+        "earth": true
+       }
+      },
+      {
+       "lowerM": 5,
+       "upperM": 10,
+       "higherHorizonNotAboveLower": true,
+       "higherVisibleFractionNotBelowLower": {
+        "sun": true,
+        "earth": true
+       }
+      }
+     ]
     },
     {
      "site": "malapert-massif",
-     "horizon5mNotAbove1m": true
+     "adjacentHeightPairs": [
+      {
+       "lowerM": 0.5,
+       "upperM": 1,
+       "higherHorizonNotAboveLower": true,
+       "higherVisibleFractionNotBelowLower": {
+        "sun": true,
+        "earth": true
+       }
+      },
+      {
+       "lowerM": 1,
+       "upperM": 2,
+       "higherHorizonNotAboveLower": true,
+       "higherVisibleFractionNotBelowLower": {
+        "sun": true,
+        "earth": true
+       }
+      },
+      {
+       "lowerM": 2,
+       "upperM": 5,
+       "higherHorizonNotAboveLower": true,
+       "higherVisibleFractionNotBelowLower": {
+        "sun": true,
+        "earth": true
+       }
+      },
+      {
+       "lowerM": 5,
+       "upperM": 10,
+       "higherHorizonNotAboveLower": true,
+       "higherVisibleFractionNotBelowLower": {
+        "sun": true,
+        "earth": true
+       }
+      }
+     ]
     },
     {
      "psrPixel": {

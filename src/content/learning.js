@@ -8,7 +8,7 @@ export const intro = {
   facts: [
     {
       q: "What is it?",
-      a: "A lunar sky simulator using astronomical ephemerides and published terrain. It replays the real Sun, Earth and Moon geometry over four published points near the lunar south pole.",
+      a: "A lunar sky simulator using calculated Sun and Earth positions and published terrain. It replays the real Sun, Earth and Moon geometry over four study points near the lunar south pole.",
     },
     {
       q: "Who is it for?",
@@ -46,7 +46,7 @@ export const raise = {
   visible:
     "Visible. Standing higher lifts your line of sight over the ridge, so the Sun appears.",
   detail:
-    "The real app does this with 720 sight lines around each point and a terrain model, at two observer heights: 1 m and 5 m. The drawing here is a cartoon with made-up distances.",
+    "The real app does this with 720 sight lines around each point and a terrain model, at five observer heights: 0.5, 1, 2, 5 and 10 m. The drawing here is a cartoon with made-up distances.",
 };
 
 export const shadow = {
@@ -140,16 +140,20 @@ export const metrics = {
       id: "steady",
       label: "Steady and thin",
       blurb: "A little light, almost all day.",
-      values: [...steady, ...steady, ...steady, ...steady, ...steady, ...steady],
+      values: [
+        ...steady,
+        ...steady,
+        ...steady,
+        ...steady,
+        ...steady,
+        ...steady,
+      ],
     },
     {
       id: "bursts",
       label: "Bright bursts",
       blurb: "Full Sun for a few hours, then a long dark stretch.",
-      values: [
-        ...Array(8).fill(1),
-        ...Array(16).fill(0),
-      ],
+      values: [...Array(8).fill(1), ...Array(16).fill(0)],
     },
   ],
   terms: [

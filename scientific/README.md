@@ -27,7 +27,7 @@ PYTHONPATH=. python -P build_mobile_textures.py   # 1024x512 mobile variants fro
 | Step | What | Source |
 | --- | --- | --- |
 | Terrain | Nested DEMs: PGDA 5 m site DEM (< 5 km), PDS `LDEM_80S_80M` (5–100 km), PDS `LDEM_75S_240M` (> 100 km, to the edge of coverage). Heights in metres above the 1737.4 km sphere. | [PGDA product 78](https://pgda.gsfc.nasa.gov/products/78), [LOLA polar GDR](https://imbrium.mit.edu/DATA/LOLA_GDR/POLAR/) |
-| Horizon | 720 great-circle sight lines (0.5°), bilinear DEM sampling, exact Cartesian elevation angle from the observer (1 m or 5 m above the surface). Method of Mazarico et al. 2011 / Barker et al. 2021. | `lunar_horizon.py` |
+| Horizon | 720 great-circle sight lines (0.5°), bilinear DEM sampling, exact Cartesian elevation angle from the observer (0.5, 1, 2, 5 or 10 m above the surface). Method of Mazarico et al. 2011 / Barker et al. 2021. | `lunar_horizon.py` |
 | Ephemeris | SPICE `azlcpo`, `LT+S`, observer fixed in `MOON_ME`. Kernels: `de440s.bsp`, `moon_pa_de440_200625.bpc`, `moon_de440_250416.tf` (its `MOON_ME` is the DE421 mean-Earth frame used by the DEMs), `pck00011.tpc`, `naif0012.tls`. | `lunar_ephem.py`, [NAIF](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/) |
 | Visibility | Fraction of the Sun or Earth disk above the terrain horizon. The disk is cut horizontally at the horizon elevation at the disk-centre azimuth (Barker et al. 2021). Uniform disk, no limb darkening. | `lunar_ephem.disk_fraction` |
 | Metrics and events | 5-minute internal grid. Rise and set times are refined by bisection to ≤ 30 s. A longest period that touches the window edge is flagged `censored` (show it as "≥"). | `build_scenes.py` |
@@ -56,7 +56,7 @@ See `public/data/validation.json`. Targets are written in `validate.py`. A test 
 | V3 | Horizon range convergence |
 | V4 | Reproduces the Barker 2021 > 70% illumination class (same period, height and definition) |
 | V4b | PGDA 18.6-year map shown side by side (context only, not a pass/fail test) |
-| V5 | Height monotonicity, and zero direct sunlight at a permanently shadowed pixel |
+| V5 | Horizon and generated Sun/Earth fraction monotonicity for all adjacent height pairs, and zero direct sunlight at a permanently shadowed pixel |
 
 ## Limitations
 
@@ -76,3 +76,9 @@ See `public/data/validation.json`. Targets are written in `validate.py`. A test 
 ## AI use
 
 This code was written with AI coding assistants (Claude Opus 5.5, reviewed with Codex). Every number in `public/data/` is computed by this code from the sources above. No value was produced or edited by a language model.
+
+## Observer height contract
+
+`manifest.observerHeightsM` lists `[0.5, 1, 2, 5, 10]` metres above the DEM surface. Each height has a separately calculated horizon, Sun/Earth visible fraction, events and metrics; heights are never interpolated. Shared `azDeg`, `elDeg`, `rangeKm` and `angularRadiusDeg` arrays retain the explicit 1 m reference (`manifest.conventions.geometryReferenceHeightM`), preserving the original geometry. Visibility calculations use the actual observer position at each height.
+
+A model observer at 0.5 m does not imply terrain accuracy of 0.5 m. The 5 m DEM omits boulders and subpixel relief, and low observer heights are particularly sensitive to terrain error. Zero height is omitted because the model cannot resolve surface contact and subpixel obstacles.

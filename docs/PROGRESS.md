@@ -88,3 +88,15 @@ Claude feb63b33 now owns integration, following the accepted handoff; tests stay
 - **Deployment and evidence:** RC3 is deployment `61c81cc1`. Evidence is in `docs/VERIFICATION.md` and `docs/release-evidence.json`.
 - **Not done:** no NASA submission was made and no submission tag was created.
 - **RC4 `42e12dc`:** LF line endings fix, after CI had failed `check:data` since a7ab3f6. CI is green, deployment is `52b32426`, the production data hashes match, and the simulator Lighthouse confirmation is 99/100.
+
+
+## Clarity and bugs round - 2026-11-14 (IN PROGRESS)
+- Human feedback: several new visitors could not explain purpose, comparisons or terminology. Prior laboratory QA did not establish comprehension.
+- Ownership handed back: Codex root frontend/root/docs/deploy; science partner scientific/public-data; independent QA tests only. Claude temporarily rate-limited; partner is Sol medium and QA Luna high per playbook.
+- Play-at-end reproduction confirmed on production in 14 preset/motion cases: no restart. Added Replay/Restart, status and scrub pause.
+- Surface sky was a permanent-colour angular mask, not ground. Kept exact scientific occlusion, added high-contrast grey explanation, initial Sun framing, direct aiming buttons and lit-terrain navigation. No fabricated terrain/photometry.
+- Five real computed heights 0.5/1/2/5/10 m. Science tests V1-V5 pass; 1/5 baseline and sky numerically/byte preserved. New test contract required multiple transitions inside one hour.
+- Home purpose and primary comparison entry; plain-language ComparisonAnswer uses same summaries; optional technical detail; inspection snapshot does not mutate original inputs. Science reviewer found and closed that inspection-state regression in source; runtime check pending QA.
+- Additional text bug corrected: rounded Sun/Earth fractions near zero/one no longer classify partial visibility as fully hidden/visible.
+- Additional winner research: two observed official project repositories, cloned privately without checkout/hooks/LFS, selected code read but never executed/reused. Applied lessons documented in CLARITY-CORRECTIONS and original private TXT.
+- Development matrix/regression and production gates IN PROGRESS. No current production pass claimed yet.

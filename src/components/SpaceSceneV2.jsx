@@ -322,7 +322,12 @@ export default function SpaceSceneV2({
     scene.add(terrain);
     const wall = new THREE.Mesh(
       new THREE.BufferGeometry(),
-      new THREE.MeshBasicMaterial({ color: "#192433", side: THREE.DoubleSide }),
+      // Angular occlusion mask: neutral grey is NOT a surface-lighting model.
+      new THREE.MeshBasicMaterial({
+        color: "#697481",
+        side: THREE.DoubleSide,
+        toneMapped: false,
+      }),
     );
     scene.add(wall);
     const pin = new THREE.Mesh(
@@ -644,8 +649,8 @@ export default function SpaceSceneV2({
             earthDetail,
             frozen: Boolean(
               freeze.moonRotation !== undefined ||
-                freeze.sunPosition !== undefined ||
-                freeze.earthPosition !== undefined,
+              freeze.sunPosition !== undefined ||
+              freeze.earthPosition !== undefined,
             ),
           };
           observationKey = observationId;
@@ -673,11 +678,11 @@ export default function SpaceSceneV2({
           trackedBody = "moon";
           previousTrackedPosition.set(0, 0, 0);
           if (exact) {
-            lookAz = Math.atan2(
-              earth.position.clone().sub(O).dot(E),
-              earth.position.clone().sub(O).dot(N),
-            );
-            lookEl = 0;
+            // Start with the Sun, rather than an unrelated azimuth that can
+            // leave both bodies off-screen. Apparent sizes remain physical.
+            const direction = sun.position.clone().sub(O).normalize();
+            lookAz = Math.atan2(direction.dot(E), direction.dot(N));
+            lookEl = Math.asin(THREE.MathUtils.clamp(direction.dot(U), -1, 1));
             transition = null;
           } else if (local) {
             localCameraBody = bodyO
@@ -1290,6 +1295,16 @@ export default function SpaceSceneV2({
         </p>
       ) : null}
       <div className="camera-controls" aria-label="Camera controls">
+        {view === "sky" ? (
+          <>
+            <button onClick={() => engine.current?.focus("sun")}>
+              Look at Sun
+            </button>
+            <button onClick={() => engine.current?.focus("earth")}>
+              Look at Earth
+            </button>
+          </>
+        ) : null}
         <select
           aria-label="Focus a celestial body"
           defaultValue=""

@@ -24,7 +24,8 @@ OUT = os.path.join(HERE, "..", "public", "data")
 PERIOD = {"startUtc": "2027-03-01T00:00:00Z", "endUtc": "2027-04-28T00:00:00Z"}
 OUTPUT_STEP_MIN = 60
 INTERNAL_STEP_MIN = 5
-OBSERVER_HEIGHTS_M = (1, 5)
+OBSERVER_HEIGHTS_M = (0.5, 1, 2, 5, 10)
+GEOMETRY_REFERENCE_HEIGHT_M = 1
 PGDA = "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp"
 IMBRIUM = "https://imbrium.mit.edu"
 
@@ -178,16 +179,17 @@ def main():
             },
             "sun": {}, "earth": {}, "events": [], "metrics": {}, "eclipses": eclipses,
         }
+        reference = model.series(out_ets, GEOMETRY_REFERENCE_HEIGHT_M)
+        for body, key in (("SUN", "sun"), ("EARTH", "earth")):
+            doc[key]["azDeg"] = r(reference[body]["az"])
+            doc[key]["elDeg"] = r(reference[body]["el"])
+            doc[key]["angularRadiusDeg"] = r(reference[body]["ang"], 4)
+            doc[key]["rangeKm"] = r(reference[body]["range"], 0)
+            doc[key]["visibleFraction"] = {}
         for hobs in OBSERVER_HEIGHTS_M:
-            so = model.series(out_ets, hobs)
+            so = reference if hobs == GEOMETRY_REFERENCE_HEIGHT_M else model.series(out_ets, hobs)
             si = model.series(in_ets, hobs)
             for body, key in (("SUN", "sun"), ("EARTH", "earth")):
-                if hobs == OBSERVER_HEIGHTS_M[0]:
-                    doc[key]["azDeg"] = r(so[body]["az"])
-                    doc[key]["elDeg"] = r(so[body]["el"])
-                    doc[key]["angularRadiusDeg"] = r(so[body]["ang"], 4)
-                    doc[key]["rangeKm"] = r(so[body]["range"], 0)
-                    doc[key]["visibleFraction"] = {}
                 doc[key]["visibleFraction"][str(hobs)] = r(so[body]["frac"])
                 doc["events"] += refine_events(model, body, in_ets, si[body]["frac"], hobs)
             sun_vis = si["SUN"]["frac"] > 0
@@ -249,6 +251,8 @@ def main():
             "longitude": "east-positive deg",
             "frame": "MOON_ME (NAIF moon_de440_250416.tf: DE440 PA rotated to DE421 mean-Earth, same frame as LOLA/PGDA DEMs)",
             "time": "UTC; sample i at startUtc + i*stepMinutes",
+            "geometryReferenceHeightM": GEOMETRY_REFERENCE_HEIGHT_M,
+            "heightCalculation": "Shared azDeg, elDeg, angularRadiusDeg and rangeKm refer to the 1 m observer. Each height has separately computed observer position, horizon, visible fractions, events and metrics; no interpolation between heights.",
             "visibleFraction": "fraction of the body's disk above the terrain horizon; disk cut horizontally at the horizon elevation at the disk-centre azimuth (Barker et al. 2021), uniform disk (no limb darkening)",
             "censored": "true when the longest period touches the start or end of the simulated window: show as >= value",
         },
@@ -270,7 +274,7 @@ def main():
         "aiDisclosure": "The pipeline code in scientific/ was written with AI coding assistants (Claude Opus 5.5; reviewed with Codex). Every number in public/data/ is computed deterministically by that code from NASA PDS/PGDA LOLA data and NAIF SPICE kernels; no value was produced or edited by a language model.",
         "assumptions": [
             "Bare-terrain horizon from LOLA DEMs: 5 m PGDA (<5 km), 80 m PDS (5-100 km), 240 m PDS (>100 km), 720 azimuths, great-circle sight lines, exact spherical geometry.",
-            "Observer heights 1 m and 5 m above the local terrain surface.",
+            "Observer heights 0.5, 1, 2, 5 and 10 m above the local terrain surface; heights describe the model observer, not DEM vertical accuracy.",
             "Sun and Earth treated as uniform disks; Earth visibility is geometric line of sight only.",
             f"Durations and metrics from a {INTERNAL_STEP_MIN}-min grid; rise/set times refined by bisection to <= 30 s and reported with 1-min resolution.",
         ],
@@ -278,7 +282,7 @@ def main():
             "Points of interest from published LOLA studies; not NASA-selected landing sites and not mission recommendations.",
             "No power, battery, thermal, communications-link (DSN), landing-safety or hazard assessment.",
             "Visibility windows shorter than the internal grid step may be missed.",
-            "DEM interpolation, boulders and sub-pixel relief are not modelled; near-field horizon is sensitive to DEM error at 1 m height (Barker et al. 2021).",
+            "DEM interpolation, boulders and sub-pixel relief are not modelled; near-field horizon is sensitive to DEM error at low observer heights, especially 0.5 m and 1 m (Barker et al. 2021); a 0.5 m model height does not imply 0.5 m terrain accuracy.",
             "Results only cover the stated period; dates outside it are not computed.",
         ],
     }
