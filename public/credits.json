@@ -1,0 +1,1302 @@
+{
+  "generatedAtUtc": "2026-11-14T13:29:04.010Z",
+  "scope": "Installed direct and transitive runtime, build and verification packages",
+  "packages": [
+    {
+      "name": "@cloudflare/kv-asset-handler",
+      "version": "0.5.0",
+      "license": "MIT OR Apache-2.0",
+      "repository": "https://github.com/cloudflare/workers-sdk",
+      "url": "https://github.com/cloudflare/workers-sdk#readme",
+      "noticeFile": null
+    },
+    {
+      "name": "@cloudflare/unenv-preset",
+      "version": "2.16.2",
+      "license": "MIT OR Apache-2.0",
+      "repository": "https://github.com/cloudflare/workers-sdk",
+      "url": "https://github.com/cloudflare/workers-sdk#readme",
+      "noticeFile": null
+    },
+    {
+      "name": "@cloudflare/workerd-windows-64",
+      "version": "1.20261113.1",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/cloudflare/workerd",
+      "url": "https://www.npmjs.com/package/@cloudflare/workerd-windows-64",
+      "noticeFile": null
+    },
+    {
+      "name": "@cspotcode/source-map-support",
+      "version": "0.8.1",
+      "license": "MIT",
+      "repository": "https://github.com/cspotcode/node-source-map-support",
+      "url": "https://www.npmjs.com/package/@cspotcode/source-map-support",
+      "noticeFile": "/licenses/@cspotcode__source-map-support.txt"
+    },
+    {
+      "name": "@esbuild/win32-x64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "repository": "https://github.com/evanw/esbuild",
+      "url": "https://www.npmjs.com/package/@esbuild/win32-x64",
+      "noticeFile": null
+    },
+    {
+      "name": "@fontsource/fira-code",
+      "version": "5.3.0",
+      "license": "OFL-1.1",
+      "repository": "https://github.com/fontsource/font-files",
+      "url": "https://fontsource.org/fonts/fira-code",
+      "noticeFile": "/licenses/@fontsource__fira-code.txt"
+    },
+    {
+      "name": "@fontsource/overpass",
+      "version": "5.3.0",
+      "license": "OFL-1.1",
+      "repository": "https://github.com/fontsource/font-files",
+      "url": "https://fontsource.org/fonts/overpass",
+      "noticeFile": "/licenses/@fontsource__overpass.txt"
+    },
+    {
+      "name": "@formatjs/ecma402-abstract",
+      "version": "2.3.6",
+      "license": "MIT",
+      "repository": "git@github.com:formatjs/formatjs",
+      "url": "https://github.com/formatjs/formatjs",
+      "noticeFile": "/licenses/@formatjs__ecma402-abstract.txt"
+    },
+    {
+      "name": "@formatjs/fast-memoize",
+      "version": "2.2.7",
+      "license": "MIT",
+      "repository": "formatjs/formatjs",
+      "url": "https://github.com/formatjs/formatjs#readme",
+      "noticeFile": "/licenses/@formatjs__fast-memoize.txt"
+    },
+    {
+      "name": "@formatjs/icu-messageformat-parser",
+      "version": "2.11.4",
+      "license": "MIT",
+      "repository": "https://github.com/formatjs/formatjs",
+      "url": "https://www.npmjs.com/package/@formatjs/icu-messageformat-parser",
+      "noticeFile": "/licenses/@formatjs__icu-messageformat-parser.txt"
+    },
+    {
+      "name": "@formatjs/icu-skeleton-parser",
+      "version": "1.8.16",
+      "license": "MIT",
+      "repository": "https://github.com/formatjs/formatjs",
+      "url": "https://www.npmjs.com/package/@formatjs/icu-skeleton-parser",
+      "noticeFile": "/licenses/@formatjs__icu-skeleton-parser.txt"
+    },
+    {
+      "name": "@formatjs/intl-localematcher",
+      "version": "0.6.2",
+      "license": "MIT",
+      "repository": "formatjs/formatjs",
+      "url": "https://github.com/formatjs/formatjs#readme",
+      "noticeFile": "/licenses/@formatjs__intl-localematcher.txt"
+    },
+    {
+      "name": "@img/colour",
+      "version": "1.1.0",
+      "license": "MIT",
+      "repository": "https://github.com/lovell/colour",
+      "url": "https://www.npmjs.com/package/@img/colour",
+      "noticeFile": "/licenses/@img__colour.txt"
+    },
+    {
+      "name": "@img/sharp-wasm32",
+      "version": "0.35.5",
+      "license": "Apache-2.0 AND LGPL-3.0-or-later AND MIT",
+      "repository": "https://github.com/lovell/sharp",
+      "url": "https://sharp.pixelplumbing.com",
+      "noticeFile": "/licenses/@img__sharp-wasm32.txt"
+    },
+    {
+      "name": "@img/sharp-win32-x64",
+      "version": "0.35.5",
+      "license": "Apache-2.0 AND LGPL-3.0-or-later",
+      "repository": "https://github.com/lovell/sharp",
+      "url": "https://sharp.pixelplumbing.com",
+      "noticeFile": "/licenses/@img__sharp-win32-x64.txt"
+    },
+    {
+      "name": "@isaacs/nonrecursive-glob-match",
+      "version": "1.1.0",
+      "license": "BlueOak-1.0.0",
+      "repository": null,
+      "url": "https://www.npmjs.com/package/@isaacs/nonrecursive-glob-match",
+      "noticeFile": "/licenses/@isaacs__nonrecursive-glob-match.txt"
+    },
+    {
+      "name": "@jridgewell/resolve-uri",
+      "version": "3.1.3",
+      "license": "MIT",
+      "repository": "https://github.com/jridgewell/resolve-uri",
+      "url": "https://www.npmjs.com/package/@jridgewell/resolve-uri",
+      "noticeFile": "/licenses/@jridgewell__resolve-uri.txt"
+    },
+    {
+      "name": "@jridgewell/sourcemap-codec",
+      "version": "1.6.0",
+      "license": "MIT",
+      "repository": "https://github.com/jridgewell/sourcemaps",
+      "url": "https://github.com/jridgewell/sourcemaps/tree/main/packages/sourcemap-codec",
+      "noticeFile": "/licenses/@jridgewell__sourcemap-codec.txt"
+    },
+    {
+      "name": "@jridgewell/trace-mapping",
+      "version": "0.3.9",
+      "license": "MIT",
+      "repository": "https://github.com/jridgewell/trace-mapping",
+      "url": "https://www.npmjs.com/package/@jridgewell/trace-mapping",
+      "noticeFile": "/licenses/@jridgewell__trace-mapping.txt"
+    },
+    {
+      "name": "@opentelemetry/api",
+      "version": "1.10.0",
+      "license": "Apache-2.0",
+      "repository": "open-telemetry/opentelemetry-js",
+      "url": "https://github.com/open-telemetry/opentelemetry-js/tree/main/api",
+      "noticeFile": "/licenses/@opentelemetry__api.txt"
+    },
+    {
+      "name": "@oxc-parser/binding-win32-x64-msvc",
+      "version": "0.152.0",
+      "license": "MIT",
+      "repository": "https://github.com/oxc-project/oxc",
+      "url": "https://oxc.rs/docs/guide/usage/parser",
+      "noticeFile": null
+    },
+    {
+      "name": "@oxc-project/types",
+      "version": "0.156.0",
+      "license": "MIT",
+      "repository": "https://github.com/oxc-project/oxc",
+      "url": "https://oxc.rs",
+      "noticeFile": "/licenses/@oxc-project__types.txt"
+    },
+    {
+      "name": "@paulirish/trace_engine",
+      "version": "0.0.67",
+      "license": "BSD-3-Clause",
+      "repository": null,
+      "url": "https://www.npmjs.com/package/@paulirish/trace_engine",
+      "noticeFile": "/licenses/@paulirish__trace_engine.txt"
+    },
+    {
+      "name": "@poppinss/colors",
+      "version": "4.1.6",
+      "license": "MIT",
+      "repository": "https://github.com/poppinss/colors",
+      "url": "https://github.com/poppinss/colors#readme",
+      "noticeFile": "/licenses/@poppinss__colors.txt"
+    },
+    {
+      "name": "@poppinss/dumper",
+      "version": "0.6.5",
+      "license": "MIT",
+      "repository": "https://github.com/poppinss/dumper",
+      "url": "https://github.com/poppinss/dumper#readme",
+      "noticeFile": "/licenses/@poppinss__dumper.txt"
+    },
+    {
+      "name": "@poppinss/exception",
+      "version": "1.2.3",
+      "license": "MIT",
+      "repository": "https://github.com/poppinss/exception",
+      "url": "https://github.com/poppinss/exception#readme",
+      "noticeFile": "/licenses/@poppinss__exception.txt"
+    },
+    {
+      "name": "@puppeteer/browsers",
+      "version": "3.2.7",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/puppeteer/puppeteer/tree/main/packages/browsers",
+      "url": "https://www.npmjs.com/package/@puppeteer/browsers",
+      "noticeFile": null
+    },
+    {
+      "name": "@rolldown/binding-win32-x64-msvc",
+      "version": "1.2.19",
+      "license": "MIT",
+      "repository": "https://github.com/rolldown/rolldown",
+      "url": "https://rolldown.rs/",
+      "noticeFile": null
+    },
+    {
+      "name": "@rolldown/pluginutils",
+      "version": "1.1.1",
+      "license": "MIT",
+      "repository": "https://github.com/rolldown/plugins",
+      "url": "https://github.com/rolldown/plugins/tree/main/packages/pluginutils#readme",
+      "noticeFile": "/licenses/@rolldown__pluginutils.txt"
+    },
+    {
+      "name": "@sentry/bundler-plugins",
+      "version": "11.12.0",
+      "license": "MIT",
+      "repository": "https://github.com/getsentry/sentry-javascript",
+      "url": "https://github.com/getsentry/sentry-javascript/tree/main/packages/bundler-plugins",
+      "noticeFile": "/licenses/@sentry__bundler-plugins.txt"
+    },
+    {
+      "name": "@sentry/conventions",
+      "version": "0.32.0",
+      "license": "MIT",
+      "repository": "https://github.com/getsentry/sentry-conventions",
+      "url": "https://github.com/getsentry/sentry-conventions#readme",
+      "noticeFile": "/licenses/@sentry__conventions.txt"
+    },
+    {
+      "name": "@sentry/core",
+      "version": "11.12.0",
+      "license": "MIT",
+      "repository": "https://github.com/getsentry/sentry-javascript",
+      "url": "https://github.com/getsentry/sentry-javascript/tree/master/packages/core",
+      "noticeFile": "/licenses/@sentry__core.txt"
+    },
+    {
+      "name": "@sentry/node",
+      "version": "11.12.0",
+      "license": "MIT",
+      "repository": "https://github.com/getsentry/sentry-javascript",
+      "url": "https://github.com/getsentry/sentry-javascript/tree/master/packages/node",
+      "noticeFile": "/licenses/@sentry__node.txt"
+    },
+    {
+      "name": "@sentry/opentelemetry",
+      "version": "11.12.0",
+      "license": "MIT",
+      "repository": "https://github.com/getsentry/sentry-javascript",
+      "url": "https://github.com/getsentry/sentry-javascript/tree/master/packages/opentelemetry",
+      "noticeFile": "/licenses/@sentry__opentelemetry.txt"
+    },
+    {
+      "name": "@sentry/server-runtime-injection",
+      "version": "11.12.0",
+      "license": "MIT",
+      "repository": "https://github.com/getsentry/sentry-javascript",
+      "url": "https://github.com/getsentry/sentry-javascript/tree/master/packages/server-runtime-injection",
+      "noticeFile": "/licenses/@sentry__server-runtime-injection.txt"
+    },
+    {
+      "name": "@sentry/server-utils",
+      "version": "11.12.0",
+      "license": "MIT",
+      "repository": "https://github.com/getsentry/sentry-javascript",
+      "url": "https://github.com/getsentry/sentry-javascript/tree/master/packages/server-utils",
+      "noticeFile": "/licenses/@sentry__server-utils.txt"
+    },
+    {
+      "name": "@sindresorhus/is",
+      "version": "7.2.0",
+      "license": "MIT",
+      "repository": "sindresorhus/is",
+      "url": "https://www.npmjs.com/package/@sindresorhus/is",
+      "noticeFile": "/licenses/@sindresorhus__is.txt"
+    },
+    {
+      "name": "@speed-highlight/core",
+      "version": "1.2.24",
+      "license": "CC0-1.0",
+      "repository": "https://github.com/speed-highlight/core",
+      "url": "https://github.com/speed-highlight/core#readme",
+      "noticeFile": "/licenses/@speed-highlight__core.txt"
+    },
+    {
+      "name": "@types/node",
+      "version": "26.6.6",
+      "license": "MIT",
+      "repository": "https://github.com/DefinitelyTyped/DefinitelyTyped",
+      "url": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/node",
+      "noticeFile": "/licenses/@types__node.txt"
+    },
+    {
+      "name": "@vitejs/plugin-react",
+      "version": "6.3.0",
+      "license": "MIT",
+      "repository": "https://github.com/vitejs/vite-plugin-react",
+      "url": "https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#readme",
+      "noticeFile": "/licenses/@vitejs__plugin-react.txt"
+    },
+    {
+      "name": "ajv",
+      "version": "8.20.0",
+      "license": "MIT",
+      "repository": "ajv-validator/ajv",
+      "url": "https://ajv.js.org",
+      "noticeFile": "/licenses/ajv.txt"
+    },
+    {
+      "name": "ajv-formats",
+      "version": "3.0.1",
+      "license": "MIT",
+      "repository": "https://github.com/ajv-validator/ajv-formats",
+      "url": "https://github.com/ajv-validator/ajv-formats#readme",
+      "noticeFile": "/licenses/ajv-formats.txt"
+    },
+    {
+      "name": "ansi-colors",
+      "version": "4.1.3",
+      "license": "MIT",
+      "repository": "doowb/ansi-colors",
+      "url": "https://github.com/doowb/ansi-colors",
+      "noticeFile": "/licenses/ansi-colors.txt"
+    },
+    {
+      "name": "ansi-regex",
+      "version": "5.0.1",
+      "license": "MIT",
+      "repository": "chalk/ansi-regex",
+      "url": "https://www.npmjs.com/package/ansi-regex",
+      "noticeFile": "/licenses/ansi-regex.txt"
+    },
+    {
+      "name": "ansi-styles",
+      "version": "6.2.3",
+      "license": "MIT",
+      "repository": "chalk/ansi-styles",
+      "url": "https://www.npmjs.com/package/ansi-styles",
+      "noticeFile": "/licenses/ansi-styles.txt"
+    },
+    {
+      "name": "atomically",
+      "version": "2.1.1",
+      "license": "MIT",
+      "repository": "github:fabiospampinato/atomically",
+      "url": "https://www.npmjs.com/package/atomically",
+      "noticeFile": "/licenses/atomically.txt"
+    },
+    {
+      "name": "axe-core",
+      "version": "4.14.0",
+      "license": "MPL-2.0",
+      "repository": "https://github.com/dequelabs/axe-core",
+      "url": "https://www.deque.com/axe/",
+      "noticeFile": "/licenses/axe-core.txt"
+    },
+    {
+      "name": "balanced-match",
+      "version": "4.0.4",
+      "license": "MIT",
+      "repository": "https://github.com/juliangruber/balanced-match",
+      "url": "https://www.npmjs.com/package/balanced-match",
+      "noticeFile": "/licenses/balanced-match.txt"
+    },
+    {
+      "name": "blake3-wasm",
+      "version": "2.1.5",
+      "license": "MIT",
+      "repository": "https://github.com/connor4312/blake3",
+      "url": "https://github.com/connor4312/blake3#readme",
+      "noticeFile": "/licenses/blake3-wasm.txt"
+    },
+    {
+      "name": "brace-expansion",
+      "version": "5.0.13",
+      "license": "MIT",
+      "repository": "https://github.com/juliangruber/brace-expansion",
+      "url": "https://www.npmjs.com/package/brace-expansion",
+      "noticeFile": "/licenses/brace-expansion.txt"
+    },
+    {
+      "name": "bundle-name",
+      "version": "4.1.1",
+      "license": "MIT",
+      "repository": "sindresorhus/bundle-name",
+      "url": "https://www.npmjs.com/package/bundle-name",
+      "noticeFile": "/licenses/bundle-name.txt"
+    },
+    {
+      "name": "chrome-launcher",
+      "version": "1.2.3",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/GoogleChrome/chrome-launcher",
+      "url": "https://www.npmjs.com/package/chrome-launcher",
+      "noticeFile": "/licenses/chrome-launcher.txt"
+    },
+    {
+      "name": "chromium-bidi",
+      "version": "157.0.8090-0",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/GoogleChromeLabs/chromium-bidi",
+      "url": "https://www.npmjs.com/package/chromium-bidi",
+      "noticeFile": "/licenses/chromium-bidi.txt"
+    },
+    {
+      "name": "cliui",
+      "version": "9.0.1",
+      "license": "ISC",
+      "repository": "yargs/cliui",
+      "url": "https://www.npmjs.com/package/cliui",
+      "noticeFile": "/licenses/cliui.txt"
+    },
+    {
+      "name": "configstore",
+      "version": "8.0.0",
+      "license": "BSD-2-Clause",
+      "repository": "sindresorhus/configstore",
+      "url": "https://www.npmjs.com/package/configstore",
+      "noticeFile": "/licenses/configstore.txt"
+    },
+    {
+      "name": "cookie",
+      "version": "1.1.1",
+      "license": "MIT",
+      "repository": "jshttp/cookie",
+      "url": "https://www.npmjs.com/package/cookie",
+      "noticeFile": "/licenses/cookie.txt"
+    },
+    {
+      "name": "csp_evaluator",
+      "version": "1.1.8",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/google/csp-evaluator",
+      "url": "https://csp-evaluator.withgoogle.com/",
+      "noticeFile": "/licenses/csp_evaluator.txt"
+    },
+    {
+      "name": "debug",
+      "version": "4.4.3",
+      "license": "MIT",
+      "repository": "https://github.com/debug-js/debug",
+      "url": "https://www.npmjs.com/package/debug",
+      "noticeFile": "/licenses/debug.txt"
+    },
+    {
+      "name": "decimal.js",
+      "version": "10.6.0",
+      "license": "MIT",
+      "repository": "https://github.com/MikeMcl/decimal.js",
+      "url": "https://www.npmjs.com/package/decimal.js",
+      "noticeFile": "/licenses/decimal.js.txt"
+    },
+    {
+      "name": "default-browser",
+      "version": "5.5.1",
+      "license": "MIT",
+      "repository": "sindresorhus/default-browser",
+      "url": "https://www.npmjs.com/package/default-browser",
+      "noticeFile": "/licenses/default-browser.txt"
+    },
+    {
+      "name": "default-browser-id",
+      "version": "5.0.1",
+      "license": "MIT",
+      "repository": "sindresorhus/default-browser-id",
+      "url": "https://www.npmjs.com/package/default-browser-id",
+      "noticeFile": "/licenses/default-browser-id.txt"
+    },
+    {
+      "name": "define-lazy-prop",
+      "version": "3.0.0",
+      "license": "MIT",
+      "repository": "sindresorhus/define-lazy-prop",
+      "url": "https://www.npmjs.com/package/define-lazy-prop",
+      "noticeFile": "/licenses/define-lazy-prop.txt"
+    },
+    {
+      "name": "detect-libc",
+      "version": "2.1.2",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/lovell/detect-libc",
+      "url": "https://www.npmjs.com/package/detect-libc",
+      "noticeFile": "/licenses/detect-libc.txt"
+    },
+    {
+      "name": "devtools-protocol",
+      "version": "0.0.1727723",
+      "license": "BSD-3-Clause",
+      "repository": "https://github.com/ChromeDevTools/devtools-protocol",
+      "url": "https://www.npmjs.com/package/devtools-protocol",
+      "noticeFile": "/licenses/devtools-protocol.txt"
+    },
+    {
+      "name": "dot-prop",
+      "version": "10.2.0",
+      "license": "MIT",
+      "repository": "sindresorhus/dot-prop",
+      "url": "https://www.npmjs.com/package/dot-prop",
+      "noticeFile": "/licenses/dot-prop.txt"
+    },
+    {
+      "name": "dotenv",
+      "version": "17.4.2",
+      "license": "BSD-2-Clause",
+      "repository": "https://github.com/motdotla/dotenv",
+      "url": "https://github.com/motdotla/dotenv#readme",
+      "noticeFile": "/licenses/dotenv.txt"
+    },
+    {
+      "name": "emoji-regex",
+      "version": "10.6.0",
+      "license": "MIT",
+      "repository": "https://github.com/mathiasbynens/emoji-regex",
+      "url": "https://mths.be/emoji-regex",
+      "noticeFile": null
+    },
+    {
+      "name": "enquirer",
+      "version": "2.4.1",
+      "license": "MIT",
+      "repository": "enquirer/enquirer",
+      "url": "https://github.com/enquirer/enquirer",
+      "noticeFile": "/licenses/enquirer.txt"
+    },
+    {
+      "name": "error-stack-parser-es",
+      "version": "1.0.5",
+      "license": "MIT",
+      "repository": "https://github.com/antfu/error-stack-parser-es",
+      "url": "https://github.com/antfu/error-stack-parser-es#readme",
+      "noticeFile": "/licenses/error-stack-parser-es.txt"
+    },
+    {
+      "name": "esbuild",
+      "version": "0.28.2",
+      "license": "MIT",
+      "repository": "https://github.com/evanw/esbuild",
+      "url": "https://www.npmjs.com/package/esbuild",
+      "noticeFile": "/licenses/esbuild.txt"
+    },
+    {
+      "name": "escalade",
+      "version": "3.2.0",
+      "license": "MIT",
+      "repository": "lukeed/escalade",
+      "url": "https://www.npmjs.com/package/escalade",
+      "noticeFile": "/licenses/escalade.txt"
+    },
+    {
+      "name": "escape-string-regexp",
+      "version": "4.0.0",
+      "license": "MIT",
+      "repository": "sindresorhus/escape-string-regexp",
+      "url": "https://www.npmjs.com/package/escape-string-regexp",
+      "noticeFile": "/licenses/escape-string-regexp.txt"
+    },
+    {
+      "name": "fast-deep-equal",
+      "version": "3.1.3",
+      "license": "MIT",
+      "repository": "https://github.com/epoberezkin/fast-deep-equal",
+      "url": "https://github.com/epoberezkin/fast-deep-equal#readme",
+      "noticeFile": "/licenses/fast-deep-equal.txt"
+    },
+    {
+      "name": "fast-uri",
+      "version": "3.1.9",
+      "license": "BSD-3-Clause",
+      "repository": "https://github.com/fastify/fast-uri",
+      "url": "https://github.com/fastify/fast-uri",
+      "noticeFile": "/licenses/fast-uri.txt"
+    },
+    {
+      "name": "fdir",
+      "version": "6.5.0",
+      "license": "MIT",
+      "repository": "https://github.com/thecodrr/fdir",
+      "url": "https://github.com/thecodrr/fdir#readme",
+      "noticeFile": "/licenses/fdir.txt"
+    },
+    {
+      "name": "get-caller-file",
+      "version": "2.0.5",
+      "license": "ISC",
+      "repository": "https://github.com/stefanpenner/get-caller-file",
+      "url": "https://github.com/stefanpenner/get-caller-file#readme",
+      "noticeFile": "/licenses/get-caller-file.txt"
+    },
+    {
+      "name": "get-east-asian-width",
+      "version": "1.7.0",
+      "license": "MIT",
+      "repository": "sindresorhus/get-east-asian-width",
+      "url": "https://www.npmjs.com/package/get-east-asian-width",
+      "noticeFile": "/licenses/get-east-asian-width.txt"
+    },
+    {
+      "name": "glob",
+      "version": "14.0.6",
+      "license": "BlueOak-1.0.0",
+      "repository": "git@github.com:isaacs/node-glob",
+      "url": "https://www.npmjs.com/package/glob",
+      "noticeFile": "/licenses/glob.txt"
+    },
+    {
+      "name": "graceful-fs",
+      "version": "4.2.12",
+      "license": "BlueOak-1.0.0",
+      "repository": "https://github.com/isaacs/node-graceful-fs",
+      "url": "https://www.npmjs.com/package/graceful-fs",
+      "noticeFile": "/licenses/graceful-fs.txt"
+    },
+    {
+      "name": "http-link-header",
+      "version": "1.1.4",
+      "license": "MIT",
+      "repository": "https://codeberg.org/jhermsmeier/node-http-link-header",
+      "url": "https://codeberg.org/jhermsmeier/node-http-link-header",
+      "noticeFile": "/licenses/http-link-header.txt"
+    },
+    {
+      "name": "image-ssim",
+      "version": "0.2.0",
+      "license": "MIT",
+      "repository": "darosh/image-ssim-js",
+      "url": "https://github.com/darosh/image-ssim-js/issues",
+      "noticeFile": "/licenses/image-ssim.txt"
+    },
+    {
+      "name": "intl-messageformat",
+      "version": "10.7.18",
+      "license": "BSD-3-Clause",
+      "repository": "git@github.com:formatjs/formatjs",
+      "url": "https://github.com/formatjs/formatjs",
+      "noticeFile": "/licenses/intl-messageformat.txt"
+    },
+    {
+      "name": "is-docker",
+      "version": "2.2.1",
+      "license": "MIT",
+      "repository": "sindresorhus/is-docker",
+      "url": "https://www.npmjs.com/package/is-docker",
+      "noticeFile": "/licenses/is-docker.txt"
+    },
+    {
+      "name": "is-in-ssh",
+      "version": "1.0.0",
+      "license": "MIT",
+      "repository": "sindresorhus/is-in-ssh",
+      "url": "https://www.npmjs.com/package/is-in-ssh",
+      "noticeFile": "/licenses/is-in-ssh.txt"
+    },
+    {
+      "name": "is-inside-container",
+      "version": "1.0.0",
+      "license": "MIT",
+      "repository": "sindresorhus/is-inside-container",
+      "url": "https://www.npmjs.com/package/is-inside-container",
+      "noticeFile": "/licenses/is-inside-container.txt"
+    },
+    {
+      "name": "is-safe-filename",
+      "version": "0.1.1",
+      "license": "MIT",
+      "repository": "sindresorhus/is-safe-filename",
+      "url": "https://www.npmjs.com/package/is-safe-filename",
+      "noticeFile": "/licenses/is-safe-filename.txt"
+    },
+    {
+      "name": "is-wsl",
+      "version": "2.2.0",
+      "license": "MIT",
+      "repository": "sindresorhus/is-wsl",
+      "url": "https://www.npmjs.com/package/is-wsl",
+      "noticeFile": "/licenses/is-wsl.txt"
+    },
+    {
+      "name": "jpeg-js",
+      "version": "0.4.4",
+      "license": "BSD-3-Clause",
+      "repository": "https://github.com/eugeneware/jpeg-js",
+      "url": "https://www.npmjs.com/package/jpeg-js",
+      "noticeFile": "/licenses/jpeg-js.txt"
+    },
+    {
+      "name": "js-library-detector",
+      "version": "6.7.0",
+      "license": "MIT",
+      "repository": "https://github.com/johnmichel/Library-Detector-for-Chrome",
+      "url": "https://github.com/johnmichel/Library-Detector-for-Chrome#readme",
+      "noticeFile": "/licenses/js-library-detector.txt"
+    },
+    {
+      "name": "json-schema-traverse",
+      "version": "1.0.0",
+      "license": "MIT",
+      "repository": "https://github.com/epoberezkin/json-schema-traverse",
+      "url": "https://github.com/epoberezkin/json-schema-traverse#readme",
+      "noticeFile": "/licenses/json-schema-traverse.txt"
+    },
+    {
+      "name": "kleur",
+      "version": "4.1.5",
+      "license": "MIT",
+      "repository": "lukeed/kleur",
+      "url": "https://www.npmjs.com/package/kleur",
+      "noticeFile": "/licenses/kleur.txt"
+    },
+    {
+      "name": "lighthouse",
+      "version": "13.6.0",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/GoogleChrome/lighthouse",
+      "url": "https://github.com/GoogleChrome/lighthouse#readme",
+      "noticeFile": "/licenses/lighthouse.txt"
+    },
+    {
+      "name": "lighthouse-logger",
+      "version": "2.0.2",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/GoogleChrome/lighthouse",
+      "url": "https://www.npmjs.com/package/lighthouse-logger",
+      "noticeFile": "/licenses/lighthouse-logger.txt"
+    },
+    {
+      "name": "lighthouse-stack-packs",
+      "version": "1.12.3",
+      "license": "Apache-2.0",
+      "repository": "GoogleChrome/lighthouse-stack-packs",
+      "url": "https://github.com/GoogleChrome/lighthouse-stack-packs#readme",
+      "noticeFile": "/licenses/lighthouse-stack-packs.txt"
+    },
+    {
+      "name": "lightningcss",
+      "version": "1.33.0",
+      "license": "MPL-2.0",
+      "repository": "https://github.com/parcel-bundler/lightningcss",
+      "url": "https://www.npmjs.com/package/lightningcss",
+      "noticeFile": "/licenses/lightningcss.txt"
+    },
+    {
+      "name": "lightningcss-win32-x64-msvc",
+      "version": "1.33.0",
+      "license": "MPL-2.0",
+      "repository": "https://github.com/parcel-bundler/lightningcss",
+      "url": "https://www.npmjs.com/package/lightningcss-win32-x64-msvc",
+      "noticeFile": "/licenses/lightningcss-win32-x64-msvc.txt"
+    },
+    {
+      "name": "lru-cache",
+      "version": "11.5.3",
+      "license": "BlueOak-1.0.0",
+      "repository": "https://github.com/isaacs/node-lru-cache",
+      "url": "https://www.npmjs.com/package/lru-cache",
+      "noticeFile": "/licenses/lru-cache.txt"
+    },
+    {
+      "name": "magic-string",
+      "version": "1.4.5",
+      "license": "MIT",
+      "repository": "https://github.com/Rich-Harris/magic-string",
+      "url": "https://www.npmjs.com/package/magic-string",
+      "noticeFile": "/licenses/magic-string.txt"
+    },
+    {
+      "name": "marky",
+      "version": "1.3.0",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/nolanlawson/marky",
+      "url": "https://github.com/nolanlawson/marky#readme",
+      "noticeFile": "/licenses/marky.txt"
+    },
+    {
+      "name": "miniflare",
+      "version": "5.20261113.0-beta",
+      "license": "MIT",
+      "repository": "https://github.com/cloudflare/workers-sdk",
+      "url": "https://github.com/cloudflare/workers-sdk/tree/main/packages/miniflare#readme",
+      "noticeFile": null
+    },
+    {
+      "name": "minimatch",
+      "version": "11.0.8",
+      "license": "BlueOak-1.0.0",
+      "repository": "https://github.com/isaacs/minimatch",
+      "url": "https://www.npmjs.com/package/minimatch",
+      "noticeFile": "/licenses/minimatch.txt"
+    },
+    {
+      "name": "minipass",
+      "version": "7.1.3",
+      "license": "BlueOak-1.0.0",
+      "repository": "https://github.com/isaacs/minipass",
+      "url": "https://www.npmjs.com/package/minipass",
+      "noticeFile": "/licenses/minipass.txt"
+    },
+    {
+      "name": "mitt",
+      "version": "3.0.1",
+      "license": "MIT",
+      "repository": "developit/mitt",
+      "url": "https://github.com/developit/mitt",
+      "noticeFile": "/licenses/mitt.txt"
+    },
+    {
+      "name": "modern-tar",
+      "version": "0.8.6",
+      "license": "MIT",
+      "repository": "https://github.com/ayuhito/modern-tar",
+      "url": "https://github.com/ayuhito/modern-tar",
+      "noticeFile": "/licenses/modern-tar.txt"
+    },
+    {
+      "name": "ms",
+      "version": "2.1.3",
+      "license": "MIT",
+      "repository": "vercel/ms",
+      "url": "https://www.npmjs.com/package/ms",
+      "noticeFile": "/licenses/ms.txt"
+    },
+    {
+      "name": "nanoid",
+      "version": "3.3.20",
+      "license": "MIT",
+      "repository": "ai/nanoid",
+      "url": "https://www.npmjs.com/package/nanoid",
+      "noticeFile": "/licenses/nanoid.txt"
+    },
+    {
+      "name": "open",
+      "version": "11.0.4",
+      "license": "MIT",
+      "repository": "sindresorhus/open",
+      "url": "https://www.npmjs.com/package/open",
+      "noticeFile": "/licenses/open.txt"
+    },
+    {
+      "name": "oxc-parser",
+      "version": "0.152.0",
+      "license": "MIT",
+      "repository": "https://github.com/oxc-project/oxc",
+      "url": "https://oxc.rs/docs/guide/usage/parser",
+      "noticeFile": "/licenses/oxc-parser.txt"
+    },
+    {
+      "name": "path-scurry",
+      "version": "3.0.0",
+      "license": "BlueOak-1.0.0",
+      "repository": "https://github.com/isaacs/path-scurry",
+      "url": "https://www.npmjs.com/package/path-scurry",
+      "noticeFile": "/licenses/path-scurry.txt"
+    },
+    {
+      "name": "path-to-regexp",
+      "version": "6.3.0",
+      "license": "MIT",
+      "repository": "https://github.com/pillarjs/path-to-regexp",
+      "url": "https://www.npmjs.com/package/path-to-regexp",
+      "noticeFile": "/licenses/path-to-regexp.txt"
+    },
+    {
+      "name": "pathe",
+      "version": "2.0.3",
+      "license": "MIT",
+      "repository": "unjs/pathe",
+      "url": "https://www.npmjs.com/package/pathe",
+      "noticeFile": "/licenses/pathe.txt"
+    },
+    {
+      "name": "picocolors",
+      "version": "1.1.1",
+      "license": "ISC",
+      "repository": "alexeyraspopov/picocolors",
+      "url": "https://www.npmjs.com/package/picocolors",
+      "noticeFile": "/licenses/picocolors.txt"
+    },
+    {
+      "name": "picomatch",
+      "version": "4.0.7",
+      "license": "MIT",
+      "repository": "micromatch/picomatch",
+      "url": "https://github.com/micromatch/picomatch",
+      "noticeFile": "/licenses/picomatch.txt"
+    },
+    {
+      "name": "playwright",
+      "version": "1.65.1",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/microsoft/playwright",
+      "url": "https://playwright.dev",
+      "noticeFile": "/licenses/playwright.txt"
+    },
+    {
+      "name": "playwright-core",
+      "version": "1.65.1",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/microsoft/playwright",
+      "url": "https://playwright.dev",
+      "noticeFile": "/licenses/playwright-core.txt"
+    },
+    {
+      "name": "postcss",
+      "version": "8.5.33",
+      "license": "MIT",
+      "repository": "postcss/postcss",
+      "url": "https://postcss.org/",
+      "noticeFile": "/licenses/postcss.txt"
+    },
+    {
+      "name": "powershell-utils",
+      "version": "0.2.1",
+      "license": "MIT",
+      "repository": "sindresorhus/powershell-utils",
+      "url": "https://www.npmjs.com/package/powershell-utils",
+      "noticeFile": "/licenses/powershell-utils.txt"
+    },
+    {
+      "name": "puppeteer-core",
+      "version": "25.17.0",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/puppeteer/puppeteer/tree/main/packages/puppeteer-core",
+      "url": "https://www.npmjs.com/package/puppeteer-core",
+      "noticeFile": null
+    },
+    {
+      "name": "react",
+      "version": "19.3.1",
+      "license": "MIT",
+      "repository": "https://github.com/react/react",
+      "url": "https://react.dev/",
+      "noticeFile": "/licenses/react.txt"
+    },
+    {
+      "name": "react-dom",
+      "version": "19.3.1",
+      "license": "MIT",
+      "repository": "https://github.com/react/react",
+      "url": "https://react.dev/",
+      "noticeFile": "/licenses/react-dom.txt"
+    },
+    {
+      "name": "require-from-string",
+      "version": "2.0.2",
+      "license": "MIT",
+      "repository": "floatdrop/require-from-string",
+      "url": "https://www.npmjs.com/package/require-from-string",
+      "noticeFile": "/licenses/require-from-string.txt"
+    },
+    {
+      "name": "robots-parser",
+      "version": "3.0.1",
+      "license": "MIT",
+      "repository": "https://github.com/samclarke/robots-parser",
+      "url": "https://github.com/samclarke/robots-parser",
+      "noticeFile": "/licenses/robots-parser.txt"
+    },
+    {
+      "name": "rolldown",
+      "version": "1.2.19",
+      "license": "MIT",
+      "repository": "https://github.com/rolldown/rolldown",
+      "url": "https://rolldown.rs/",
+      "noticeFile": "/licenses/rolldown.txt"
+    },
+    {
+      "name": "run-applescript",
+      "version": "7.1.0",
+      "license": "MIT",
+      "repository": "sindresorhus/run-applescript",
+      "url": "https://www.npmjs.com/package/run-applescript",
+      "noticeFile": "/licenses/run-applescript.txt"
+    },
+    {
+      "name": "scheduler",
+      "version": "0.28.0",
+      "license": "MIT",
+      "repository": "https://github.com/react/react",
+      "url": "https://react.dev/",
+      "noticeFile": "/licenses/scheduler.txt"
+    },
+    {
+      "name": "semver",
+      "version": "7.8.6",
+      "license": "ISC",
+      "repository": "https://github.com/npm/node-semver",
+      "url": "https://www.npmjs.com/package/semver",
+      "noticeFile": "/licenses/semver.txt"
+    },
+    {
+      "name": "sentry",
+      "version": "0.49.0",
+      "license": "FSL-1.1-Apache-2.0",
+      "repository": "https://github.com/getsentry/toolkit",
+      "url": "https://www.npmjs.com/package/sentry",
+      "noticeFile": "/licenses/sentry.txt"
+    },
+    {
+      "name": "sharp",
+      "version": "0.35.5",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/lovell/sharp",
+      "url": "https://sharp.pixelplumbing.com",
+      "noticeFile": "/licenses/sharp.txt"
+    },
+    {
+      "name": "source-map-js",
+      "version": "1.2.2",
+      "license": "BSD-3-Clause",
+      "repository": "7rulnik/source-map-js",
+      "url": "https://github.com/7rulnik/source-map-js",
+      "noticeFile": "/licenses/source-map-js.txt"
+    },
+    {
+      "name": "speedline-core",
+      "version": "1.4.3",
+      "license": "MIT",
+      "repository": "https://github.com/paulirish/speedline",
+      "url": "https://www.npmjs.com/package/speedline-core",
+      "noticeFile": null
+    },
+    {
+      "name": "string-width",
+      "version": "8.3.0",
+      "license": "MIT",
+      "repository": "sindresorhus/string-width",
+      "url": "https://www.npmjs.com/package/string-width",
+      "noticeFile": "/licenses/string-width.txt"
+    },
+    {
+      "name": "strip-ansi",
+      "version": "6.0.1",
+      "license": "MIT",
+      "repository": "chalk/strip-ansi",
+      "url": "https://www.npmjs.com/package/strip-ansi",
+      "noticeFile": "/licenses/strip-ansi.txt"
+    },
+    {
+      "name": "stubborn-fs",
+      "version": "2.0.0",
+      "license": "MIT",
+      "repository": "github:fabiospampinato/stubborn-fs",
+      "url": "https://www.npmjs.com/package/stubborn-fs",
+      "noticeFile": "/licenses/stubborn-fs.txt"
+    },
+    {
+      "name": "stubborn-utils",
+      "version": "1.0.2",
+      "license": "MIT",
+      "repository": "github:fabiospampinato/stubborn-utils",
+      "url": "https://www.npmjs.com/package/stubborn-utils",
+      "noticeFile": "/licenses/stubborn-utils.txt"
+    },
+    {
+      "name": "supports-color",
+      "version": "10.2.2",
+      "license": "MIT",
+      "repository": "chalk/supports-color",
+      "url": "https://www.npmjs.com/package/supports-color",
+      "noticeFile": "/licenses/supports-color.txt"
+    },
+    {
+      "name": "tagged-tag",
+      "version": "1.0.0",
+      "license": "MIT",
+      "repository": "sindresorhus/tagged-tag",
+      "url": "https://www.npmjs.com/package/tagged-tag",
+      "noticeFile": "/licenses/tagged-tag.txt"
+    },
+    {
+      "name": "third-party-web",
+      "version": "0.30.0",
+      "license": "MIT",
+      "repository": "https://github.com/patrickhulce/third-party-web",
+      "url": "https://www.npmjs.com/package/third-party-web",
+      "noticeFile": "/licenses/third-party-web.txt"
+    },
+    {
+      "name": "three",
+      "version": "0.187.0",
+      "license": "MIT",
+      "repository": "https://github.com/mrdoob/three.js",
+      "url": "https://threejs.org/",
+      "noticeFile": "/licenses/three.txt"
+    },
+    {
+      "name": "tinyglobby",
+      "version": "0.2.17",
+      "license": "MIT",
+      "repository": "https://github.com/SuperchupuDev/tinyglobby",
+      "url": "https://superchupu.dev/tinyglobby",
+      "noticeFile": "/licenses/tinyglobby.txt"
+    },
+    {
+      "name": "tldts-core",
+      "version": "7.5.2",
+      "license": "MIT",
+      "repository": "https://github.com/remusao/tldts",
+      "url": "https://github.com/remusao/tldts#readme",
+      "noticeFile": "/licenses/tldts-core.txt"
+    },
+    {
+      "name": "tldts-icann",
+      "version": "7.5.2",
+      "license": "MIT",
+      "repository": "https://github.com/remusao/tldts",
+      "url": "https://github.com/remusao/tldts#readme",
+      "noticeFile": "/licenses/tldts-icann.txt"
+    },
+    {
+      "name": "tslib",
+      "version": "2.9.1",
+      "license": "0BSD",
+      "repository": "https://github.com/Microsoft/tslib",
+      "url": "https://www.typescriptlang.org/",
+      "noticeFile": "/licenses/tslib.txt"
+    },
+    {
+      "name": "type-fest",
+      "version": "5.10.0",
+      "license": "(MIT OR CC0-1.0)",
+      "repository": "sindresorhus/type-fest",
+      "url": "https://www.npmjs.com/package/type-fest",
+      "noticeFile": null
+    },
+    {
+      "name": "typed-query-selector",
+      "version": "2.12.3",
+      "license": "MIT",
+      "repository": "g-plane/typed-query-selector",
+      "url": "https://www.npmjs.com/package/typed-query-selector",
+      "noticeFile": "/licenses/typed-query-selector.txt"
+    },
+    {
+      "name": "undici",
+      "version": "7.30.1",
+      "license": "MIT",
+      "repository": "https://github.com/nodejs/undici",
+      "url": "https://undici.nodejs.org",
+      "noticeFile": "/licenses/undici.txt"
+    },
+    {
+      "name": "undici-types",
+      "version": "8.9.0",
+      "license": "MIT",
+      "repository": "https://github.com/nodejs/undici",
+      "url": "https://undici.nodejs.org",
+      "noticeFile": "/licenses/undici-types.txt"
+    },
+    {
+      "name": "unenv",
+      "version": "2.0.0-rc.24",
+      "license": "MIT",
+      "repository": "unjs/unenv",
+      "url": "https://www.npmjs.com/package/unenv",
+      "noticeFile": "/licenses/unenv.txt"
+    },
+    {
+      "name": "vite",
+      "version": "8.3.8",
+      "license": "MIT",
+      "repository": "https://github.com/vitejs/vite",
+      "url": "https://vite.dev",
+      "noticeFile": "/licenses/vite.txt"
+    },
+    {
+      "name": "webdriver-bidi-protocol",
+      "version": "1.0.2",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/GoogleChromeLabs/webdriver-bidi-protocol",
+      "url": "https://www.npmjs.com/package/webdriver-bidi-protocol",
+      "noticeFile": "/licenses/webdriver-bidi-protocol.txt"
+    },
+    {
+      "name": "when-exit",
+      "version": "2.1.5",
+      "license": "MIT",
+      "repository": "github:fabiospampinato/when-exit",
+      "url": "https://www.npmjs.com/package/when-exit",
+      "noticeFile": "/licenses/when-exit.txt"
+    },
+    {
+      "name": "workerd",
+      "version": "1.20261113.1",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/cloudflare/workerd",
+      "url": "https://www.npmjs.com/package/workerd",
+      "noticeFile": null
+    },
+    {
+      "name": "wrangler",
+      "version": "4.162.0",
+      "license": "MIT OR Apache-2.0",
+      "repository": "https://github.com/cloudflare/workers-sdk",
+      "url": "https://github.com/cloudflare/workers-sdk#readme",
+      "noticeFile": null
+    },
+    {
+      "name": "wrap-ansi",
+      "version": "9.0.2",
+      "license": "MIT",
+      "repository": "chalk/wrap-ansi",
+      "url": "https://www.npmjs.com/package/wrap-ansi",
+      "noticeFile": "/licenses/wrap-ansi.txt"
+    },
+    {
+      "name": "ws",
+      "version": "8.23.0",
+      "license": "MIT",
+      "repository": "https://github.com/websockets/ws",
+      "url": "https://github.com/websockets/ws",
+      "noticeFile": "/licenses/ws.txt"
+    },
+    {
+      "name": "wsl-utils",
+      "version": "1.0.1",
+      "license": "MIT",
+      "repository": "sindresorhus/wsl-utils",
+      "url": "https://www.npmjs.com/package/wsl-utils",
+      "noticeFile": "/licenses/wsl-utils.txt"
+    },
+    {
+      "name": "xdg-basedir",
+      "version": "5.1.0",
+      "license": "MIT",
+      "repository": "sindresorhus/xdg-basedir",
+      "url": "https://www.npmjs.com/package/xdg-basedir",
+      "noticeFile": "/licenses/xdg-basedir.txt"
+    },
+    {
+      "name": "y18n",
+      "version": "5.0.8",
+      "license": "ISC",
+      "repository": "yargs/y18n",
+      "url": "https://github.com/yargs/y18n",
+      "noticeFile": "/licenses/y18n.txt"
+    },
+    {
+      "name": "yargs",
+      "version": "18.2.0",
+      "license": "MIT",
+      "repository": "https://github.com/yargs/yargs",
+      "url": "https://yargs.js.org/",
+      "noticeFile": "/licenses/yargs.txt"
+    },
+    {
+      "name": "yargs-parser",
+      "version": "22.0.0",
+      "license": "ISC",
+      "repository": "https://github.com/yargs/yargs-parser",
+      "url": "https://www.npmjs.com/package/yargs-parser",
+      "noticeFile": "/licenses/yargs-parser.txt"
+    },
+    {
+      "name": "youch",
+      "version": "4.1.0-beta.10",
+      "license": "MIT",
+      "repository": "https://github.com/poppinss/youch",
+      "url": "https://github.com/poppinss/youch#readme",
+      "noticeFile": "/licenses/youch.txt"
+    },
+    {
+      "name": "youch-core",
+      "version": "0.3.3",
+      "license": "MIT",
+      "repository": "https://github.com/poppinss/youch-core",
+      "url": "https://github.com/poppinss/youch-core#readme",
+      "noticeFile": "/licenses/youch-core.txt"
+    },
+    {
+      "name": "zod",
+      "version": "4.6.7",
+      "license": "MIT",
+      "repository": "https://github.com/colinhacks/zod",
+      "url": "https://zod.dev",
+      "noticeFile": "/licenses/zod.txt"
+    }
+  ]
+}

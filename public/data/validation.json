@@ -1,0 +1,240 @@
+{
+ "schemaVersion": "1.0.0",
+ "generatedAtUtc": "2026-11-14T13:10:08Z",
+ "tests": [
+  {
+   "id": "V1",
+   "title": "Ephemeris vs JPL Horizons",
+   "method": "Apparent airless az/el of Sun and Earth from each site (terrain + 1 m) at 5 UTC instants: SPICE azlcpo (LT+S, DE440s, MOON_ME) vs Horizons API (DE441, coord@301), angular separation of direction vectors.",
+   "metric": "p95 and max angular separation (deg), n = 40",
+   "target": "p95 < 0.01 deg (max and outliers reported)",
+   "result": {
+    "p95Deg": 0.0,
+    "maxDeg": 0.0,
+    "n": 40,
+    "perSiteBody": [
+     {
+      "site": "connecting-ridge",
+      "body": "SUN",
+      "maxSepDeg": 0.0
+     },
+     {
+      "site": "connecting-ridge",
+      "body": "EARTH",
+      "maxSepDeg": 0.0
+     },
+     {
+      "site": "shackleton-rim",
+      "body": "SUN",
+      "maxSepDeg": 0.0
+     },
+     {
+      "site": "shackleton-rim",
+      "body": "EARTH",
+      "maxSepDeg": 0.0
+     },
+     {
+      "site": "nobile-rim-1",
+      "body": "SUN",
+      "maxSepDeg": 0.0
+     },
+     {
+      "site": "nobile-rim-1",
+      "body": "EARTH",
+      "maxSepDeg": 0.0
+     },
+     {
+      "site": "malapert-massif",
+      "body": "SUN",
+      "maxSepDeg": 0.0
+     },
+     {
+      "site": "malapert-massif",
+      "body": "EARTH",
+      "maxSepDeg": 0.0
+     }
+    ],
+    "newHorizonsRequests": 0
+   },
+   "status": "pass",
+   "evidence": "Horizons responses cached in scientific/cache/horizons/ (not versioned); serial requests with identifying User-Agent.",
+   "notes": "Agreement holds for these 40 sampled instants only, limited by the 1e-6 deg precision printed by Horizons. It is not a general proof of equality for every site, time or body."
+  },
+  {
+   "id": "V2",
+   "title": "Vertical datum and registration: PGDA 5 m vs PDS LDEM 80 m",
+   "method": "PGDA 5 m DEM block-averaged to 80 m cells and compared with LDEM_80S_80M bilinear samples at the same polar-stereographic X/Y; also +/-80 m shifts.",
+   "metric": "median difference (systematic offset), MAD, best shift",
+   "target": "|median| < 2 m at every site and best shift = (0,0)",
+   "result": [
+    {
+     "site": "Site01",
+     "medianDiffM": 0.27,
+     "madM": 0.62,
+     "p95AbsM": 2.39,
+     "bestShiftM": [
+      0,
+      0
+     ],
+     "n": 40000
+    },
+    {
+     "site": "Site04",
+     "medianDiffM": 0.27,
+     "madM": 0.91,
+     "p95AbsM": 3.57,
+     "bestShiftM": [
+      0,
+      0
+     ],
+     "n": 40000
+    },
+    {
+     "site": "Site06",
+     "medianDiffM": 0.2,
+     "madM": 1.05,
+     "p95AbsM": 4.51,
+     "bestShiftM": [
+      0,
+      0
+     ],
+     "n": 62500
+    },
+    {
+     "site": "Site23",
+     "medianDiffM": 0.26,
+     "madM": 0.71,
+     "p95AbsM": 2.66,
+     "bestShiftM": [
+      0,
+      0
+     ],
+     "n": 68644
+    }
+   ],
+   "status": "pass",
+   "evidence": "scientific/validate.py v2_datum",
+   "notes": "Exploratory first run on 2026-11-14 preceded writing this target (median 0.2-0.3 m observed); stated for transparency."
+  },
+  {
+   "id": "V3",
+   "title": "Horizon range convergence",
+   "method": "Horizon at 1 m computed with sight lines truncated at 300 km vs full DEM coverage.",
+   "metric": "max |delta horizon| over 720 azimuths",
+   "target": "< 0.01 deg at every site",
+   "result": [
+    {
+     "site": "connecting-ridge",
+     "maxAbsDiffDeg": 0.0,
+     "minReachKm": 442.7
+    },
+    {
+     "site": "shackleton-rim",
+     "maxAbsDiffDeg": 0.0,
+     "minReachKm": 448.0
+    },
+    {
+     "site": "nobile-rim-1",
+     "maxAbsDiffDeg": 0.0,
+     "minReachKm": 340.7
+    },
+    {
+     "site": "malapert-massif",
+     "maxAbsDiffDeg": 0.0,
+     "minReachKm": 332.6
+    }
+   ],
+   "status": "pass",
+   "evidence": "scientific/validate.py v3_convergence",
+   "notes": ""
+  },
+  {
+   "id": "V4",
+   "title": "Reproduce Barker et al. (2021) illumination class",
+   "method": "Our points are centroids of PGDA RoIs defined as regions with average illumination > 70% at 1 m between 2024-01-01 and 2026-01-01. Same period, height and definition (mean visible fraction of the solar disk), hourly.",
+   "metric": "mean visible solar-disk fraction, 2024-2026, 1 m",
+   "target": "> 0.70 at both RoI centroids",
+   "result": [
+    {
+     "site": "connecting-ridge",
+     "meanVisibleFraction2024to2026At1m": 0.7828
+    },
+    {
+     "site": "shackleton-rim",
+     "meanVisibleFraction2024to2026At1m": 0.7083
+    }
+   ],
+   "status": "pass",
+   "evidence": "scientific/validate.py v4_barker",
+   "notes": "Differences expected from limb darkening (not modelled here) and from using the RoI centroid rather than every RoI pixel."
+  },
+  {
+   "id": "V4b",
+   "title": "Context: PGDA 18.6-year average illumination map",
+   "method": "Our 2-year hourly mean at 1 m vs PDS AVGVISIB_85S_060M_201608 at the same point.",
+   "metric": "values side by side",
+   "target": "qualitative only (different period, resolution and DEM)",
+   "result": [
+    {
+     "site": "connecting-ridge",
+     "pgda18yrAvgVisibility60m": 0.736,
+     "ours2024to2026At1m": 0.783
+    },
+    {
+     "site": "shackleton-rim",
+     "pgda18yrAvgVisibility60m": 0.657,
+     "ours2024to2026At1m": 0.708
+    },
+    {
+     "site": "nobile-rim-1",
+     "pgda18yrAvgVisibility60m": 0.785,
+     "ours2024to2026At1m": 0.834
+    },
+    {
+     "site": "malapert-massif",
+     "pgda18yrAvgVisibility60m": 0.715,
+     "ours2024to2026At1m": 0.654
+    }
+   ],
+   "status": "info",
+   "evidence": "scientific/validate.py v4b_pgda",
+   "notes": "Not a pass/fail test. Two of the points were chosen as PGDA maxima, which biases this comparison."
+  },
+  {
+   "id": "V5",
+   "title": "Sanity: height monotonicity and a permanently shadowed pixel",
+   "method": "Horizon at 5 m must not exceed horizon at 1 m; a pixel flagged permanently shadowed in PDS LPSR_85S_060M (Shackleton floor, 80 m DEM near field) must receive no direct sunlight hourly over 2024-2026.",
+   "metric": "booleans; max solar-disk fraction at PSR pixel",
+   "target": "all true; PSR max fraction = 0",
+   "result": [
+    {
+     "site": "connecting-ridge",
+     "horizon5mNotAbove1m": true
+    },
+    {
+     "site": "shackleton-rim",
+     "horizon5mNotAbove1m": true
+    },
+    {
+     "site": "nobile-rim-1",
+     "horizon5mNotAbove1m": true
+    },
+    {
+     "site": "malapert-massif",
+     "horizon5mNotAbove1m": true
+    },
+    {
+     "psrPixel": {
+      "latDeg": -89.67,
+      "lonEastDeg": 129.78,
+      "lpsrValue": 1.0,
+      "maxSunFraction2024to2026": 0.0
+     }
+    }
+   ],
+   "status": "pass",
+   "evidence": "scientific/validate.py v5_sanity",
+   "notes": "PSR test uses the 80 m DEM as near field (no 5 m PGDA tile covers this pixel)."
+  }
+ ]
+}

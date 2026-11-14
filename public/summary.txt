@@ -1,0 +1,36 @@
+LUNAR NAVIGATOR — PROJECT SUMMARY
+Team An0r4k | NASA Space Apps 2026
+Challenge: Lunar Landing Site Navigator
+
+THE QUESTION
+If a lunar landing is delayed, does the same location still offer a useful window of sunlight and direct Earth visibility? Lunar Navigator makes that question explorable for non-specialists and inspectable for reviewers.
+
+THE EXPERIENCE
+The Guided Mission is designed as a roughly ten-minute investigation: arrive, read the terrain horizon, compare light and Earth visibility, test a delay and explain a decision. Chapters can be revisited or skipped. The Open Workspace exposes every screen immediately for a short review. No login or mission completion is required.
+
+Home, Guided Mission, Simulator, Compare, Evidence and Credits are separate screens. The simulator includes an immersive Explore space action that hides the interface, with a visible return control and Escape support.
+
+TWO SIMULATION MODES
+Faithful Mode uses one astronomical timestamp for all bodies. Free Mode lets the visitor hold selected positions or orientations fixed, making artificial experiments possible. Those configurations are explicitly labeled and do not change faithful mission results.
+
+WHAT IS COMPARED
+The prototype covers four published polar points of interest: Connecting ridge, Shackleton rim, Nobile rim 1 and Malapert massif. They are not certified landing sites. The dataset spans 1 March to 28 April 2027, at observer heights of 1 and 5 metres. Visitors compare an original arrival, a delayed arrival and an alternative point using the same operating duration and assumptions.
+
+Outputs include mean visible solar-disc fraction, periods of direct sunlight, the longest continuous darkness, the fraction of time with some part of Earth visible and the longest gap in that visibility. Mean illumination uses hourly samples; event searches use five-minute steps and refined boundaries. Shorter events can be missed. Intervals touching a window boundary are marked as lower bounds.
+
+DATA AND METHOD
+NAIF SPICE supplies positions and orientations. Published LRO/LOLA PDS and PGDA elevation products supply terrain horizons. Selected angular results are checked against JPL Horizons, an official challenge resource. Dataset provenance, conventions, checksums and executed validation results are available in the Evidence screen and scientific documentation.
+
+The 3D globe uses credited NASA SVS/LROC surface imagery. Orbital overview scale is adjusted and labeled. The surface sky uses apparent angular sizes and a terrain-horizon silhouette. Global day/night shading is distinct from terrain visibility. Earth appearance is a historical NASA Blue Marble composite, not current weather.
+
+LIMITS
+Geometric Earth visibility is not an operational communications link, DSN schedule or relay model. Sunlight is not electrical power or battery survival. The project is an educational research prototype and does not certify landing safety or claim NASA endorsement.
+
+OPEN SOURCE AND TRANSPARENCY
+Original code is Apache-2.0. Third-party software and data retain their own terms. Credits, GitHub source links, preserved license notices and AI-use metadata are public. Claude and Codex assisted research, implementation, explanation and verification; numerical outputs are computed from the cited data rather than invented by language models. The official interpretation of the earlier AI-assisted ideation history remains unresolved; no eligibility certification is claimed.
+
+Repository: https://github.com/Andre1B/lunar-navigator-spaceapps-2026
+Challenge: https://www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator/
+Sources: https://ssd.jpl.nasa.gov/horizons/ | https://naif.jpl.nasa.gov/naif/ | https://pgda.gsfc.nasa.gov/products/78 | https://svs.gsfc.nasa.gov/4720/ | https://svs.gsfc.nasa.gov/12564/
+
+Written with AI assistance. This summary describes the implemented prototype; release verification status is maintained separately in the repository.

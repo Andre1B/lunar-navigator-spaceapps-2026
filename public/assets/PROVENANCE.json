@@ -1,0 +1,29 @@
+[
+  {
+    "file": "moon-lroc-2k.jpg",
+    "source": "https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/lroc_color_2k.jpg",
+    "credit": "NASA Scientific Visualization Studio / LROC; Ernie Wright (STC), Noah Petro (NASA/GSFC)",
+    "use": "Aesthetic lunar globe texture; not numerical elevation",
+    "downloadedOn": "2026-11-14",
+    "sha256": "f7130a1822681fa7512d7dcfd40db8c10b9ba4f06777910348698260ed7a2170",
+    "modifications": "None"
+  },
+  {
+    "file": "earth-blue-marble-2004-03.png",
+    "source": "https://svs.gsfc.nasa.gov/vis/a010000/a012500/a012564/frames/5400x2700_2x1_60p/world.topo.2004-03.png",
+    "credit": "NASA Goddard Space Flight Center; Blue Marble data courtesy Reto Stockli (NASA/GSFC)",
+    "use": "Historical March 2004 appearance, not current weather",
+    "downloadedOn": "2026-11-14",
+    "sha256": "f52cd7195d75d83f519e9c92c180969601665a77607e61e37fe9830b615ac9d0",
+    "modifications": "None"
+  },
+  {
+    "file": "space-apps-official-white.png",
+    "source": "https://drive.google.com/file/d/1UP7H6w3Te5Ja4n0vscKjWot2buCc-FqT/view",
+    "credit": "Official Space Apps asset supplied by Campinas organizers",
+    "use": "Unmodified event identification; brand rights reserved",
+    "downloadedOn": "2026-11-14",
+    "sha256": "7f27072e01f729424caa3408e3b7dc49d63a1fe3df247d81eae6e1498c2e116b",
+    "modifications": "None"
+  }
+]

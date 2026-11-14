@@ -1,0 +1,5 @@
+# Python 3.12. Versions used to generate public/data on 2026-11-14.
+numpy==2.5.3
+spiceypy==8.4.0   # bundles NAIF CSPICE N0067
+tifffile==2026.9.20
+# Optional, not imported by the pipeline: pyshp==3.1.8 was used once to read PGDA RoI centroids, which are hard-coded in build_scenes.py.
