@@ -28,7 +28,16 @@ Reference: the private, visibly labeled generated concept `tmp/lunar-ui-concept.
 
 ## Final release gates
 
-Pending final candidate production deployment, updated browser suite, public-link and demo checks, final Lighthouse and final native screenshot comparison. Do not replace “pending” with “pass” without the actual outputs.
+Completed on production deployment **254df20f** at https://lunar-navigator-2026.pages.dev/:
+
+- **71/71** unit/data tests, no failures or todo cases.
+- **27/27** production browser checks: all routes, independent freezes, all body-focus options, changes to location/height/date/delay, unavailable/empty dates, mission-note persistence, native Tab/Space/Escape, immersive focus return, reduced motion, 1440/390 px layout, correct public file types and absolute source links. Zero failed requests, console errors or page errors in those flows.
+- **10/10** separate production demo checks: six slides, real button clicks, keyboard navigation, deep-link loads, clamped bounds, image loading, all six slides at 1280x720 and 390x844, no overflow or CSP errors. Browser/IAB click failure was tooling/zoom; native Chrome confirmed no app bug.
+- Final production **Lighthouse 13.6.0**: mobile 100 in Performance, Accessibility, Best Practices, SEO and Agentic Browsing. Desktop Performance 99; the other four categories 100. Largest Contentful Paint approximately 0.77 s mobile and 0.83 s desktop in these laboratory runs, not field guarantees.
+- Native-size 1487x1058 production simulator screenshot captured after both NASA textures loaded, matching the generated reference's actual dimensions. Root reopened the reference and latest production image with view_image and checked the ledger above. Separate-screen layout and scientifically corrected copy remain deliberate, user-required departures from the initial concept.
+- Public HTML/TXT summaries, six-slide demo, AI metadata, dependency credits, data files and source repository are accessible without an account.
+
+Machine-readable results and raw-report hashes: [release-evidence.json](release-evidence.json). Native Chrome headless used SwiftShader: real-device GPU performance, Safari/Firefox and a full screen-reader audit remain untested. Color contrast and keyboard checks do not substitute for those unexecuted checks. No material unresolved failure was found against the agreed tested release criteria.
 
 ## Competition submission
 

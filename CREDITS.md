@@ -20,6 +20,8 @@ Lunar Navigator — Team An0r4k, NASA Space Apps 2026, Lunar Landing Site Naviga
 
 Installed JavaScript package versions, transitive dependencies, upstream repositories and preserved license texts: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), generated from package metadata. The site presents this inventory at **Credits**. Python dependencies and versions are recorded in [scientific/requirements.txt](scientific/requirements.txt) and scientific documentation; bundled NAIF code and kernel notices retain original terms.
 
+Repository URLs are normalized to clickable HTTPS links. The `@paulirish/trace_engine` build-tool dependency links its upstream Chrome DevTools repository, with the packaging distinction recorded in credits.json. The `http-link-header` tool dependency's current official source is Codeberg, not GitHub; the actual upstream URL is preserved rather than inventing a GitHub repository.
+
 ## NASA and partner data / resources
 
 - NASA JPL Solar System Dynamics, [Horizons](https://ssd.jpl.nasa.gov/horizons/): independent sampled reference queries; see scientific validation and cached provenance.

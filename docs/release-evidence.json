@@ -1,0 +1,68 @@
+{
+  "recordedAtUtc": "2026-11-14T14:03:47.829543+00:00",
+  "site": "https://lunar-navigator-2026.pages.dev/",
+  "testedDeployment": "254df20f",
+  "sourceCommit": "318e7d705995c2b2c3ebc414a4c63fa386c45905",
+  "unitTests": {
+    "pass": 71,
+    "fail": 0,
+    "todo": 0
+  },
+  "productionBrowser": {
+    "pass": 27,
+    "fail": 0,
+    "recordSha256": "88d5799798535cb332d37eb38a8fb55e099b5787d0f12dc548a1acdaaaadf2d2",
+    "passCount": 27,
+    "failCount": 0
+  },
+  "demoBrowser": {
+    "pass": 10,
+    "fail": 0,
+    "slides": 6,
+    "recordSha256": "29c15658209189b79003fcc762cab6b78cfc350d12feb0fdb523449236d577cf",
+    "passCount": 10,
+    "failCount": 0
+  },
+  "lighthouse": [
+    {
+      "formFactor": "mobile",
+      "requestedUrl": "https://lunar-navigator-2026.pages.dev/",
+      "finalDisplayedUrl": "https://lunar-navigator-2026.pages.dev/",
+      "fetchTime": "2026-11-14T13:56:11.160Z",
+      "lighthouseVersion": "13.6.0",
+      "scores": {
+        "performance": 100,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100,
+        "agentic-browsing": 100
+      },
+      "largestContentfulPaintMs": 768.863,
+      "rawReportSha256": "b628a816f8120583fd339f40e9892c91173264c3ba7498a9d3fb0e2ebd61e409",
+      "runtimeError": null
+    },
+    {
+      "formFactor": "desktop",
+      "requestedUrl": "https://lunar-navigator-2026.pages.dev/",
+      "finalDisplayedUrl": "https://lunar-navigator-2026.pages.dev/",
+      "fetchTime": "2026-11-14T13:56:21.337Z",
+      "lighthouseVersion": "13.6.0",
+      "scores": {
+        "performance": 99,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100,
+        "agentic-browsing": 100
+      },
+      "largestContentfulPaintMs": 826.881,
+      "rawReportSha256": "2bf07e6846049773cd90b1a58da304825edff87901bcbb77e2fdfbba409c23c4",
+      "runtimeError": null
+    }
+  ],
+  "limitations": [
+    "Laboratory measurements, not field performance.",
+    "Browser QA used Chrome headless SwiftShader; real GPU, Safari/Firefox and a screen reader were not tested.",
+    "Scientific and eligibility caveats remain in the documented evidence.",
+    "Browser/IAB zoom and button-key limitations required Playwright for exact viewport/native keyboard checks."
+  ]
+}

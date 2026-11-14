@@ -1,14 +1,14 @@
 // Browser QA (Playwright). Not part of `npm test` (name does not end in .test.mjs).
 //   dev:        node tests/browser-check.mjs                 (http://localhost:5173)
 //   production: QA_URL=https://<site> node tests/browser-check.mjs
-// Env: QA_HEADED=1 shows the browser. Output: ../tmp/lunar-qa/{results.json,*.png} (outside git).
+// Env: QA_OUT=<dir> overrides the output directory (use a separate one per base URL); QA_HEADED=1 shows the browser. Output: ../tmp/lunar-qa/{results.json,*.png} (outside git).
 import {chromium} from 'playwright';
 import {mkdirSync,writeFileSync,existsSync} from 'node:fs';
 import {dirname,join,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const BASE=(process.env.QA_URL||'http://localhost:5173').replace(/\/$/,'');
-const OUT=resolve(dirname(fileURLToPath(import.meta.url)),'..','..','tmp','lunar-qa');
+const OUT=process.env.QA_OUT?resolve(process.env.QA_OUT):resolve(dirname(fileURLToPath(import.meta.url)),'..','..','tmp','lunar-qa');
 mkdirSync(OUT,{recursive:true});
 const CHROME_EXE='C:/Program Files/Google/Chrome/Application/chrome.exe';
 const results=[];
@@ -336,10 +336,13 @@ await check('evidence: validation statuses rendered, caveats present, no garbled
 await check('credits: GitHub links present and external links are safe',async()=>{
   const page=await open(desktop,'credits','credits');
   await page.locator('.credit-list article').first().waitFor({timeout:15000});
+  const location=new URL(page.url());
   const links=await page.$$eval('a[target=_blank]',as=>as.map(a=>({rel:a.rel,href:a.href})));
   expect(links.length>10,'few external links: '+links.length);
   expect(links.every(l=>/noopener|noreferrer/.test(l.rel)),'target=_blank without noopener/noreferrer (noreferrer implies noopener)');
   expect(links.some(l=>/github\.com/.test(l.href)),'GitHub links');
+  const bad=links.filter(l=>!/^https:\/\/[^/]+\.[a-z]{2,}/i.test(l.href)||/localhost|github:|git@|\/#\//.test(l.href)||new URL(l.href).origin===location.origin);
+  expect(bad.length===0,'credits links that are not absolute https URLs to external sites: '+bad.slice(0,4).map(l=>l.href).join(', '));
   expect(await page.locator('main').innerText().then(t=>/not certify or endorse|no affiliation or endorsement/i.test(t)),'no-endorsement statement');
   await page.close();
 });
@@ -392,6 +395,14 @@ await check('default motion: simulation also starts paused',async()=>{
   const page=await open(desktop,'simulator','paused');
   await page.getByRole('button',{name:'Play'}).waitFor({timeout:15000});
   await page.close();
+});
+
+await check('public files and linked pages respond (summary, AI record, datasets, credits)',async()=>{
+  const paths=['/summary.html','/summary.txt','/ai-use.json','/credits.json','/data/manifest.json','/data/sky.json','/data/validation.json','/data/planets.json','/data/sites/connecting-ridge.json','/icon.svg'];
+  const bad=[];const info=[];
+  for(const p of paths){const r=await desktop.request.get(BASE+p);const ct=r.headers()['content-type']||'';info.push(`${p}:${r.status()}`);if(!r.ok()||/text\/html/.test(ct)&&p.endsWith('.json'))bad.push(`${p} ${r.status()} ${ct}`);}
+  expect(bad.length===0,'bad responses: '+bad.join('; '));
+  return info.join(' ');
 });
 
 // ---- Network / console hygiene (collected across all flows above)

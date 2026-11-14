@@ -32,12 +32,16 @@ Only publish new lunar project. Cloudflare onlyone account was selected after in
 
 PASS: 71 independent unit/data tests; deterministic regeneration of sky and four site JSONs matched hashes (manifest/validation differ only generated timestamp); production build; science/front-end bounded review; initial browser desktop/mobile keyboard/reduced-motion and immersive Escape/return checks. The last browser pass before body-focus changes was 20/20; final updated body-focus pass and production run are pending. Initial production Lighthouse mobile: performance 100, accessibility 100, best practices 100, SEO 92; robots and missing-path handling were fixed for the final run. A new Lighthouse agentic-browsing category was 50 on the initial baseline; proper 404/llms discovery resources now added, final audit pending.
 
-Remaining: final new-code browser pass + production QA, final production Lighthouse, public asset/link/credits checks, demo navigation and final release evidence. Do not call the project submitted or eligibility certified. Official interpretation of prior AI-assisted ideation remains unresolved; document assistance honestly. The NASA registration/eligibility/legal confirmations and Submit for Judging have NOT been performed. The user has authorized GitHub/Pages publication, not an unchecked legal submission.
+FINAL RELEASE: production deployment **254df20f**, source documentation checkpoint 318e7d7, camera code b07e64a. **71/71** unit/data checks; **27/27** production browser checks; **10/10** separate six-slide demo checks. Final mobile Lighthouse all five categories 100; desktop Performance 99 and others 100. Zero browser console/page/request errors in tested flows. See docs/VERIFICATION.md and docs/release-evidence.json for evidence, report hashes, exact scope and untested GPU/browser/screen-reader cases. All public static source/build files matched hashes before deployment. No runtime source change after these release checks.
+
+Do not call the project submitted or eligibility certified. Official interpretation of prior AI-assisted ideation remains unresolved; document assistance honestly. The NASA registration/eligibility/legal confirmations and Submit for Judging have NOT been performed. The user has authorized GitHub/Pages publication, not an unchecked legal submission.
 
 ## Budget
 
 Initial read Codex 54% relevant allowance consumed; Claude five-hour 0%, weekly 9%. User has two manual resets; notify near limit and checkpoint, never consume a reset credit silently.
 
+Last Codex allowance read at delivery: 66% used; two manual reset credits still available, none consumed. Continue checking before substantial new work.
+
 ## Resumption
 
-Read this file, scientific/PROGRESS.md, tests/PROGRESS.md and docs/review-sol.md. Do not duplicate completed research or delete data. Sonnet test agent owns tests/ and has an outstanding production QA after root sends the final URL/deploy-ready message. Root owns final build, publication and evidence. Operational Cloudflare work is finished, with logs in the epic outside git. No additional hosting cleanup is needed.
+Read this file, scientific/PROGRESS.md, tests/PROGRESS.md and docs/review-sol.md. Do not duplicate completed research or delete data. All delegated production/demo QA is finished; no reply is pending. Root owns subsequent build/publication and user feedback. Operational Cloudflare work is finished, with logs in the epic outside git. No additional hosting cleanup is needed. Preserve the actual public version until a new change is authorized; refresh the evidence for material changes.
