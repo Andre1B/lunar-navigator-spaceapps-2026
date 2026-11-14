@@ -1,0 +1,39 @@
+{
+ "schemaVersion": "1.0.0",
+ "purpose": "Background sky for the 3D views. Star positions are real (catalogue based); brightness and colour are an illustrative rendering, not a photometric or exposure-correct view from the lunar surface.",
+ "files": [
+  {
+   "file": "starmap/starmap-2020-celestial-4096x2048.jpg",
+   "width": 4096,
+   "height": 2048,
+   "bytes": 2217653,
+   "sha256": "bbbb4feb01d619508879e40fa44fdd223ab4d1a0a2a6df4b50ed5e5f03faac68"
+  },
+  {
+   "file": "starmap/starmap-2020-celestial-2048x1024.jpg",
+   "width": 2048,
+   "height": 1024,
+   "bytes": 434340,
+   "sha256": "f4264c496ef231db35135a8efea9385d70f8b9be76f7639a1760c8c30c32473e"
+  }
+ ],
+ "grid": {
+  "projection": "plate carree (equirectangular) in ICRF/J2000 right ascension and declination",
+  "columns": "column c centre RA = (180 - (c + 0.5) * 360 / width) mod 360 deg  (RA 0h at the centre, increasing to the LEFT, as seen from inside the sphere)",
+  "rows": "row r centre Dec = 90 - (r + 0.5) * 180 / height deg",
+  "threeMapping": "For a J2000 direction d, RA = atan2(d.y, d.x), Dec = asin(d.z); in the scene's P mapping (x, y, z) -> (x, z, -y). On a three SphereGeometry, uv.u_geom = (RA + 180) / 360, so the texture needs u_tex = 1 - u_geom: set texture.wrapS = RepeatWrapping, repeat.x = -1, offset.x = 1 (or scale the sky sphere by -1 in X). Use side = BackSide and keep the sky sphere unrotated, since J2000 is the scene's world frame.",
+  "verify": "Orion's belt (RA ~5.6 h, Dec ~-1 deg) and the Southern Cross (RA ~12.4 h, Dec ~-60 deg) should appear there; the south celestial pole is near the lunar south pole's sky only approximately (the lunar spin axis is ~1.5 deg from the ecliptic pole, not the celestial pole)."
+ },
+ "conversion": "EXR half-float linear RGB (values 0-1) -> sRGB transfer function -> 8-bit JPEG (quality 88); 2048 version by Lanczos downsampling. No exposure or colour change.",
+ "limitations": [
+  "Illustrative brightness: the map is designed for animation, not photometry. Do not infer what an observer or camera on the Moon would see next to the Sun.",
+  "Star positions are J2000 catalogue positions; proper motion to 2027 and aberration are not applied (well below display resolution)."
+ ],
+ "source": {
+  "product": "NASA SVS Deep Star Maps 2020, celestial coordinates, starmap_2020_4k.exr",
+  "url": "https://svs.gsfc.nasa.gov/4851/",
+  "file": "https://svs.gsfc.nasa.gov/vis/a000000/a004800/a004851/starmap_2020_4k.exr",
+  "credit": "NASA/Goddard Space Flight Center Scientific Visualization Studio. Gaia DR2: ESA/Gaia/DPAC."
+ },
+ "generator": "scientific/build_starmap.py"
+}

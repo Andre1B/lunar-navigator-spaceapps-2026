@@ -41,7 +41,17 @@ Research considered prior winners and related tools. No competitor code was copi
 - [42 Quake Heroes scientific notebook](https://github.com/gabrielchayb/42-model-source-notebook): studied for inspectable methods and the importance of defining a metric; not part of our calculation.
 - [CLPS Lunar Mission Browser](https://github.com/EmanuelAbasto/CLPS-Lunar-Mission-Browser), [LuminaLuna](https://github.com/Planet-Coders/lunar-landing-site-navigator) and [Lunar Horizon](https://github.com/localizedprojects/CLPS-MOON-BROWSER): related-tool descriptions studied during research; no application code imported, their performance claims not independently reproduced.
 
-## AI assistance
+## V2 visual assets and conversion tools
+
+- NASA SVS [CGI Moon Kit](https://svs.gsfc.nasa.gov/4720/): LROC 2025 albedo, converted from the 16-bit 4k TIFF to sRGB JPEG; LOLA `ldem_4` global elevation in metres. Credit: NASA's Scientific Visualization Studio and the LRO LROC/LOLA teams. Physical vertical scale is 1.0. Isotropic polar filtering and uniform physical-baseline normals avoid equirectangular polar sampling artifacts. Global relief is explanatory, distinct from the numerical horizon products.
+- PGDA 5 m terrain, with PDS 80 m fallback: four 20 km windows averaged to 40 m for oblique visual geometry. Exact spherical positions preserve curvature. The numerical visibility metrics continue to use the independently generated horizon profiles.
+- [NASA Deep Star Maps 2020](https://svs.gsfc.nasa.gov/4851/): NASA/Goddard Space Flight Center Scientific Visualization Studio; Gaia DR2: ESA/Gaia/DPAC. EXR converted from linear values to sRGB JPEG. Catalogue positions retained; brightness and colour are illustrative.
+- Blue Marble March 2004: the credited original above was resized to a 2k JPEG. Historical appearance, not live weather.
+- [Pillow](https://github.com/python-pillow/Pillow), HPND; [OpenEXR](https://github.com/AcademySoftwareFoundation/openexr), BSD-3-Clause; [imagecodecs](https://github.com/cgohlke/imagecodecs), BSD-3-Clause: optional local conversion tools, not browser dependencies. Versions and roles are recorded in `scientific/requirements.txt`.
+
+Exact source URLs, transformations, checksums and limitations accompany the assets in `public/data/globe/visual-assets.json`, `moon-elevation.json`, `terrain/terrain.json` and `starmap/starmap.json`. The old `lroc_color_2k.jpg` texture is retained as a historical fallback asset; the V2 renderer uses the credited 4k/2k conversion.
+
+## AI assistance and review
 
 Claude and Codex assisted research, implementation, explanation, testing and documentation. See [public/ai-use.json](public/ai-use.json). Scientific numbers come from deterministic code processing the cited resources; no ephemeris/terrain values are invented by an LLM. A generated UI design reference was used privately, with visible labeling; it is not shipped as scientific imagery. The real-time scene is a code rendering of cited data, not a generated photograph.
 

@@ -11,3 +11,9 @@ Approved user revisions supersede the initial single-screen reference: Home, Gui
 Scientific corrections to the generated concept: Free Mode is independent body freezes, not merely a free camera; dates follow dataset coverage, not the invented concept date; no NASA standards/safety claim; globe texture is aesthetic, numerical horizon is separate; simulated charts never use the example bars in the generated image.
 
 Native render comparison and mobile, keyboard, reduced-motion and production Lighthouse gates must be documented before completion. Concept-to-build differences above are deliberate user requirements or scientific corrections.
+
+## V2 direction (supersedes the first composition)
+
+Astra's bounded direction and actual-render review are recorded in astra-art-direction.md. A second private labeled concept informed composition; it is not deployed imagery. The accepted implementation uses charcoal and warm white, blue actions, gold sunlight, cyan Earth visibility and restrained red site pins. Solid panels, typography and meaningful camera/time transitions replace decorative glow. Home explains the arrival-delay question, four south-pole study points and both navigation paths before advanced details. Free entry remains visible at the user's request.
+
+Fidelity ledger: (1) scene-first composition implemented with real data; (2) named cameras and integrated time implemented; (3) physical sunlight retained rather than invented dramatic lighting; (4) source texture/terrain replace generated artwork; (5) mobile setup collapses while all routes and tutorial remain accessible. Desktop scene height is budgeted to leave time controls visible. Production and independent V2 verification are recorded in REDESIGN-V2.md and VERIFICATION.md, not implied by this design document.

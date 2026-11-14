@@ -45,3 +45,6 @@ Last Codex allowance read at delivery: 66% used; two manual reset credits still 
 ## Resumption
 
 Read this file, scientific/PROGRESS.md, tests/PROGRESS.md and docs/review-sol.md. Do not duplicate completed research or delete data. All delegated production/demo QA is finished; no reply is pending. Root owns subsequent build/publication and user feedback. Operational Cloudflare work is finished, with logs in the epic outside git. No additional hosting cleanup is needed. Preserve the actual public version until a new change is authorized; refresh the evidence for material changes.
+
+## Active V2 checkpoint
+The major tutorial/visual redesign is implemented locally and under independent verification. See docs/REDESIGN-V2.md for precise source/assets/ownership. V1 evidence above is historical and must not be reused as V2 evidence. Root allowance 81% used, two manual resets unconsumed. New unit/data/geometry suite 84/84; browser V2 is running independently; production V2 and Lighthouse not yet run. No additional Cloudflare project changes are authorized or needed. Keep credentials and private research outside git.

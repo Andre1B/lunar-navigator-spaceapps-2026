@@ -8,7 +8,7 @@ If a lunar landing is delayed, does the same location still offer a useful windo
 THE EXPERIENCE
 The Guided Mission is designed as a roughly ten-minute investigation: arrive, read the terrain horizon, compare light and Earth visibility, test a delay and explain a decision. Chapters can be revisited or skipped. The Open Workspace exposes every screen immediately for a short review. No login or mission completion is required.
 
-Home, Guided Mission, Simulator, Compare, Evidence and Credits are separate screens. The simulator includes an immersive Explore space action that hides the interface, with a visible return control and Escape support.
+Home, How it works, Guided Mission, Simulator, Compare, Evidence and Credits are separate screens. The interactive guide contains seven lessons with adjustable examples, quizzes and a manual walkthrough; a ten-step tour points to real application controls. The simulator includes an immersive Explore space action that hides the interface, with a visible return control and Escape support.
 
 TWO SIMULATION MODES
 Faithful Mode uses one astronomical timestamp for all bodies. Free Mode lets the visitor hold selected positions or orientations fixed, making artificial experiments possible. Those configurations are explicitly labeled and do not change faithful mission results.
@@ -23,7 +23,7 @@ NAIF SPICE supplies positions and orientations. Published LRO/LOLA PDS and PGDA 
 
 Seven additional planets follow documented ephemerides as visual context only, with system barycentre proxies where applicable. Their positions are not independently validated against Horizons and do not change the mission results.
 
-The 3D globe uses credited NASA SVS/LROC surface imagery. Orbital overview scale is adjusted and labeled. The surface sky uses apparent angular sizes and a terrain-horizon silhouette. Global day/night shading is distinct from terrain visibility. Earth appearance is a historical NASA Blue Marble composite, not current weather.
+The 3D globe uses credited NASA SVS/LROC imagery and real-scale LOLA displacement with polar filtering and physical surface normals. Named camera presets include the south pole, a surface sky, oblique local terrain and solar context. The 20 km local terrain windows are visual geometry at 40 m resolution. Catalogue-based stars use NASA SVS/Gaia data, with illustrative brightness and colour. Orbital overview scale is adjusted and labeled. The surface sky uses apparent angular sizes and a terrain-horizon silhouette. Global day/night shading is distinct from terrain visibility. Earth appearance is a historical NASA Blue Marble composite, not current weather.
 
 LIMITS
 Geometric Earth visibility is not an operational communications link, DSN schedule or relay model. Sunlight is not electrical power or battery survival. The project is an educational research prototype and does not certify landing safety or claim NASA endorsement.

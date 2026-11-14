@@ -1,0 +1,76 @@
+{
+ "schemaVersion": "1.0.0",
+ "purpose": "True-scale lunar relief for the 3D globe (geometry and shading). Not used by any visibility or metric calculation; site horizons use the PGDA/PDS DEMs in sites/*.json.",
+ "encoding": "Raw little-endian int16, row-major, metres above the 1737.4 km reference sphere (radius = 1737400 + value). No no-data values.",
+ "grid": {
+  "projection": "simple cylindrical (equirectangular), planetocentric latitude, east-positive longitude",
+  "row0": "northernmost row; row r centre latitude = 90 - (r + 0.5) * 180 / height",
+  "col0": "westernmost column; column c centre longitude = -180 + (c + 0.5) * 360 / width (map centred on 0 deg)",
+  "uvForThreeSphereGeometry": "With the body frame mapped (x,y,z)->(x,z,-y), three.js SphereGeometry has u = (lon + 180) / 360 (u = 0.5 at lon 0 on local +X, u = 0.25 at lon -90) and uv.y = 1 at the north pole. Row 0 of this grid is north, so sample row = (1 - uv.y) * height, or upload it as a texture with three's default flipY = true.",
+  "frame": "LOLA mean-Earth/polar-axis lunar frame (same as manifest conventions)"
+ },
+ "files": [
+  {
+   "file": "globe/moon-elevation-1440x720.i16",
+   "width": 1440,
+   "height": 720,
+   "bytes": 2073600,
+   "sha256": "c987e22061e94b72f2b43422d0b86e8b90f4cb9ccd24aa566acc539df4c0d34c",
+   "minM": -8878,
+   "maxM": 10504,
+   "derivation": "ldem_4.tif km x 1000, rounded to the nearest metre"
+  },
+  {
+   "file": "globe/moon-elevation-720x360.i16",
+   "width": 720,
+   "height": 360,
+   "bytes": 518400,
+   "sha256": "f7fef6675f810ca583c4f940a7a752e9136fa61efafafafa9ed9a3f041eafc74",
+   "minM": -8328,
+   "maxM": 9790,
+   "derivation": "2x2 mean of the 1440x720 grid, rounded to the nearest metre"
+  }
+ ],
+ "isotropicFiles": [
+  {
+   "file": "globe/moon-elevation-1440x720-isotropic.i16",
+   "width": 1440,
+   "height": 720,
+   "bytes": 2073600,
+   "sha256": "6b48952504bdc592fe59e0a65c09d47a71a0a06a855aaaeee895aa6b2f87814b",
+   "minM": -8517,
+   "maxM": 10504,
+   "derivation": "1440x720 grid, each row box-averaged along longitude over round(1/cos(lat)) columns (circular)"
+  },
+  {
+   "file": "globe/moon-elevation-720x360-isotropic.i16",
+   "width": 720,
+   "height": 360,
+   "bytes": 518400,
+   "sha256": "a38b8263da9b40eb0937e714f4800969363183884ca16b5dfedd4c289e4957b3",
+   "minM": -8223,
+   "maxM": 9790,
+   "derivation": "720x360 grid, each row box-averaged along longitude over round(1/cos(lat)) columns (circular)"
+  }
+ ],
+ "isotropicNote": "Use the isotropic variants for mesh displacement and normals. In the raw grids, samples along a row near a pole are only metres apart while rows are 7.6-15 km apart, so neighbour differences give false east-west slopes (up to ~19 at 89.9 S). The isotropic variants average each row over about one row spacing of physical distance. Equatorial rows are unchanged (k = 1). This is resampling, not smoothing for looks; true scale is kept.",
+ "normalsRecommendation": "Physical normal at a vertex: n = normalize(U - dh/de * E - dh/dn * N), with dh/de and dh/dn from samples at a fixed physical baseline (>= the row spacing; 7.6 km for 1440x720, 15.2 km for 720x360) taken at great-circle points P +/- baseline * E and P +/- baseline * N, and U, E, N the local up, east and north. Within ~1 deg of a pole, prefer the polar products (LOLA polar DEMs) or set the normal to U.",
+ "verticalScale": "1.0 (true scale). Relief spans about 19.4 km, 1.1% of the radius. Any vertical exaggeration applied by the renderer must be labelled visual only.",
+ "orientationCheck": {
+  "medianDiffM": 0.5,
+  "medianAbsDiffM": 32.4,
+  "n": 429,
+  "medianAbsDiffWithLonShiftM": {
+   "-4col": 153.7,
+   "+4col": 141.7
+  },
+  "note": "Polar pixels (82-89.5 S) vs PDS LDEM_80S_80M. Unshifted grid fits best; the residual reflects the 4 px/deg (~7.6 km) resolution."
+ },
+ "source": {
+  "product": "NASA SVS CGI Moon Kit, displacement map ldem_4.tif (4 px/deg, float km relative to 1737.4 km), derived from LRO LOLA",
+  "url": "https://svs.gsfc.nasa.gov/4720/",
+  "file": "https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/ldem_4.tif",
+  "credit": "NASA's Scientific Visualization Studio; LRO LOLA team"
+ },
+ "generator": "scientific/build_globe.py"
+}

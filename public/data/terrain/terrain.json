@@ -1,0 +1,132 @@
+{
+ "schemaVersion": "1.0.0",
+ "purpose": "Local 3D terrain for an oblique overview of each site. Visual geometry only: horizons and metrics come from sites/*.json (5 m near field plus 80 m and 240 m far field), not from these tiles.",
+ "encoding": "Raw little-endian int16, row-major, metres above the 1737.4 km reference sphere (radius = 1737400 + value). No no-data values.",
+ "grid": {
+  "projection": "south polar stereographic on the 1737.4 km sphere, true scale at the pole; X/Y in metres; longitude 0 toward +Y, 90 E toward +X (same as manifest sites[].polarStereoXYM)",
+  "cellCentre": "x = xMin + (c + 0.5) * cellSizeM ; y = yMax - (r + 0.5) * cellSizeM (row 0 is the +Y edge, column 0 the -X edge)",
+  "registration": "cell-centred (PixelIsArea); the site lies on the shared corner of the four central cells",
+  "aggregation": "each cell = mean of 8 x 8 bilinear samples (5 m spacing) of the PGDA 5 m DEM; cells not fully covered by it use PDS LDEM_80S_80M bilinear at the cell centre (see fractionFromPgda5m)",
+  "frame": "MOON_ME of DE421 (same as all DEMs here)"
+ },
+ "helpers": {
+  "toLatLon": "rho = hypot(x, y); lat = -90 + 2 * atan(rho / (2 * 1737400)) [deg]; lon = atan2(x, y) [deg east]",
+  "toBodyFixedM": "P = (1737400 + h) * (cos lat cos lon, cos lat sin lon, sin lat) in MOON_ME; use exact positions, not a flat plane (the drop is about 29 m at 10 km from the site)",
+  "toSiteENU": "zenith U = unit(lat0, lon0); east E = normalize((0,0,1) x U); north N = U x E; local = ((P - O)\u00b7E, (P - O)\u00b7N, (P - O)\u00b7U) with O = (1737400 + h0) * U",
+  "mapAxesAtSite": "at the site, map +rho (direction (sin lon0, cos lon0) in X/Y) is local north and (cos lon0, -sin lon0) is local east; the stereographic scale factor here is 1.000 to within 0.2%",
+  "normals": "build normals from the exact 3D positions of neighbouring cells (cross product of central differences), not from the int16 values alone",
+  "threeMapping": "same P mapping as sky.json and the globe: three (x, y, z) = (X_body, Z_body, -Y_body)"
+ },
+ "verticalScale": "1.0 (true scale). Any exaggeration must be labelled visual only.",
+ "tiles": [
+  {
+   "siteId": "connecting-ridge",
+   "file": "terrain/connecting-ridge-20km-40m.i16",
+   "width": 500,
+   "height": 500,
+   "cellSizeM": 40.0,
+   "boundsPolarStereoM": {
+    "xMin": -21102.5,
+    "xMax": -1102.5,
+    "yMin": -21942.5,
+    "yMax": -1942.5
+   },
+   "siteXYM": [
+    -11102.5,
+    -11942.5
+   ],
+   "siteCellRowCol": [
+    249.5,
+    249.5
+   ],
+   "minM": -1184,
+   "maxM": 1958,
+   "siteTerrainHeightM": 1950.9,
+   "fractionFromPgda5m": 0.6368,
+   "sha256": "eca697ab24cb4e1812c728ae337eac91df1a6b3f089f2652a3181fa2e275a70f"
+  },
+  {
+   "siteId": "shackleton-rim",
+   "file": "terrain/shackleton-rim-20km-40m.i16",
+   "width": 500,
+   "height": 500,
+   "cellSizeM": 40.0,
+   "boundsPolarStereoM": {
+    "xMin": -12812.5,
+    "xMax": 7187.5,
+    "yMin": -16647.5,
+    "yMax": 3352.5
+   },
+   "siteXYM": [
+    -2812.5,
+    -6647.5
+   ],
+   "siteCellRowCol": [
+    249.5,
+    249.5
+   ],
+   "minM": -2846,
+   "maxM": 1957,
+   "siteTerrainHeightM": 1729.1,
+   "fractionFromPgda5m": 0.6368,
+   "sha256": "2aa8a8b46b037c2a92e92b61d7e98178836877186d5ed2a226050c5315914a22"
+  },
+  {
+   "siteId": "nobile-rim-1",
+   "file": "terrain/nobile-rim-1-20km-40m.i16",
+   "width": 500,
+   "height": 500,
+   "cellSizeM": 40.0,
+   "boundsPolarStereoM": {
+    "xMin": 76002.0,
+    "xMax": 96002.0,
+    "yMin": 103742.0,
+    "yMax": 123742.0
+   },
+   "siteXYM": [
+    86002.0,
+    113742.0
+   ],
+   "siteCellRowCol": [
+    249.5,
+    249.5
+   ],
+   "minM": 1299,
+   "maxM": 6833,
+   "siteTerrainHeightM": 6762.7,
+   "fractionFromPgda5m": 0.7292,
+   "sha256": "76d50d5cc584ee32d4af66a0f72694ade8d4c44a04ba0944f65a7de8e4e37b47"
+  },
+  {
+   "siteId": "malapert-massif",
+   "file": "terrain/malapert-massif-20km-40m.i16",
+   "width": 500,
+   "height": 500,
+   "cellSizeM": 40.0,
+   "boundsPolarStereoM": {
+    "xMin": -14938.0,
+    "xMax": 5062.0,
+    "yMin": 112162.0,
+    "yMax": 132162.0
+   },
+   "siteXYM": [
+    -4938.0,
+    122162.0
+   ],
+   "siteCellRowCol": [
+    249.5,
+    249.5
+   ],
+   "minM": 846,
+   "maxM": 5173,
+   "siteTerrainHeightM": 4984.4,
+   "fractionFromPgda5m": 0.794,
+   "sha256": "b0712509de4d461ed0ee19a82f1a99e7cb3ca960cbc7190f5c595ef1c3178ed4"
+  }
+ ],
+ "source": {
+  "near": "PGDA High-Resolution LOLA Topography for Lunar South Pole Sites, 5 m/pix (Barker et al. 2021), https://pgda.gsfc.nasa.gov/products/78",
+  "fallback": "LOLA PDS LDEM_80S_80M, https://imbrium.mit.edu/DATA/LOLA_GDR/POLAR/IMG/"
+ },
+ "generator": "scientific/build_terrain_tiles.py"
+}

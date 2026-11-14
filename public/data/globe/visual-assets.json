@@ -1,0 +1,53 @@
+{
+ "schemaVersion": "1.0.0",
+ "purpose": "Appearance textures for the 3D views. Not used by any visibility or metric calculation.",
+ "moonColor": {
+  "files": [
+   {
+    "file": "globe/moon-color-lroc-4096x2048.jpg",
+    "width": 4096,
+    "height": 2048,
+    "bytes": 2062012,
+    "sha256": "463bfe1ac80ee8bd5a72198146c4c0f75e63888660ff97bd77494198bc71c82e"
+   },
+   {
+    "file": "globe/moon-color-lroc-2048x1024.jpg",
+    "width": 2048,
+    "height": 1024,
+    "bytes": 527056,
+    "sha256": "59997274bc8c0520b645e66183c9653bb5c679a71eb9bb4edcbc29e87be2a514"
+   }
+  ],
+  "grid": "simple cylindrical, centred on 0 deg longitude, row 0 north: identical to globe/moon-elevation.json (same UV mapping)",
+  "conversion": "16-bit sRGB TIFF -> 8-bit sRGB (value / 257, rounded) -> JPEG q90, 4:4:4; 2048 version by Lanczos downsampling. No colour or contrast change.",
+  "source": {
+   "product": "NASA SVS CGI Moon Kit, 2025 colour map, lroc_color_16bit_srgb_4k.tif (from LRO LROC WAC mosaics)",
+   "url": "https://svs.gsfc.nasa.gov/4720/",
+   "file": "https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/lroc_color_16bit_srgb_4k.tif",
+   "sourceSha256": "9731fa8af425b6c2f88f277ecca82bf8c603f3743894f64ed7b25c5bfefa22ff",
+   "credit": "NASA's Scientific Visualization Studio; LRO LROC team (Arizona State University)"
+  },
+  "note": "A colour-enhanced albedo map without shadows, designed for rendering. Lighting must come from the true Sun direction."
+ },
+ "earthColor": {
+  "files": [
+   {
+    "file": "globe/earth-visual-2k.jpg",
+    "width": 2048,
+    "height": 1024,
+    "bytes": 352850,
+    "sha256": "fab3f7cc43251b6e7727525cb480aae0e3c085da96354e906781540609156831"
+   }
+  ],
+  "conversion": "PNG 5400x2700 -> Lanczos 2048x1024 -> JPEG q90, 4:4:4. No colour change.",
+  "source": {
+   "product": "NASA Blue Marble Next Generation, March 2004 monthly composite (world.topo.2004-03)",
+   "url": "https://svs.gsfc.nasa.gov/12564/",
+   "inputFile": "public/assets/earth-blue-marble-2004-03.png (read only, unchanged)",
+   "inputSha256": "f52cd7195d75d83f519e9c92c180969601665a77607e61e37fe9830b615ac9d0",
+   "credit": "NASA Goddard Space Flight Center; Blue Marble data courtesy of Reto Stockli (NASA/GSFC)"
+  },
+  "note": "Historical appearance (March 2004). Not 2027 weather or cloud cover. Earth rotation in sky.json is the low-precision IAU_EARTH model, visual only."
+ },
+ "generator": "scientific/build_visual_assets.py"
+}

@@ -46,6 +46,11 @@ export const chapters = [
 ];
 export const sources = [
   {
+    title: "NASA Deep Star Maps 2020",
+    url: "https://svs.gsfc.nasa.gov/4851/",
+    use: "J2000 catalogue star positions. NASA/Goddard Scientific Visualization Studio; Gaia DR2: ESA/Gaia/DPAC. Brightness and colour are illustrative, not a photometric prediction. Conversion and source hashes are in data/starmap/starmap.json.",
+  },
+  {
     title: "NASA Blue Marble Next Generation",
     url: "https://svs.gsfc.nasa.gov/12564/",
     use: "Historical March 2004 Earth appearance. Credit: NASA’s Goddard Space Flight Center; data courtesy of Reto Stockli (NASA/GSFC). Not 2027 weather; Earth rotation uses a visual-only low-precision IAU model.",
@@ -87,6 +92,27 @@ export const sources = [
   },
 ];
 export const scientificSoftware = [
+  {
+    name: "Pillow",
+    version: "optional conversion tool",
+    license: "HPND",
+    repository: "https://github.com/python-pillow/Pillow",
+    role: "Resizing and encoding credited visual assets",
+  },
+  {
+    name: "OpenEXR",
+    version: "optional conversion tool",
+    license: "BSD-3-Clause",
+    repository: "https://github.com/AcademySoftwareFoundation/openexr",
+    role: "Reading the NASA star-map source",
+  },
+  {
+    name: "imagecodecs",
+    version: "2026.11.11",
+    license: "BSD-3-Clause",
+    repository: "https://github.com/cgohlke/imagecodecs",
+    role: "Decoding the source LROC TIFF",
+  },
   {
     name: "Python",
     version: "3.12",

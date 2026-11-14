@@ -3,3 +3,5 @@ numpy==2.5.3
 spiceypy==8.4.0   # bundles NAIF CSPICE N0067
 tifffile==2026.9.20
 # Optional, not imported by the pipeline: pyshp==3.1.8 was used once to read PGDA RoI centroids, which are hard-coded in build_scenes.py.
+# Optional, only for build_starmap.py (visual background): OpenEXR==3.5.4, Pillow
+# Optional, only for build_visual_assets.py (LZW 16-bit TIFF): imagecodecs==2026.11.11 (released 2026-11-11; local build tool only)

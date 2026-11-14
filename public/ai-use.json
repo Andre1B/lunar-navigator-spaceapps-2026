@@ -1,10 +1,42 @@
 {
- "schemaVersion":"1.0.0",
- "project":"Lunar Navigator",
- "tools":[{"name":"Codex","configuredModel":"GPT-6.1 Sol","effort":"medium","uses":["implementation","research assistance","explanatory copy","documentation","integration","verification"]},{"name":"Claude","configuredModel":"Opus / Sonnet as recorded in project checkpoints","uses":["scientific implementation","research assistance","independent tests","review"]}],
- "contentAcknowledgment":"Code and explanatory text were developed with AI assistance. Review and validation evidence is recorded separately; this acknowledgment does not claim correctness or eligibility certification.",
- "numericalData":"Positions, terrain horizons and visibility samples are computed by deterministic code from cited NASA/PDS/PGDA/NAIF resources. These numbers are not generated or estimated by a language model.",
- "imagery":"A visibly labeled AI-generated UI concept informed the design privately. It is not deployed as scientific output. The deployed lunar texture is credited NASA SVS imagery. The interactive scene is an explanatory code rendering, with scale and limitations indicated.",
- "humanDirection":"The user specified guided and unrestricted navigation, faithful and free simulation, independent freezes, immersive display, separate screens and the visual direction. Earlier research and planning were AI-assisted; no claim is made that the official interpretation of the ideation restriction has been resolved.",
- "limitations":"The project is an educational prototype, not NASA-authored output, operational guidance or a safety certification. Completion and check status must be read in the evidence page and project checkpoints."
+  "schemaVersion": "1.0.0",
+  "project": "Lunar Navigator",
+  "tools": [
+    {
+      "name": "Codex",
+      "configuredModel": "GPT-6.1 Sol",
+      "effort": "medium",
+      "uses": [
+        "implementation",
+        "research assistance",
+        "explanatory copy",
+        "documentation",
+        "integration",
+        "verification"
+      ]
+    },
+    {
+      "name": "Claude",
+      "configuredModel": "Opus / Sonnet as recorded in project checkpoints",
+      "uses": [
+        "scientific implementation",
+        "research assistance",
+        "independent tests",
+        "review"
+      ]
+    },
+    {
+      "name": "Codex",
+      "configuredModel": "GPT-6 Astra",
+      "effort": "medium",
+      "uses": [
+        "bounded visual art direction and review"
+      ]
+    }
+  ],
+  "contentAcknowledgment": "Code and explanatory text were developed with AI assistance. Review and validation evidence is recorded separately; this acknowledgment does not claim correctness or eligibility certification.",
+  "numericalData": "Positions, terrain horizons and visibility samples are computed by deterministic code from cited NASA/PDS/PGDA/NAIF resources. These numbers are not generated or estimated by a language model.",
+  "imagery": "Privately labeled AI-generated UI concepts informed the design; none is shipped as scientific output. Deployed imagery and visual elevation derive from credited NASA SVS/LROC/LOLA, Blue Marble and Gaia-based star-map resources. Conversion methods and hashes accompany each asset. The interactive scene is a code rendering: global and local terrain are visual geometry, scale adjustments are labeled, and numerical visibility uses separate published-data horizon calculations.",
+  "humanDirection": "The user specified guided and unrestricted navigation, faithful and free simulation, independent freezes, immersive display, separate screens and the visual direction. Earlier research and planning were AI-assisted; no claim is made that the official interpretation of the ideation restriction has been resolved.",
+  "limitations": "The project is an educational prototype, not NASA-authored output, operational guidance or a safety certification. Completion and check status must be read in the evidence page and project checkpoints."
 }

@@ -15,11 +15,15 @@ import {
   timeAt,
 } from "./lib/analysis.mjs";
 import Horizon from "./components/Horizon.jsx";
-import Timeline from "./components/Timeline.jsx";
-const SpaceScene = lazy(() => import("./components/SpaceScene.jsx"));
+import Timeline from "./components/TimelineV2.jsx";
+import HomeV2 from "./pages/HomeV2.jsx";
+import SimulatorV2 from "./pages/SimulatorV2.jsx";
+import InteractiveTour from "./components/InteractiveTour.jsx";
+const Learn = lazy(() => import("./pages/Learn.jsx"));
 const links = [
+  ["learn", "How it works"],
   ["mission", "Guided Mission"],
-  ["simulator", "Simulator"],
+  ["simulator", "Explore 3D"],
   ["compare", "Compare"],
   ["evidence", "Evidence"],
   ["credits", "Credits"],
@@ -39,7 +43,7 @@ function Button({ children, onClick, secondary = false, ...props }) {
     </button>
   );
 }
-function Header({ route, mode, setMode }) {
+function Header({ route, mode, onTour }) {
   return (
     <header className="header">
       <a className="brand" href="#/home">
@@ -57,9 +61,9 @@ function Header({ route, mode, setMode }) {
           </a>
         ))}
       </nav>
-      <span className="header-mode">
-        {mode === "faithful" ? "Faithful" : "Free"} Mode
-      </span>
+      <button className="header-tour" data-tour-start onClick={onTour}>
+        Take a tour
+      </button>
     </header>
   );
 }
@@ -77,74 +81,6 @@ function DataStatus({ dataset }) {
         </details>
       ) : null}
     </aside>
-  );
-}
-function Home({ start }) {
-  return (
-    <main id="main" tabIndex={-1} className="home">
-      <section className="home-intro">
-        <div className="home-copy">
-          <h1>
-            Find your
-            <br />
-            window<span className="red">.</span>
-          </h1>
-          <p className="lead">
-            A landing date changes.
-            <br />
-            The lunar horizon changes the plan.
-          </p>
-          <p>
-            Explore sunlight, terrain and direct Earth visibility. Build a
-            mission you can explain, then challenge it.
-          </p>
-          <div className="home-actions">
-            <Button onClick={() => start("faithful")}>
-              Start in Faithful Mode
-            </Button>
-            <Button secondary onClick={() => start("free")}>
-              Start in Free Mode
-            </Button>
-          </div>
-          <a className="text-link" href="#/compare">
-            Short on time? Open all stages →
-          </a>
-          <p className="caption">
-            Guided mission: about 10 minutes. Open workspace: explore any stage,
-            immediately.
-          </p>
-        </div>
-        <div
-          className="home-moon"
-          role="img"
-          aria-label="Lunar surface texture from NASA’s Scientific Visualization Studio"
-        >
-          <div className="moon-disc" />
-          <span>One Moon. Many possible windows.</span>
-        </div>
-      </section>
-      <section className="home-directory">
-        <a href="#/simulator">
-          <span>Explore</span>
-          <h2>The moving sky</h2>
-          <p>See the Moon, change time and investigate what is visible.</p>
-        </a>
-        <a href="#/compare">
-          <span>Decide</span>
-          <h2>Compare your options</h2>
-          <p>Inspect the original plan, a delay and an alternative location.</p>
-        </a>
-        <a href="#/evidence">
-          <span>Verify</span>
-          <h2>Follow the evidence</h2>
-          <p>Open source data, methods, assumptions and validation.</p>
-        </a>
-      </section>
-      <p className="caption">
-        Educational research prototype for NASA Space Apps 2026. Not an
-        operational landing or communications service. No NASA endorsement.
-      </p>
-    </main>
   );
 }
 function Mission({ chapter, setChapter, mode, journal, setJournal }) {
@@ -307,6 +243,7 @@ function Setup({
       <label htmlFor="delay">Arrival delay</label>
       <select
         id="delay"
+        data-tour="arrival-delay"
         value={delay}
         onChange={(e) => setDelay(Number(e.target.value))}
       >
@@ -393,7 +330,7 @@ function Compare({ dataset, settings, setters, index, setIndex, mode }) {
             ) : null}
             <section>
               <h2>Three scenarios. One set of assumptions.</h2>
-              <div className="table-wrap">
+              <div className="table-wrap" data-tour="scenario-table">
                 <table>
                   <thead>
                     <tr>
@@ -432,7 +369,7 @@ function Compare({ dataset, settings, setters, index, setIndex, mode }) {
                 gaps may be missed.
               </p>
             </section>
-            <section className="decision">
+            <section className="decision" data-tour="example-constraint">
               <label htmlFor="dark-limit">
                 Example constraint: maximum continuous darkness
               </label>
@@ -493,272 +430,6 @@ function Compare({ dataset, settings, setters, index, setIndex, mode }) {
     </main>
   );
 }
-function Simulator({
-  dataset,
-  index,
-  setIndex,
-  mode,
-  setMode,
-  siteId,
-  setSiteId,
-  height,
-}) {
-  const [immersive, setImmersive] = useState(false),
-    [playing, setPlaying] = useState(false),
-    [speed, setSpeed] = useState(1),
-    [freeze, setFreeze] = useState({}),
-    [view, setView] = useState("overview");
-  const returnButton = useRef(null),
-    enterButton = useRef(null),
-    wasImmersive = useRef(false);
-  const { manifest, sky } = dataset;
-  const site = manifest?.sites.find((s) => s.id === siteId);
-  useEffect(() => {
-    const escape = (e) => {
-      if (e.key === "Escape") setImmersive(false);
-    };
-    window.addEventListener("keydown", escape);
-    return () => window.removeEventListener("keydown", escape);
-  }, []);
-  useEffect(() => {
-    if (immersive) returnButton.current?.focus();
-    else if (wasImmersive.current) enterButton.current?.focus();
-    wasImmersive.current = immersive;
-    document.body.classList.toggle("immersive-active", immersive);
-    return () => document.body.classList.remove("immersive-active");
-  }, [immersive]);
-  useEffect(() => {
-    if (!playing || !manifest) return;
-    const t = setInterval(
-      () =>
-        setIndex((i) => {
-          if (i >= manifest.period.sampleCount - 1) {
-            setPlaying(false);
-            return i;
-          }
-          return Math.min(i + speed, manifest.period.sampleCount - 1);
-        }),
-      500,
-    );
-    return () => clearInterval(t);
-  }, [playing, speed, manifest, setIndex]);
-  function changeMode(next) {
-    setMode(next);
-    setFreeze({});
-    setPlaying(false);
-  }
-  const freezeControls = [
-    ["earthPosition", "Earth's position relative to the Moon"],
-    ["earthRotation", "Earth's axial rotation"],
-    ["moonRotation", "Moon's orientation"],
-    ["sunPosition", "Sun's direction relative to the Moon"],
-    ...(dataset.planets?.planets ?? []).map((p) => [
-      "planet-" + p.id,
-      p.name + "'s position relative to the Moon",
-    ]),
-  ];
-  return (
-    <main
-      id="main"
-      tabIndex={-1}
-      className={"simulator-page " + (immersive ? "immersive" : "")}
-    >
-      <div className="sim-top">
-        <div>
-          <h1>The moving sky.</h1>
-          <p>Follow the geometry. Change your perspective.</p>
-        </div>
-        <Button ref={enterButton} onClick={() => setImmersive(true)}>
-          Explore space · hide interface
-        </Button>
-      </div>
-      <div className="sim-toolbar">
-        <div className="segmented" aria-label="Simulation mode">
-          <button
-            aria-pressed={mode === "faithful"}
-            onClick={() => changeMode("faithful")}
-          >
-            Faithful Mode
-          </button>
-          <button
-            aria-pressed={mode === "free"}
-            onClick={() => changeMode("free")}
-          >
-            Free Mode
-          </button>
-        </div>
-        <label className="inline">
-          View
-          <select value={view} onChange={(e) => setView(e.target.value)}>
-            <option value="overview">Orbital overview</option>
-            <option value="sky">Surface sky - terrain horizon</option>
-          </select>
-        </label>
-        {manifest ? (
-          <label className="inline">
-            Point
-            <select value={siteId} onChange={(e) => setSiteId(e.target.value)}>
-              {manifest.sites.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        ) : null}
-      </div>
-      {mode === "free" ? (
-        <aside className="warning free-notice">
-          <strong>Experimental configuration.</strong> Independent freezes do
-          not represent a real astronomical date. No mission recommendations.
-          <div className="freeze-controls">
-            {freezeControls.map(([key, label]) => (
-              <label key={key}>
-                <input
-                  type="checkbox"
-                  checked={freeze[key] !== undefined}
-                  onChange={(e) =>
-                    setFreeze((f) => {
-                      const next = { ...f };
-                      if (e.target.checked) next[key] = index;
-                      else delete next[key];
-                      return next;
-                    })
-                  }
-                />
-                {label}
-              </label>
-            ))}
-            <button onClick={() => changeMode("faithful")}>
-              Reset to Faithful Mode
-            </button>
-          </div>
-        </aside>
-      ) : null}
-      <section className="scene-frame">
-        <Suspense
-          fallback={<p className="scene-loading">Loading the 3D renderer…</p>}
-        >
-          <SpaceScene
-            sky={sky}
-            planets={dataset.planets}
-            index={index}
-            freeze={mode === "free" ? freeze : {}}
-            view={view}
-            site={site}
-            siteData={dataset.sites[siteId]}
-            height={height}
-          />
-        </Suspense>
-        <span className="scene-caption">
-          {view === "overview"
-            ? "Orbital overview - not to scale - Earth size and distances adjusted"
-            : "Surface sky - angular sizes from distance - DEM horizon silhouette"}
-          <br />
-          Globe shading is not local terrain-shadow analysis. Moon: NASA SVS /
-          LROC. Earth: NASA GSFC / Reto Stockli, 2004.
-        </span>
-        {dataset.sites[siteId] && mode === "faithful" ? (
-          <span className="sky-status">
-            Faithful reference at this point: Sun{" "}
-            {percent(
-              dataset.sites[siteId].sun.visibleFraction[String(height)][index],
-            )}{" "}
-            visible · Earth{" "}
-            {percent(
-              dataset.sites[siteId].earth.visibleFraction[String(height)][
-                index
-              ],
-            )}{" "}
-            visible
-          </span>
-        ) : null}
-        {!sky ? (
-          <p className="scene-pending">
-            Appearance preview only · astronomical dataset unavailable
-          </p>
-        ) : null}
-        {immersive ? (
-          <button
-            ref={returnButton}
-            className="return-workspace"
-            onClick={() => setImmersive(false)}
-          >
-            Return to workspace · Esc
-          </button>
-        ) : null}
-        {immersive && mode === "free" ? (
-          <span className="immersive-warning">
-            Free Mode · experimental geometry
-          </span>
-        ) : null}
-      </section>
-      <div className="sim-bottom">
-        <DataStatus dataset={dataset} />
-        {manifest ? (
-          <>
-            <div className="playback">
-              <Button secondary onClick={() => setPlaying((v) => !v)}>
-                {playing ? "Pause" : "Play"}
-              </Button>
-              <Button
-                secondary
-                disabled={index >= manifest.period.sampleCount - 1}
-                onClick={() =>
-                  setIndex((i) =>
-                    Math.min(i + 1, manifest.period.sampleCount - 1),
-                  )
-                }
-              >
-                Step +1 h
-              </Button>
-              <label className="inline">
-                Speed
-                <select
-                  value={speed}
-                  onChange={(e) => setSpeed(Number(e.target.value))}
-                >
-                  <option value="1">1 h / tick</option>
-                  <option value="6">6 h / tick</option>
-                  <option value="24">24 h / tick</option>
-                </select>
-              </label>
-              <span className="mono">
-                {timeAt(manifest.period, index).slice(0, 16).replace("T", " ")}{" "}
-                UTC
-              </span>
-            </div>
-            <Timeline
-              data={dataset.sites[siteId]}
-              height={height}
-              period={manifest.period}
-              index={index}
-              onChange={setIndex}
-            />
-          </>
-        ) : null}
-        <p className="caption">
-          Pause stops the shared simulation clock. Free Mode holds the selected
-          position or orientation at the instant you check it. Camera movement
-          never changes the calculation.
-        </p>
-        <p className="caption">
-          Other planets are visual context only. System barycentres are used as
-          position proxies where applicable, not validated planet centres. The
-          overview uses enlarged markers; actual angular sizes in the surface
-          sky can be smaller than one pixel. No planet brightness or additional
-          occultations are modeled.
-        </p>
-        {mode === "free" ? (
-          <p className="caption">
-            Artificial sky: rendered occlusion can differ from the faithful
-            visibility timeline below.
-          </p>
-        ) : null}
-      </div>
-    </main>
-  );
-}
 function Evidence({ dataset }) {
   const { manifest, validation } = dataset;
   return (
@@ -786,7 +457,7 @@ function Evidence({ dataset }) {
       <section>
         <h2>Validation status</h2>
         {validation?.tests?.length ? (
-          <div className="validation-list">
+          <div className="validation-list" data-tour="validation">
             {validation.tests.map((t) => (
               <article key={t.id}>
                 <span className={"test-status " + t.status}>{t.status}</span>
@@ -1026,7 +697,22 @@ export default function App() {
     [mode, setMode] = useState("faithful"),
     [chapter, setChapter] = useState(0),
     [index, setIndex] = useState(0),
-    [journal, setJournal] = useState({});
+    [journal, setJournal] = useState({}),
+    [tourStep, setTourStep] = useState(null);
+  const tourOrigin = useRef(null);
+  const startTour = () => {
+    tourOrigin.current = document.activeElement;
+    setTourStep(0);
+  };
+  const closeTour = () => {
+    setTourStep(null);
+    requestAnimationFrame(() => {
+      const t = tourOrigin.current?.isConnected
+        ? tourOrigin.current
+        : document.querySelector("[data-tour-start]");
+      t?.focus();
+    });
+  };
   const [siteId, setSiteId] = useState(""),
     [alternative, setAlternative] = useState(""),
     [height, setHeight] = useState(1),
@@ -1071,15 +757,26 @@ export default function App() {
       >
         Skip to content
       </a>
-      <Header route={route} mode={mode} setMode={setMode} />
+      <Header route={route} mode={mode} onTour={startTour} />
       {route === "home" ? (
-        <Home
-          start={(m) => {
+        <HomeV2
+          onTour={startTour}
+          onStart={(m) => {
             setMode(m);
             setChapter(0);
-            go("mission");
+            go(m === "free" ? "simulator" : "mission");
           }}
         />
+      ) : route === "learn" ? (
+        <Suspense
+          fallback={
+            <main id="main" className="page">
+              <h1>Loading the interactive guide...</h1>
+            </main>
+          }
+        >
+          <Learn onStartTour={startTour} onOpen={go} />
+        </Suspense>
       ) : route === "mission" ? (
         <Mission
           chapter={chapter}
@@ -1089,7 +786,9 @@ export default function App() {
           setJournal={setJournal}
         />
       ) : route === "simulator" ? (
-        <Simulator
+        <SimulatorV2
+          tourActive={tourStep !== null}
+          onTour={startTour}
           dataset={dataset}
           index={index}
           setIndex={setIndex}
@@ -1098,13 +797,14 @@ export default function App() {
           siteId={siteId}
           setSiteId={setSiteId}
           height={height}
+          setHeight={setHeight}
         />
       ) : route === "compare" ? (
         <Compare
           dataset={dataset}
           settings={settings}
           setters={setters}
-          index={index}
+          index={Math.round(index)}
           setIndex={setIndex}
           mode={mode}
         />
@@ -1118,6 +818,14 @@ export default function App() {
           <a href="#/home">Return home</a>
         </main>
       )}
+      {tourStep !== null ? (
+        <InteractiveTour
+          index={tourStep}
+          onChange={setTourStep}
+          onClose={closeTour}
+          onNavigate={go}
+        />
+      ) : null}
       <footer className="footer">
         <a
           className="event-mark"
