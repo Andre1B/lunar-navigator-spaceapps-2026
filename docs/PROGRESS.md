@@ -116,3 +116,8 @@ Claude feb63b33 now owns integration, following the accepted handoff; tests stay
 - Independent QA reproduced a 2.64-degree direction jump from a 1-pixel first-finger move after a second finger touched. Camera position was an invalid diagnostic because the observer remains stationary in this view.
 - Sky dragging now retains one pointer ID until release/cancel/lost capture; secondary touches cannot replace the origin, move the view or end another pointer's drag. The existing camera controls and physical geometry are unchanged.
 - Direction-based regression with a one-finger positive control, stronger post-render matrix and remaining workflow checks are pending independent QA. No deployment yet.
+
+### Independent touch regression recheck
+- Native mobile Chrome, direction-based measurement after a matching ready rendered frame: one-finger 1px control 0.115deg; two-finger primary 1px move 0.115deg (previous defect 2.64deg). pointercancel stopped movement at 0.000deg; a new drag resumed at 0.115deg.
+- No console, network or page errors in this directed check. The strengthened 280-state /49-transition rendered matrix is still running. Frame serial may reset on canvas remount; test waits require changed serial plus matching view/site/height and ready state rather than assuming a global increasing counter.
+- Local npm test130/130 and check:data8/8 passed in the root run after the pointer fix. Production has not been replaced.
