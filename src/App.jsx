@@ -1,5 +1,5 @@
 // AI-assisted implementation and copy: /ai-use.json. No simulated metrics are invented.
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useDataset } from "./lib/useDataset.js";
 import {
   chapters,
@@ -20,7 +20,7 @@ import {
   downloadComparison,
   assessDarkness,
 } from "./lib/comparisonReport.mjs";
-const Learn = lazy(() => import("./pages/Learn.jsx"));
+import Learn from "./pages/Learn.jsx";
 const links = [
   ["review", "3-min review"],
   ["learn", "How it works"],
