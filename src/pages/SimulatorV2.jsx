@@ -225,7 +225,7 @@ export default function SimulatorV2({
           </div>
           <details className="explorer-help">
             <summary>What are these locations?</summary>
-            <p>Published lunar study points, not certified landing sites.</p>
+            <p>Points on published lunar terrain, not certified landing sites.</p>
             <a href="#/evidence">Sources and coordinates</a>
           </details>
         </aside>

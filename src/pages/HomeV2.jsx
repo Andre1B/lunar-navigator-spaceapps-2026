@@ -142,7 +142,7 @@ export default function HomeV2({ onStart, onTour }) {
             <div>
               <h3>Choose a place and a time</h3>
               <p>
-                Four published south-pole points, with a clearly defined study
+                Four points on published south-pole terrain, with a defined study
                 period.
               </p>
             </div>

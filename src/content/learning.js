@@ -177,7 +177,7 @@ export const metrics = {
 export const steps = [
   {
     title: "Pick a point",
-    body: "Choose one of four published points near the south pole. They come from scientific studies. They are not NASA-selected landing sites.",
+    body: "Choose one of four points on published south-pole terrain. Two use published study regions; two were selected by us within the study terrain. They are not NASA-selected landing sites.",
     route: "compare",
     action: "Choose a point in Compare",
     more: "The four points are Connecting ridge, Shackleton rim, Nobile rim 1 and Malapert massif.",
