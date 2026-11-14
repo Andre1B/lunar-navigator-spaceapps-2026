@@ -45,3 +45,8 @@ PYTHONPATH=. python -P validate.py --horizons
 - Reviewed the second SpaceScene revision and eventSummary (read-only) and sent the exact credits list to the coordinator.
 - Added build_planets.py, which writes public/data/planets.json (375 KB). It has 7 planets over the same period: Moon-centred J2000 positions with LT+S, PCK mean radii, and system barycentres labelled as proxies for Mars through Neptune. Visual only and not validated against Horizons.
 - Added public/demo/ (index.html, demo.css, demo.js): six slides in English. External JS because the CSP is script-src self. Checked in the headless preview: slide 1 and slide 4 at 1280x720, slide 5 at 390x844, no console errors. No screenshots of the app were embedded.
+- Demo revision. Slide 3 now uses a real app screenshot: tmp/lunar-qa/desktop-compare.png cropped to the Compare section, with the footer logo excluded, saved as public/demo/app-comparison.png (77 KB) and labelled "Screenshot of the live app, cropped".
+- Slide 2 no longer claims existing tools are slow, which we never measured. It now states our focus.
+- V1 and V2 caveats are kept as footnotes on slide 5.
+- Visible text is about 455 words.
+- Preview at 1280x720 and 390x844 showed no overflow. The only console error is a 404 for /icon.svg, which is absent in the preview sandbox but present on the site.

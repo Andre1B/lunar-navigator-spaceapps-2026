@@ -35,3 +35,9 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--earth);outline-offs
 @media (max-width:760px){.cols,.grid{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:no-preference){.slide.active{animation:in .25s ease-out}@keyframes in{from{opacity:0;transform:translateY(6px)}}}
 @media print{.slide{display:flex!important;page-break-after:always;min-height:auto}.controls{display:none}}
+.cols.fig{grid-template-columns:1fr 1.35fr;align-items:center}
+figure{margin:0}
+figure img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:10px}
+figcaption{color:var(--muted);font-size:.72em;margin-top:.5em}
+sup{font-size:.65em;color:var(--accent)}
+@media (max-width:760px){.cols.fig{grid-template-columns:1fr}}

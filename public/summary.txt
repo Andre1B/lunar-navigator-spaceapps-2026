@@ -21,6 +21,8 @@ Outputs include mean visible solar-disc fraction, periods of direct sunlight, th
 DATA AND METHOD
 NAIF SPICE supplies positions and orientations. Published LRO/LOLA PDS and PGDA elevation products supply terrain horizons. Selected angular results are checked against JPL Horizons, an official challenge resource. Dataset provenance, conventions, checksums and executed validation results are available in the Evidence screen and scientific documentation.
 
+Seven additional planets follow documented ephemerides as visual context only, with system barycentre proxies where applicable. Their positions are not independently validated against Horizons and do not change the mission results.
+
 The 3D globe uses credited NASA SVS/LROC surface imagery. Orbital overview scale is adjusted and labeled. The surface sky uses apparent angular sizes and a terrain-horizon silhouette. Global day/night shading is distinct from terrain visibility. Earth appearance is a historical NASA Blue Marble composite, not current weather.
 
 LIMITS
