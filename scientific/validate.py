@@ -57,7 +57,7 @@ def horizons_query(body_id, lon, lat, alt_km, tlist):
     req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     with urllib.request.urlopen(req, timeout=60) as resp:
         text = resp.read().decode("utf-8")
-    with open(path, "w", encoding="utf-8") as f:
+    with open(path, "w", encoding="utf-8", newline="\n") as f:
         f.write(text)
     time.sleep(2.0)  # serial, one request at a time
     return text, False
@@ -251,7 +251,7 @@ def main():
     doc = {"schemaVersion": B.SCHEMA_VERSION,
            "generatedAtUtc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
            "tests": tests}
-    with open(os.path.join(B.OUT, "validation.json"), "w", encoding="utf-8") as f:
+    with open(os.path.join(B.OUT, "validation.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(doc, f, indent=1)
     for t in tests:
         print(t["id"], t["status"], json.dumps(t["result"])[:400])
@@ -264,7 +264,7 @@ def main():
         man = json.load(f)
     man["validation"]["status"] = status
     man["validation"]["summary"] = {t["id"]: t["status"] for t in tests}
-    with open(man_path, "w", encoding="utf-8") as f:
+    with open(man_path, "w", encoding="utf-8", newline="\n") as f:
         json.dump(man, f, indent=1)
 
 

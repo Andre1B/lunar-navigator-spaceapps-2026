@@ -82,7 +82,7 @@ def main():
         },
         "generator": "scientific/build_visual_assets.py",
     }
-    with open(os.path.join(OUT_DIR, "visual-assets.json"), "w", encoding="utf-8") as f:
+    with open(os.path.join(OUT_DIR, "visual-assets.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(meta, f, indent=1)
     print(json.dumps([moon, moon_small, earth4k, earth], indent=1))
 

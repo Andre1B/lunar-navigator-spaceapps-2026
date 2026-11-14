@@ -114,7 +114,7 @@ def main():
         },
         "generator": "scientific/build_globe.py",
     }
-    with open(os.path.join(OUT_DIR, "moon-elevation.json"), "w", encoding="utf-8") as f:
+    with open(os.path.join(OUT_DIR, "moon-elevation.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(meta, f, indent=1)
     print(json.dumps({k: meta[k] for k in ("files", "orientationCheck")}, indent=1))
 

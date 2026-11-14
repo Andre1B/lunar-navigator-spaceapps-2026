@@ -97,7 +97,7 @@ def main():
         "groundNote": "The ground colour stays NASA Blue Marble (globe/earth-visual-*.jpg). The Solar System Scope colour map is not used.",
         "generator": "scientific/build_earth_layers.py",
     }
-    with open(os.path.join(OUT_DIR, "earth-layers.json"), "w", encoding="utf-8") as f:
+    with open(os.path.join(OUT_DIR, "earth-layers.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(meta, f, indent=1)
     print(json.dumps({"files": files, "check": check}, indent=1))
 

@@ -37,7 +37,7 @@ def main():
         "files": entries,
         "generator": "scientific/hash_dataset.py",
     }
-    with open(os.path.join(OUT, "integrity.json"), "w", encoding="utf-8") as f:
+    with open(os.path.join(OUT, "integrity.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(doc, f, indent=1)
     for e in entries:
         print(e["file"], e["sha256"][:12])

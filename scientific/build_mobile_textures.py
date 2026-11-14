@@ -48,7 +48,7 @@ def main():
         ],
         "generator": "scientific/build_mobile_textures.py",
     }
-    with open(os.path.join(B.OUT, "globe", "mobile-textures.json"), "w", encoding="utf-8") as f:
+    with open(os.path.join(B.OUT, "globe", "mobile-textures.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(meta, f, indent=1)
     for o in out:
         print(o["file"], o["bytes"])

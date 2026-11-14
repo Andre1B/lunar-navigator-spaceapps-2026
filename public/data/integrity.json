@@ -1,13 +1,13 @@
 {
  "schemaVersion": "1.0.0",
  "purpose": "Identify the exact derived dataset used by the app and by downloaded comparison reports. Hashes cover the files' current bytes; input data hashes are in manifest.provenance.",
- "hashedAtUtc": "2026-11-14T18:45:55Z",
+ "hashedAtUtc": "2026-11-14T19:58:30Z",
  "manifestGeneratedAtUtc": "2026-11-14T13:09:37Z",
  "files": [
   {
    "file": "manifest.json",
-   "bytes": 8174,
-   "sha256": "48addf4955b423cd137fe344d046d5155babade74967ef4ee4e35360306d3fef"
+   "bytes": 7973,
+   "sha256": "f297e7ab6fb206012742e02922ee16c7a62e775f5c996ff2179379e8adba181d"
   },
   {
    "file": "sky.json",
@@ -21,8 +21,8 @@
   },
   {
    "file": "validation.json",
-   "bytes": 6870,
-   "sha256": "0f380d98021e7a17cddfe5f93fd7cc334c42d241089889084b663d1118cf7cdf"
+   "bytes": 6631,
+   "sha256": "a4d88219434a0511d2586582582bc4ba3f52d939177400a34dc1e2f55ad1dfae"
   },
   {
    "file": "sites/connecting-ridge.json",

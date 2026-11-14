@@ -62,7 +62,7 @@ def main():
             "generator": "scientific/build_planets.py",
         },
     }
-    with open(os.path.join(B.OUT, "planets.json"), "w", encoding="utf-8") as f:
+    with open(os.path.join(B.OUT, "planets.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(doc, f, separators=(",", ":"))
     for p in planets:
         d = np.linalg.norm(p["posKm"][0]) / 1.495978707e8

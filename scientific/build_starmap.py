@@ -68,7 +68,7 @@ def main():
         },
         "generator": "scientific/build_starmap.py",
     }
-    with open(os.path.join(OUT_DIR, "starmap.json"), "w", encoding="utf-8") as f:
+    with open(os.path.join(OUT_DIR, "starmap.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(meta, f, indent=1)
     print(json.dumps(files, indent=1))
 

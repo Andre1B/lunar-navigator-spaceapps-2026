@@ -205,7 +205,7 @@ def main():
                 "durationResolutionMin": INTERNAL_STEP_MIN,
             }
         doc["events"].sort(key=lambda ev: (ev["heightM"], ev["utc"]))
-        with open(os.path.join(OUT, "sites", f"{site['id']}.json"), "w", encoding="utf-8") as f:
+        with open(os.path.join(OUT, "sites", f"{site['id']}.json"), "w", encoding="utf-8", newline="\n") as f:
             json.dump(doc, f, separators=(",", ":"))
         site_entries.append({
             "id": site["id"], "name": site["name"], "regionLabel": site["regionLabel"],
@@ -231,7 +231,7 @@ def main():
         "earthOrientationNote": "IAU_EARTH from pck00011.tpc (IAU low-precision rotation model, no nutation). Visual only; not validated against Horizons or ITRF93.",
         "radiiKm": {"sun": E.SUN_RADIUS_KM, "earth": E.EARTH_RADIUS_KM, "moon": 1737.4},
     }
-    with open(os.path.join(OUT, "sky.json"), "w", encoding="utf-8") as f:
+    with open(os.path.join(OUT, "sky.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(sky, f, separators=(",", ":"))
 
     dem_files = [("LDEM_80S_80M.IMG", f"{IMBRIUM}/DATA/LOLA_GDR/POLAR/IMG/LDEM_80S_80M.IMG", "mid (5-100 km)"),
@@ -282,7 +282,7 @@ def main():
             "Results only cover the stated period; dates outside it are not computed.",
         ],
     }
-    with open(os.path.join(OUT, "manifest.json"), "w", encoding="utf-8") as f:
+    with open(os.path.join(OUT, "manifest.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(manifest, f, indent=1)
     print("eclipses", eclipses)
 
