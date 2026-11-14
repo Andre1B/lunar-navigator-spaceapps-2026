@@ -2,6 +2,54 @@
 
 This record distinguishes executed checks from pending release gates. It does not certify scientific precision in every geometry or competition eligibility.
 
+## Current release candidate (V2 true-scale simulator)
+
+**Release:** commit `090c45ec6c8756e07d26ef195bed372c54293b12`, tag `release-candidate-2026-11-14-3`. The tag is a candidate, not a submission.
+**Deployment:** Cloudflare Pages deployment `61c81cc1` of `lunar-navigator-2026` at 2026-11-14T19:50:26Z, built from a clean tree. The bundle reports `build.dirty = false` and the same revision.
+
+| Check | Result | Where it ran |
+| --- | --- | --- |
+| Unit, data, report, event, integrity and arrival-series tests | 128/128 | local |
+| `check:data` (derived-file hashes) | 8/8 | local |
+| Arrival series, worked example, text description (U3/U6/U9) | 15/15 | production RC1 `ea3f888` |
+| Arrival skies A/B | 10/10 | production RC1 |
+| Review | 12/12 | production RC1 |
+| V2 routes and layout | 21/21 | production RC1 |
+| True-scale mobile 390 subset | 1/1 | production RC1 (full matrix 21/22 in development, plus a mobile fix rechecked) |
+| Demo | 10/10 | production RC1 |
+| Texture loading and Learn recheck | 10/10, plus Learn and smoke | production RC3 |
+
+- **Texture loading:** at 1440 px the simulator loads only 2k imagery until the first interaction. A drag, wheel, arrow key, "+" key or the Zoom button then makes exactly three 4k requests, with the same orientation. At 390 px it loads only 1k imagery.
+- **Errors:** none on the console or network in these flows.
+- **What changed between RC1 and RC3:** only desktop texture loading and the eager Learn route, both prompted by Lighthouse. Both were rechecked.
+
+**Production Lighthouse 13.6** on RC3, run serially:
+
+| Page | Form factor | Performance | Accessibility | Best Practices | SEO |
+| --- | --- | --- | --- | --- | --- |
+| Simulator | mobile | 98 | 99 | 100 | 100 |
+| Simulator | desktop | 100 | 100 | 100 | 100 |
+| Home | mobile | 100 | 100 | 100 | 100 |
+| Review | mobile | 99 | 100 | 100 | 100 |
+| Compare | mobile | 99 | 100 | 100 | 100 |
+| Learn | mobile | 100 | 100 | 100 | 100 |
+| Evidence | mobile | 100 | 100 | 100 | 100 |
+| Credits | mobile | 100 | 100 | 100 | 100 |
+
+- **Earlier failures on RC1/RC2:** two results fell below the gate and were fixed.
+  - Desktop simulator scored 88. Three long tasks came from 4k texture uploads; desktop now starts with 2k imagery.
+  - Learn mobile scored 89. The page waited for a lazily loaded route chunk; the route is now static. An A/B run showed the new worked example was not the cause.
+- **Raw reports and hashes:** see [release-evidence.json](release-evidence.json).
+
+**Limits:**
+- These are laboratory runs in headless Chrome with SwiftShader.
+- Real-device GPU, Safari, Firefox and a full screen-reader audit were not tested.
+- The full true-scale browser matrix was not re-run in production.
+
+## Historical v1 record (superseded)
+
+The sections below describe the earlier v1 deployment `254df20f`. They do not certify the current version.
+
 ## Independent checks executed
 
 - `npm test`: 71 passing analytic, dataset and planetary-context checks. No skipped/todo cases in the root execution. Test author: separate Claude Sonnet agent.
@@ -26,7 +74,7 @@ Reference: the private, visibly labeled generated concept `tmp/lunar-ui-concept.
 6. **Responsive repair:** Evidence numeric output was wrapped to remove 390 px overflow; header navigation now occupies two rows, preserving access to Credits. Simulator HUD and control placement were inspected at 1440/390 px.
 7. **Copy differences:** the concept's invented 2030 date and simplified free-camera description were replaced by real dataset coverage and independent freezes. No fake figures or operational-safety claims were imported from the image. These are intentional scientific/user-required deviations, not unreported fidelity drift.
 
-## Final release gates
+## Final release gates (v1, superseded)
 
 Completed on production deployment **254df20f** at https://lunar-navigator-2026.pages.dev/:
 

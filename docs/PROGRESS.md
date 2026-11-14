@@ -78,3 +78,12 @@ Claude feb63b33 now owns integration, following the accepted handoff; tests stay
 - **Docs:** `docs/WINNER-LESSONS.md` now covers all 24 winners, with evidence, lesson and action (or the reason for not adopting). It supersedes and removes `review-winners-transfer.md`. Also updated: CREDITS, the visible research links (`content.js`), the summary HTML and TXT, and demo slide 3 (its screenshot is now labelled as an earlier version).
 - **Checks:** `npm run build` passes, `npm test` reports 0 failures and `check:data` reports 8 files valid. Browser checks of U3, U6 and U9 are requested from the test agent df6de34e.
 - **Next:** test results, then commit, push and a release-candidate tag, then a clean build, deployment of `lunar-navigator-2026` only, and production QA with Lighthouse.
+
+## 2026-11-14 · Release candidates published (Claude)
+
+- **RC1 `ea3f888`:** U3, U6 and U9 plus the 24-winner docs. Production QA by the test agent: u369 15/15, ab 10/10, review 12/12, v2 21/21, truescale mobile 1/1, demo 10/10.
+- **RC2 `2827ecb`:** the desktop simulator scored 88 in Lighthouse because of 4k texture uploads. The desktop now loads 2k imagery first and switches to 4k on the first interaction.
+- **RC3 `090c45e`:** Learn mobile scored 89 because of a lazy route chunk; the route is now loaded eagerly. The test agent rechecked textures (10/10), Learn and a smoke test in production.
+- **Lighthouse on RC3:** 8 runs, performance 98–100 and accessibility 99–100.
+- **Deployment and evidence:** RC3 is deployment `61c81cc1`. Evidence is in `docs/VERIFICATION.md` and `docs/release-evidence.json`.
+- **Not done:** no NASA submission was made and no submission tag was created.
