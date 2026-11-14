@@ -61,6 +61,8 @@ Exact source URLs, transformations, checksums and limitations accompany the asse
 
 ## AI assistance and review
 
+Continuous verification uses MIT-licensed [actions/checkout](https://github.com/actions/checkout) at `d23441a48e516b6c34aea4fa41551a30e30af803` and [actions/setup-node](https://github.com/actions/setup-node) at `249970729cb0ef3589644e2896645e5dc5ba9c38`. They run only in GitHub Actions, with read-only repository permissions. Their source is referenced, not bundled in the browser.
+
 ### True-scale simulator revision
 
 Every 3D solid body now uses its documented physical radius and apparent ephemeris position in the same unit system; earlier compressed distances and enlarged planetary meshes were removed. Camera inspection changes viewpoint only. Floating rendering origin avoids loss of precision far from the Moon. Surface normals, optical exposure, atmosphere and glare are rendering approximations, not validated photometry or a weather forecast.

@@ -8,8 +8,7 @@ import {
   researchProjects,
 } from "./lib/content.js";
 import { percent, hours, timeAt } from "./lib/analysis.mjs";
-import Horizon from "./components/Horizon.jsx";
-import Timeline from "./components/TimelineV2.jsx";
+import ArrivalComparison from "./components/ArrivalComparison.jsx";
 import HomeV2 from "./pages/HomeV2.jsx";
 import Review from "./pages/Review.jsx";
 import SimulatorV2 from "./pages/SimulatorV2.jsx";
@@ -275,14 +274,16 @@ function Setup({
     </aside>
   );
 }
-function Compare({ dataset, settings, setters, index, setIndex, mode }) {
+function Compare({ dataset, settings, setters, setIndex, mode }) {
   const { manifest, sites } = dataset;
   const [limit, setLimit] = useState(72);
   const rows = useMemo(
     () => comparisonRows(dataset, settings),
     [dataset, settings],
   );
-  const data = sites[settings.siteId];
+  const ephemerisProduct = manifest?.provenance.kernels.find((k) =>
+    k.file.startsWith("de440"),
+  )?.file;
   return (
     <main id="main" tabIndex={-1} className="page">
       <div className="page-heading">
@@ -328,6 +329,9 @@ function Compare({ dataset, settings, setters, index, setIndex, mode }) {
                       <th>Scenario</th>
                       <th>
                         Mean visible Sun{" "}
+                        <span className="metric-product">
+                          {ephemerisProduct} + LOLA
+                        </span>
                         <a
                           className="metric-method"
                           href="#/evidence?metric=solar"
@@ -338,6 +342,9 @@ function Compare({ dataset, settings, setters, index, setIndex, mode }) {
                       </th>
                       <th>
                         Longest darkness{" "}
+                        <span className="metric-product">
+                          {ephemerisProduct} + LOLA
+                        </span>
                         <a
                           className="metric-method"
                           href="#/evidence?metric=darkness"
@@ -348,6 +355,9 @@ function Compare({ dataset, settings, setters, index, setIndex, mode }) {
                       </th>
                       <th>
                         Earth visible{" "}
+                        <span className="metric-product">
+                          {ephemerisProduct} + LOLA
+                        </span>
                         <a
                           className="metric-method"
                           href="#/evidence?metric=earth"
@@ -358,6 +368,9 @@ function Compare({ dataset, settings, setters, index, setIndex, mode }) {
                       </th>
                       <th>
                         Longest Earth gap{" "}
+                        <span className="metric-product">
+                          {ephemerisProduct} + LOLA
+                        </span>
                         <a
                           className="metric-method"
                           href="#/evidence?metric=earth-gap"
@@ -484,19 +497,15 @@ function Compare({ dataset, settings, setters, index, setIndex, mode }) {
                 trade-offs rather than a universal “best site”.
               </p>
             </section>
-            <section className="chart-section">
-              <div className="section-heading">
-                <h2>Look above the terrain.</h2>
-                <a href="#/simulator">Open 3D simulator →</a>
-              </div>
-              <Horizon data={data} index={index} height={settings.height} />
-            </section>
-            <Timeline
-              data={data}
-              height={settings.height}
+            <ArrivalComparison
+              rows={rows}
+              sites={sites}
               period={manifest.period}
-              index={index}
-              onChange={setIndex}
+              height={settings.height}
+              onInspect={(i) => {
+                setIndex(i);
+                go("simulator");
+              }}
             />
           </div>
         </div>
@@ -506,6 +515,10 @@ function Compare({ dataset, settings, setters, index, setIndex, mode }) {
 }
 function Evidence({ dataset }) {
   const { manifest, validation } = dataset;
+  const control = validation?.tests.find((t) => t.id === "V5");
+  const shadowPixel = Array.isArray(control?.result)
+    ? control.result.find((r) => r.psrPixel)?.psrPixel
+    : null;
   const readMetric = () =>
     new URLSearchParams(location.hash.split("?")[1] ?? "").get("metric");
   const [metric, setMetric] = useState(readMetric);
@@ -570,6 +583,11 @@ function Evidence({ dataset }) {
       <DataStatus dataset={dataset} />
       <section>
         <h2>Validation status</h2>
+        <p className="caption">
+          Scientific validation record generated:{" "}
+          {validation?.generatedAtUtc ?? "pending"}. This date identifies the
+          data checks, not a browser or performance audit.
+        </p>
         {validation?.tests?.length ? (
           <div className="validation-list" data-tour="validation">
             {validation.tests.map((t) => (
@@ -609,6 +627,29 @@ function Evidence({ dataset }) {
           </p>
         )}
       </section>
+      {shadowPixel ? (
+        <section className="negative-control">
+          <h2>A check that should stay dark.</h2>
+          <p>
+            We selected one pixel classified as permanently shadowed in a
+            published LOLA map. Across the 2024–2026 reference interval, its
+            largest computed visible Sun fraction was{" "}
+            <strong>{percent(shadowPixel.maxSunFraction2024to2026)}</strong>.
+          </p>
+          <p>
+            This is a negative control: a misplaced Sun or terrain horizon could
+            wrongly light a point that should remain dark. It checks this
+            reference pixel, not the whole crater and not every possible
+            location.
+          </p>
+          <p className="caption">
+            V5 status: {control.status}. Reference coordinate:{" "}
+            {shadowPixel.latDeg}° latitude, {shadowPixel.lonEastDeg}° east
+            longitude. Source: LOLA permanently shadowed-region map; exact
+            record in validation.json.
+          </p>
+        </section>
+      ) : null}
       <section>
         <h2>What this does not establish</h2>
         <ul>

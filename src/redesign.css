@@ -1,5 +1,91 @@
 /* V2: a scene-first scientific explorer, with restrained aerospace color. */
 /* A short review and audit trail share the simulator's visual language. */
+.scene-method > summary { min-height:36px; padding:10px 0; }
+.metric-product {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 400;
+  overflow-wrap: anywhere;
+  margin: 6px 0;
+}
+.arrival-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0;
+}
+.arrival-switch button[aria-pressed="true"] {
+  background: #1d507e;
+  border-color: #7eb8e9;
+}
+.arrival-time {
+  font-size: 14px;
+}
+.next-events {
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  grid-column: 1/-1;
+}
+.next-events-title {
+  margin: 0 0 12px;
+  font-size: 20px;
+}
+.next-events-context,
+.next-events-method {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.next-events-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+.next-events-item {
+  min-width: 0;
+}
+.next-events-name {
+  color: #f0c978;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+.next-events-earthrise .next-events-name,
+.next-events-earthset .next-events-name {
+  color: #80c5f7;
+}
+.next-events-value {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.next-events-until,
+.next-events-time {
+  display: block;
+}
+.next-events-until {
+  font-weight: 600;
+}
+.next-events-time,
+.next-events-resolution {
+  color: var(--muted);
+  font-size: 12px;
+}
+.negative-control {
+  border-top: 1px solid var(--line);
+  padding-top: 24px;
+}
+@media (max-width: 800px) {
+  .next-events-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 460px) {
+  .next-events-list {
+    grid-template-columns: 1fr;
+  }
+}
 .metric-method {
   display: block;
   font-size: 12px;

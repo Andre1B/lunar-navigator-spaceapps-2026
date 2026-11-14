@@ -9,7 +9,8 @@
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
     "test": "node --test tests/*.test.mjs",
-    "credits": "node scripts/credits.mjs"
+    "credits": "node scripts/credits.mjs",
+    "check:data": "node scripts/check-data-integrity.mjs"
   },
   "dependencies": {
     "@fontsource/fira-code": "^5.3.0",

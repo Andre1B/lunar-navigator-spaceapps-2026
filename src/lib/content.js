@@ -98,6 +98,20 @@ export const sources = [
 ];
 export const scientificSoftware = [
   {
+    name: "GitHub Actions checkout",
+    version: "v6 pinned at d23441a48e516b6c34aea4fa41551a30e30af803",
+    license: "MIT",
+    repository: "https://github.com/actions/checkout",
+    role: "Clean-checkout verification tooling; not a scientific or browser dependency",
+  },
+  {
+    name: "GitHub Actions setup-node",
+    version: "v6 pinned at 249970729cb0ef3589644e2896645e5dc5ba9c38",
+    license: "MIT",
+    repository: "https://github.com/actions/setup-node",
+    role: "Pinned Node.js CI environment; not a scientific or browser dependency",
+  },
+  {
     name: "Pillow",
     version: "optional conversion tool",
     license: "HPND",

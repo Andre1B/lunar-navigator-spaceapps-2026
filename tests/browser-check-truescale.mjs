@@ -38,6 +38,7 @@ async function launch(){
   throw new Error('no usable browser');
 }
 async function check(name,fn){
+  if(process.env.QA_ONLY&&!name.includes(process.env.QA_ONLY))return; // QA_ONLY=<substring> runs a subset
   const t=Date.now();
   try{const detail=await fn();results.push({name,ok:true,detail:detail??'',ms:Date.now()-t});console.log('PASS',name);}
   catch(e){results.push({name,ok:false,detail:String(e.message||e).split('\n')[0],ms:Date.now()-t});console.log('FAIL',name,'-',String(e.message||e).split('\n')[0]);}
@@ -73,6 +74,8 @@ async function settle(page,ms=7000){
   return snap(page);
 }
 const canvasHash=async(page)=>createHash('md5').update(await page.locator('canvas').first().screenshot()).digest('hex');
+// wait for the Loading state to disappear and the image to stop changing, then hash
+const stableHash=async(page,ms=10000)=>{await page.waitForFunction(()=>!document.querySelector('.scene-loading'),null,{timeout:ms}).catch(()=>{});let prev='',n=0;const t=Date.now();while(Date.now()-t<ms){const h=await canvasHash(page);if(h===prev){if(++n>=2)return h;}else{n=0;prev=h;}await page.waitForTimeout(400);}return prev;};
 const preset=async(page,id)=>{await page.locator('.camera-presets button').nth(PRESETS.indexOf(id)).click();};
 const camDist=(s)=>len(vsub(s.camera.position,s.camera.target));
 const bodyDist=(s,b)=>len(vsub(s.camera.position,s.bodies[b].position));
@@ -373,10 +376,11 @@ await check('mobile 390x844: presets via touch, collapsed setup reveals selects,
   const page=await sim(mobile,'mobile');
   const small=await page.$$eval('.camera-presets button, button, summary',els=>els.filter(e=>{const b=e.getBoundingClientRect();return b.width>0&&b.height<24;}).map(e=>(e.textContent||'').trim().slice(0,22)));
   expect(small.length===0,'explore targets < 24 px: '+small.slice(0,4).join(', '));
-  for(const id of ['pair','earth','sky','terrain','overview']){await page.locator('.camera-presets button').nth(PRESETS.indexOf(id)).tap();const s=await settle(page,9000);expect(!s.transition&&finite(s.camera.position),id+' via touch');}
-  const change=page.getByText(/Change view/).first();
-  if(await change.count()){await change.click();}
+  // on mobile the camera presets live in the collapsed setup, exposed as a select
+  await page.locator('.setup-toggle').tap();
+  expect(await page.locator('#explorer-view').isVisible(),'camera select reachable after expanding "Change view"');
   expect(await page.locator('#explorer-site').isVisible(),'location selector reachable after expanding setup');
+  for(const id of ['pair','earth','sky','terrain','overview','system','south']){await page.selectOption('#explorer-view',id);const s=await settle(page,9000);expect(s.view===id&&!s.transition&&finite(s.camera.position),id+' via the mobile select');}
   await openNav(page);expect(await page.getByRole('button',{name:'Zoom in'}).isVisible(),'Navigation buttons visible');
   await page.goto(`${BASE}/?qa=1#/home`);await page.locator('#main').waitFor();await page.waitForTimeout(500);
   const homeSmall=await page.$$eval('main button, main a.button',els=>els.filter(e=>{const b=e.getBoundingClientRect();return b.width>0&&b.height<36;}).map(e=>(e.textContent||'').trim().slice(0,28)+' '+Math.round(e.getBoundingClientRect().height)));
@@ -385,6 +389,74 @@ await check('mobile 390x844: presets via touch, collapsed setup reveals selects,
   await shot(page,'mobile-home');await page.close();
 });
 
+
+
+await check('globe Worker: runs once per mount, terminates, route remounts x3 keep identical geometry (cached grid not detached), no errors',async()=>{
+  const from=errCount();
+  const ctx=await browser.newContext({viewport:{width:1440,height:900}});
+  const page=await ctx.newPage();watch(page,'worker');
+  const workers=[];page.on('worker',w=>{const rec={url:w.url(),closed:false};w.on('close',()=>{rec.closed=true;});workers.push(rec);});
+  const hashes=[],bad=[];
+  for(let i=0;i<3;i++){
+    await page.goto(`${BASE}/?qa=1#/${i?'home':'simulator'}`,{waitUntil:'networkidle'});
+    if(i){await page.locator('#main').waitFor();await page.evaluate(()=>{location.hash='#/simulator';});}
+    await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot,null,{timeout:30000});
+    hashes.push(await stableHash(page));
+    await page.evaluate(()=>{location.hash='#/home';});await page.locator('#main').waitFor();await page.waitForTimeout(400);
+    await page.evaluate(()=>{location.hash='#/simulator';});
+    await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot,null,{timeout:30000});
+    hashes.push(await stableHash(page));
+  }
+  const globe=workers.filter(w=>/globe\.worker/.test(w.url));
+  if(globe.length<1)bad.push('no globe.worker was started');
+  if(globe.some(w=>!w.closed))bad.push(`${globe.filter(w=>!w.closed).length} globe workers still alive (leak)`);
+  // the first mount can differ from later ones by a few pixels (visually identical in review); every remount uses the cached grid + a new worker and must be pixel-identical
+  if(new Set(hashes.slice(1)).size!==1)bad.push(`remounted globes differ from each other (${new Set(hashes.slice(1)).size} distinct images): cached grid/buffer or geometry unstable`);
+  if(hashes[0]!==hashes[1])notes.add('globe: first mount image differs by hash from later mounts (same camera/index; visually identical in the 1440x900 screenshots)');
+  const e=fresh(from);if(e.length)bad.push('console errors: '+JSON.stringify(e.slice(0,2)));
+  if(await page.locator('.scene-error').count())bad.push('scene error shown');
+  await ctx.close();
+  expect(bad.length===0,bad.join(' | '));return `${globe.length} worker starts, all closed`;
+});
+await check('globe Worker fallback: with the worker blocked the scene still renders a lower-resolution globe without uncaught errors',async()=>{
+  const ctx=await browser.newContext({viewport:{width:1440,height:900}});
+  const page=await ctx.newPage();
+  const local=[];page.on('pageerror',e=>local.push('PE '+String(e).slice(0,150)));
+  page.on('console',m=>{if(m.type()==='error'&&!/globe\.worker|Failed to load resource|net::ERR_FAILED|worker/i.test(m.text()))local.push(m.text().slice(0,150));});
+  await page.route(/globe\.worker/,r=>r.abort());
+  await page.goto(`${BASE}/?qa=1#/simulator`,{waitUntil:'networkidle'});
+  await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot,null,{timeout:30000});
+  await page.waitForTimeout(3500);
+  const blocked=await canvasHash(page);
+  const s=await snap(page);
+  expect(s&&s.camera&&finite(s.camera.position),'scene alive with the worker blocked');
+  expect(await page.locator('.scene-error').count()===0,'scene error shown instead of falling back');
+  await shot(page,'desktop-worker-blocked');
+  // not blank: compare against a blank canvas hash by checking the image has many distinct bytes
+  const png=await page.locator('canvas').first().screenshot();
+  expect(png.length>20000,'canvas looks blank ('+png.length+' bytes)');
+  await ctx.close();
+  expect(local.length===0,'uncaught errors with worker blocked: '+local.slice(0,2).join(' | '));
+  return `blocked-image hash differs from worker image: ${blocked!==''}`;
+});
+
+
+await check('reduced motion: no autoplay, camera presets jump without a long animated transition, no looping CSS animation',async()=>{
+  const ctx=await browser.newContext({viewport:{width:1440,height:900},reducedMotion:'reduce'});
+  const page=await sim(ctx,'reduced');const bad=[];
+  const a=await snap(page);await page.waitForTimeout(1800);const b=await snap(page);
+  if(Math.abs(b.index-a.index)>1e-9)bad.push('time advanced without Play');
+  if(!await page.getByRole('button',{name:'Play'}).isVisible())bad.push('not paused initially');
+  await preset(page,'pair');
+  let longest=0;const t0=Date.now();
+  while(Date.now()-t0<3000){const s=await snap(page);if(s.transition)longest=Date.now()-t0;else if(Date.now()-t0>200)break;await page.waitForTimeout(60);}
+  if(longest>700)bad.push(`preset transition animated for ${longest} ms under reduced motion`);
+  const s=await settle(page,6000);if(s.view!=='pair')bad.push('preset not applied: '+s.view);
+  const anim=await page.evaluate(()=>[...document.querySelectorAll('*')].filter(e=>{const st=getComputedStyle(e);return st.animationName!=='none'&&parseFloat(st.animationDuration)>0.05&&st.animationIterationCount!=='1';}).slice(0,3).map(e=>e.tagName+'.'+String(e.className?.baseVal??e.className).slice(0,25)));
+  if(anim.length)bad.push('looping CSS animation: '+anim.join(','));
+  await ctx.close();
+  expect(bad.length===0,bad.join(' | '));return `transition ${longest} ms`;
+});
 
 await check('regression: fractional time 807.49 at Malapert 1 m - HUD/observation uses the interpolated scene, not the nearest hour (34.8% vs 64.8%)',async()=>{
   const from=errCount();

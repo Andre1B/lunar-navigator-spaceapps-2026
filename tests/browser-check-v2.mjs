@@ -65,11 +65,13 @@ await check('home: purpose is clear, three entry actions work (Faithful->mission
   await shot(page,'desktop-home');
   const text=await page.locator('main').innerText();
   expect(/Moon/i.test(text)&&/landing|window|light/i.test(text),'purpose text');
-  await page.getByRole('button',{name:/Start a Faithful Mission/}).click();
-  await page.waitForFunction(()=>location.hash==='#/mission');
-  expect((await page.locator('.header-mode').innerText().catch(()=>'Faithful')).startsWith('Faithful'),'faithful label');
+  await page.getByRole('button',{name:/Open the simulator/}).click();
+  await page.waitForFunction(()=>location.hash==='#/simulator',null,{timeout:10000});
   await page.goto(`${BASE}/#/home`);await page.locator('#main').waitFor();
-  await page.getByRole('button',{name:/Experiment in Free Mode/}).click();
+  await page.getByRole('link',{name:'Guided analysis'}).first().click();
+  await page.waitForFunction(()=>location.hash==='#/mission',null,{timeout:10000});
+  await page.goto(`${BASE}/#/home`);await page.locator('#main').waitFor();
+  await page.getByRole('button',{name:/Free experiment/}).click();
   await page.waitForFunction(()=>location.hash==='#/simulator',null,{timeout:10000});
   const freeBtn=page.getByRole('button',{name:/^Free Mode/}).first();await freeBtn.waitFor();
   await page.waitForFunction(()=>[...document.querySelectorAll('button')].some(b=>/^Free Mode/.test(b.textContent.trim())&&b.getAttribute('aria-pressed')==='true'),null,{timeout:8000}).catch(()=>{throw new Error('Free Mode must be pressed after entering Explore from Home');});
@@ -258,6 +260,7 @@ await check('explore: Look-at focus, camera buttons and zoom work in every prese
     const opts=await sel.locator('option').evaluateAll(o=>o.map(x=>x.value).filter(Boolean));
     expect(opts.length>=3,preset+': few focus options');
     for(const v of opts){await sel.selectOption(v);await page.waitForTimeout(80);}
+    {const d=page.locator('details.manual-camera-controls');if(await d.getAttribute('open')===null)await d.locator('summary').click();}
     for(const label of ['Rotate camera left','Rotate camera up','Zoom in','Zoom out','Reset view'])await page.getByRole('button',{name:label}).click();
   }
   expect(freshErrors(from).length===0,'console errors: '+JSON.stringify(freshErrors(from).slice(0,2)));
@@ -335,7 +338,7 @@ await check('compare: data changes, outside coverage, empty date, darkness limit
   await page.fill('#arrival','2027-04-27');expect((await rows()).every(r=>r.includes('Not calculated')),'beyond coverage');
   await page.fill('#arrival','');expect((await rows()).every(r=>r.includes('Not calculated')),'empty date');
   await page.fill('#arrival','2027-03-01');await page.fill('#dark-limit','0');
-  expect(/Exceeds|Lower bound/.test(await page.locator('.decision ul').innerText()),'limit applies');
+  expect(/Exceeds|Lower bound/.test(await page.locator('.decision').innerText()),'limit applies');
   expect(/not a NASA requirement/.test(await page.locator('main').innerText()),'caveat');
   await shot(page,'desktop-compare');
   await page.close();

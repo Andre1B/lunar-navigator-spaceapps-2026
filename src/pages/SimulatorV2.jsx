@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import Timeline from "../components/TimelineV2.jsx";
+import NextEvents from "../components/NextEvents.jsx";
 import { percent, timeAt } from "../lib/analysis.mjs";
 const Scene = lazy(() => import("../components/SpaceSceneV2.jsx"));
 const cameras = [
@@ -433,6 +434,14 @@ export default function SimulatorV2({
             </div>
           </section>
           <div className="explorer-bottom">
+            {mode === "faithful" && data && manifest ? (
+              <NextEvents
+                siteData={data}
+                period={manifest.period}
+                index={index}
+                height={height}
+              />
+            ) : null}
             <section className="explorer-prompt">
               <div className="prompt-tabs">
                 <button
