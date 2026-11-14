@@ -111,3 +111,8 @@ Claude feb63b33 now owns integration, following the accepted handoff; tests stay
 - QA found a mobile guidance overlay covering Sun/Earth buttons. Guidance now sits below the canvas rather than over any controls. Directed390/768 overlap recheck passed.
 - QA instrumentation strengthened: camera direction/quaternion and actual post-render frame identity now exposed only with?qa. The280-state and49-transition checks must await a rendered frame, not merely updated React props. Final stronger matrix and touch-pair diagnosis pending.
 - Display rounding now preserves tiny partial discs with<0.1%/>99.9% rather than labelling them zero/full. Numerical data unchanged.
+
+### Two-pointer sky-drag correction
+- Independent QA reproduced a 2.64-degree direction jump from a 1-pixel first-finger move after a second finger touched. Camera position was an invalid diagnostic because the observer remains stationary in this view.
+- Sky dragging now retains one pointer ID until release/cancel/lost capture; secondary touches cannot replace the origin, move the view or end another pointer's drag. The existing camera controls and physical geometry are unchanged.
+- Direction-based regression with a one-finger positive control, stronger post-render matrix and remaining workflow checks are pending independent QA. No deployment yet.

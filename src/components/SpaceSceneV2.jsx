@@ -1039,24 +1039,28 @@ export default function SpaceSceneV2({
     resize.observe(el);
     const down = (e) => {
         upgradeImagery();
-        if (latest.current.view === "sky") {
-          skyDrag = { x: e.clientX, y: e.clientY };
+        if (latest.current.view === "sky" && !skyDrag && e.button === 0) {
+          // One pointer owns a sky drag until it ends. A second finger must not
+          // replace its origin or move the view when the first finger resumes.
+          skyDrag = { pointerId: e.pointerId, x: e.clientX, y: e.clientY };
           renderer.domElement.setPointerCapture(e.pointerId);
         }
       },
       move = (e) => {
-        if (skyDrag) {
+        if (skyDrag && e.pointerId === skyDrag.pointerId) {
           lookAz -= (e.clientX - skyDrag.x) * 0.002;
           lookEl = THREE.MathUtils.clamp(
             lookEl + (e.clientY - skyDrag.y) * 0.002,
             -1.4,
             1.4,
           );
-          skyDrag = { x: e.clientX, y: e.clientY };
+          skyDrag.x = e.clientX;
+          skyDrag.y = e.clientY;
           schedule();
         }
       },
       up = (e) => {
+        if (!skyDrag || e.pointerId !== skyDrag.pointerId) return;
         skyDrag = null;
         if (e && renderer.domElement.hasPointerCapture(e.pointerId))
           renderer.domElement.releasePointerCapture(e.pointerId);
@@ -1079,6 +1083,7 @@ export default function SpaceSceneV2({
       ["pointermove", move],
       ["pointerup", up],
       ["pointercancel", up],
+      ["lostpointercapture", up],
       ["wheel", wheel],
     ])
       renderer.domElement.addEventListener(
@@ -1259,6 +1264,7 @@ export default function SpaceSceneV2({
         ["pointermove", move],
         ["pointerup", up],
         ["pointercancel", up],
+        ["lostpointercapture", up],
         ["wheel", wheel],
       ])
         renderer.domElement.removeEventListener(event, handler);
