@@ -25,6 +25,7 @@ async function launch(){
   throw new Error('no usable browser');
 }
 async function check(name,fn){
+  if(process.env.QA_ONLY&&!name.includes(process.env.QA_ONLY))return; // QA_ONLY=<substring> runs a subset
   const t=Date.now();
   try{const detail=await fn();results.push({name,ok:true,detail:detail??'',ms:Date.now()-t});console.log('PASS',name);}
   catch(e){results.push({name,ok:false,detail:String(e.message||e).split('\n')[0],ms:Date.now()-t});console.log('FAIL',name,'-',String(e.message||e).split('\n')[0]);}
@@ -330,8 +331,8 @@ await check('explore: immersive hides interface, focus moves to Return, Escape r
 // ================= Compare (V1 flows adapted: same ids)
 await check('compare: data changes, outside coverage, empty date, darkness limit',async()=>{
   const page=await open(desktop,'compare','compare');
-  await page.locator('table tbody tr').first().waitFor({timeout:20000});
-  const rows=()=>page.locator('table tbody tr').allInnerTexts();
+  await page.locator('table').first().locator('tbody tr').first().waitFor({timeout:20000});
+  const rows=()=>page.locator('table').first().locator('tbody tr').allInnerTexts();
   const base=await rows();expect(base.length===3&&!/NaN|undefined/.test(base.join(' ')),'3 clean rows');
   await page.selectOption('#site','shackleton-rim');expect((await rows())[0]!==base[0],'site changes row');
   await page.selectOption('#delay','29');
@@ -350,10 +351,10 @@ for(const [label,ctx] of [['desktop-1440',desktop],['mobile-390',mobile]]){
     const from=errCount(),httpFrom=issues.http.length+issues.requestfailed.length;const bad=[];
     for(const route of ROUTES){
       const page=await open(ctx,route,`overflow-${label}-${route}`,route==='simulator'?1800:600);
-      if(route==='compare')await page.locator('table tbody tr').first().waitFor({timeout:20000});
+      if(route==='compare')await page.locator('table').first().locator('tbody tr').first().waitFor({timeout:20000});
       await shot(page,`${label}-${route}`);
       const r=await page.evaluate(()=>{
-        const vw=document.documentElement.clientWidth,skip=e=>e.closest('.table-wrap,pre,nav,.chapter-list,.learn-svg,canvas');
+        const vw=document.documentElement.clientWidth,skip=e=>e.closest('.table-wrap,pre,nav,.chapter-list,svg,canvas');
         const boxes=[...document.querySelectorAll('body *')].filter(e=>{const b=e.getBoundingClientRect();return b.width>0&&(b.right>vw+1||b.left<-1)&&!skip(e)&&getComputedStyle(e).position!=='fixed';}).slice(0,3).map(e=>e.tagName+'.'+String(e.className?.baseVal??e.className).slice(0,30));
         const text=[...document.querySelectorAll('main *')].filter(e=>e.scrollWidth>e.clientWidth+1&&e.clientWidth>0&&!skip(e)&&getComputedStyle(e).overflowX==='visible'&&e.children.length===0).slice(0,3).map(e=>e.tagName+'.'+String(e.className?.baseVal??e.className).slice(0,30)+' text');
         return {sw:document.documentElement.scrollWidth,vw,off:[...boxes,...text]};

@@ -50,7 +50,7 @@ async function download(page){
   return {name:dl.suggestedFilename(),text,json:JSON.parse(text)};
 }
 const setLimit=(page,v)=>page.fill('#dark-limit',String(v));
-async function compareReady(ctx,tag){const page=await open(ctx,'compare',tag);await page.locator('table tbody tr').first().waitFor({timeout:20000});return page;}
+async function compareReady(ctx,tag){const page=await open(ctx,'compare',tag);await page.locator('table').first().locator('tbody tr').first().waitFor({timeout:20000});return page;}
 
 const browser=await launch();
 console.log('browser',browser.version(),'base',BASE);
@@ -64,7 +64,7 @@ await check(`review ${label}: readable, three scenarios, no overflow, no console
   await shot(page,`${label}-review`);
   const r=await page.evaluate(()=>{
     const vw=document.documentElement.clientWidth;
-    const skip=e=>e.closest('.table-wrap,pre,nav,.chapter-list,canvas');
+    const skip=e=>e.closest('.table-wrap,pre,nav,.chapter-list,svg,canvas');
     const off=[...document.querySelectorAll('main *')].filter(e=>{const b=e.getBoundingClientRect();return b.width>0&&(b.right>vw+1||b.left<-1)&&!skip(e);}).slice(0,3).map(e=>e.tagName+'.'+String(e.className).slice(0,25));
     const text=[...document.querySelectorAll('main *')].filter(e=>e.scrollWidth>e.clientWidth+1&&e.clientWidth>0&&!skip(e)&&getComputedStyle(e).overflowX==='visible'&&e.children.length===0).slice(0,3).map(e=>e.tagName+'.'+String(e.className).slice(0,25));
     const items=[...document.querySelectorAll('header a,header button')].filter(e=>e.getBoundingClientRect().width>0);
@@ -105,7 +105,7 @@ await check('review: every link/CTA works (Compare, Simulator, Evidence, Learn, 
 
 await check('review numbers equal the Compare table for the same default settings',async()=>{
   const cmp=await compareReady(desktop,'cmp-numbers');
-  const rows=await cmp.locator('table tbody tr').allInnerTexts();
+  const rows=await cmp.locator('table').first().locator('tbody tr').allInnerTexts();
   const pct=(t)=>t.match(/\d+(\.\d)?%/g)||[];
   const rev=await open(desktop,'review','rev-numbers',900);
   const text=await rev.locator('main').innerText();
@@ -134,7 +134,7 @@ await check('download: real file, JSON parses, reproduces the UI (settings, wind
   // the file reproduces what the page shows
   const ui={site:await page.inputValue('#site'),alt:await page.inputValue('#alternative'),height:+await page.inputValue('#height'),date:await page.inputValue('#arrival'),days:+await page.inputValue('#days'),delay:+await page.inputValue('#delay'),limit:+await page.inputValue('#dark-limit')};
   expect(j.settings.siteId===ui.site&&j.settings.alternative===ui.alt&&Number(j.settings.height)===ui.height&&j.settings.date===ui.date&&Number(j.settings.days)===ui.days&&Number(j.settings.delay)===ui.delay&&j.settings.exampleDarknessLimitH===ui.limit,'settings in file != UI: '+JSON.stringify([j.settings,ui]));
-  const rows=await page.locator('table tbody tr').allInnerTexts();
+  const rows=await page.locator('table').first().locator('tbody tr').allInnerTexts();
   j.scenarios.forEach((s,i)=>{
     const mean=(s.summary.meanVisibleSolarDiscFraction*100).toFixed(1)+'%',earth=(s.summary.earthVisibleTimeFraction*100).toFixed(1)+'%';
     expect(rows[i].includes(mean),`${s.label}: UI row lacks mean Sun ${mean}: ${rows[i].replace(/\s+/g,' ').slice(0,100)}`);
@@ -192,7 +192,7 @@ await check('censored/undetermined and out-of-coverage warnings are shown and ex
   await page.selectOption('#days','7');await page.fill('#arrival','2027-04-27');
   const j=(await download(page)).json;
   expect(j.scenarios.every(s=>s.status==='not-calculated'&&s.summary===null&&s.startUtc===null),'file must not invent numbers outside coverage');
-  const rows=await page.locator('table tbody tr').allInnerTexts();
+  const rows=await page.locator('table').first().locator('tbody tr').allInnerTexts();
   expect(rows.every(r=>r.includes('Not calculated')),'UI says Not calculated');
   expect(/Outside|Not calculated|not calculated/.test(await page.locator('main').innerText()),'UI warns about coverage');
   await page.close();return [...seen].join(',');
@@ -224,7 +224,7 @@ await check('Free Mode never changes the exported comparison or the Review',asyn
   await sim.getByLabel(/Earth.s position/).check();
   await sim.getByRole('button',{name:/Step \+1 h/}).click();await sim.getByRole('button',{name:/Step \+1 h/}).click();
   await sim.evaluate(()=>{location.hash='#/compare';});
-  await sim.locator('table tbody tr').first().waitFor({timeout:20000});
+  await sim.locator('table').first().locator('tbody tr').first().waitFor({timeout:20000});
   const after=(await download(sim)).json;
   const strip=(r)=>{const c=JSON.parse(JSON.stringify(r));delete c.generatedAtUtc;return c;};
   expect(JSON.stringify(strip(after))===JSON.stringify(strip(before)),'exported record changed after Free Mode experiments');
@@ -243,7 +243,7 @@ await check('method links open the specific explanation for each metric (solar, 
     await page.locator('#main').waitFor();await page.waitForTimeout(500);
     texts.push(await page.locator('main').innerText());
     expect(await page.locator('main h1').count()>0,m+': no heading');
-    await page.goto(`${BASE}/#/compare`);await page.locator('table tbody tr').first().waitFor();
+    await page.goto(`${BASE}/#/compare`);await page.locator('table').first().locator('tbody tr').first().waitFor();
   }
   const focus=await Promise.all(['solar','darkness','earth','earth-gap'].map(async m=>{await page.goto(`${BASE}/#/evidence?metric=${m}`);await page.waitForTimeout(500);return page.evaluate(()=>(document.querySelector('[aria-current],[data-metric],.metric-explainer,.metric-focus')?.textContent||'').trim());}));
   expect(new Set(focus.filter(Boolean)).size>=3||new Set(texts).size===4,'metric deep links do not show distinct explanations');

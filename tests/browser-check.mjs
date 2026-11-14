@@ -43,8 +43,8 @@ async function open(ctx,route,tag){
   await page.locator('#main').waitFor();
   return page;
 }
-const tableText=(page)=>page.locator('table tbody tr').allInnerTexts();
-async function waitData(page){await page.locator('table tbody tr').first().waitFor({timeout:15000});}
+const tableText=(page)=>page.locator('table').first().locator('tbody tr').allInnerTexts();
+async function waitData(page){await page.locator('table').first().locator('tbody tr').first().waitFor({timeout:15000});}
 async function activeInfo(page){return page.evaluate(()=>({id:document.activeElement?.id||'',tag:document.activeElement?.tagName,text:(document.activeElement?.textContent||'').trim().slice(0,60),hash:location.hash}));}
 
 const browser=await launch();

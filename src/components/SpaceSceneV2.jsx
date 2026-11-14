@@ -141,14 +141,14 @@ export default function SpaceSceneV2({
     THREE.Cache.enabled = true;
     const moonMap = loader.load(
       "/data/globe/moon-color-lroc-" +
-        (mobile ? "1024x512" : "4096x2048") +
+        (mobile ? "1024x512" : "2048x1024") +
         ".jpg",
       schedule,
     );
     moonMap.colorSpace = THREE.SRGBColorSpace;
     moonMap.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
     const earthMap = loader.load(
-      "/data/globe/earth-visual-" + (mobile ? "1k" : "4k") + ".jpg",
+      "/data/globe/earth-visual-" + (mobile ? "1k" : "2k") + ".jpg",
       schedule,
     );
     earthMap.colorSpace = THREE.SRGBColorSpace;
@@ -165,7 +165,7 @@ export default function SpaceSceneV2({
     );
     const starsMap = loader.load(
       "/data/starmap/starmap-2020-celestial-" +
-        (mobile ? "1024x512" : "4096x2048") +
+        (mobile ? "1024x512" : "2048x1024") +
         ".jpg",
       schedule,
     );
@@ -190,6 +190,26 @@ export default function SpaceSceneV2({
         }
       };
       uploadFrame = requestAnimationFrame(upload);
+    };
+    // Desktop starts with 2k imagery: at the default framing the visible globe is not
+    // larger than a 2k map. The same texture objects switch to 4k on the first scene
+    // interaction (drag, wheel, keys, camera buttons), when closer inspection begins.
+    let imageryUpgraded = mobile;
+    const upgradeImagery = () => {
+      if (imageryUpgraded) return;
+      imageryUpgraded = true;
+      const imageLoader = new THREE.ImageLoader();
+      for (const [texture, url] of [
+        [moonMap, "/data/globe/moon-color-lroc-4096x2048.jpg"],
+        [earthMap, "/data/globe/earth-visual-4k.jpg"],
+        [starsMap, "/data/starmap/starmap-2020-celestial-4096x2048.jpg"],
+      ])
+        imageLoader.load(url, (image) => {
+          if (disposed) return;
+          texture.image = image;
+          texture.needsUpdate = true;
+          schedule();
+        });
     };
     const stars = new THREE.Mesh(
       new THREE.SphereGeometry(5e7, 48, 24),
@@ -997,6 +1017,7 @@ export default function SpaceSceneV2({
     });
     resize.observe(el);
     const down = (e) => {
+        upgradeImagery();
         if (latest.current.view === "sky") {
           skyDrag = { x: e.clientX, y: e.clientY };
           renderer.domElement.setPointerCapture(e.pointerId);
@@ -1020,6 +1041,7 @@ export default function SpaceSceneV2({
           renderer.domElement.releasePointerCapture(e.pointerId);
       },
       wheel = (e) => {
+        upgradeImagery();
         if (latest.current.view === "sky") {
           e.preventDefault();
           camera.fov = THREE.MathUtils.clamp(
@@ -1052,6 +1074,7 @@ export default function SpaceSceneV2({
         schedule();
       },
       move(dx, dy) {
+        upgradeImagery();
         transition = null;
         if (latest.current.view === "sky") {
           lookAz += dx;
@@ -1084,6 +1107,7 @@ export default function SpaceSceneV2({
         schedule();
       },
       zoom(f) {
+        upgradeImagery();
         transition = null;
         if (latest.current.view === "sky") {
           camera.fov = THREE.MathUtils.clamp(camera.fov * f, 2, 90);
