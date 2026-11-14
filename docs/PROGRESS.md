@@ -100,3 +100,8 @@ Claude feb63b33 now owns integration, following the accepted handoff; tests stay
 - Additional text bug corrected: rounded Sun/Earth fractions near zero/one no longer classify partial visibility as fully hidden/visible.
 - Additional winner research: two observed official project repositories, cloned privately without checkout/hooks/LFS, selected code read but never executed/reused. Applied lessons documented in CLARITY-CORRECTIONS and original private TXT.
 - Development matrix/regression and production gates IN PROGRESS. No current production pass claimed yet.
+
+### Root narrow hardware smoke and visual inspection
+- Chrome157 headless with default GPU selection (NO forced SwiftShader) reported ANGLE NVIDIA GeForce RTX3060 Laptop GPU / Direct3D11. Play advanced12 to16.83, Pause held, SurfaceSky direct Sun aim and lit-terrain navigation rendered, terrain drag worked and camera values stayed finite; no page/console errors. This is a narrow hardware-backed smoke, not the full real-device matrix. Raw results and screenshots are private in tmp/lunar-native-gpu.
+- Root inspected actual Home390, Compare390, desktop comparison answer, SurfaceSky and LocalTerrain captures. Corrected an oversized mobile CTA caused by a vertical flex basis. The diagram/real-terrain distinction is visible in the native hardware render. The demo now uses a direct current-app capture of ComparisonAnswer.
+- Built source abd118e; check:data8/8, credits163 packages /0 missing repository URLs. New independent browser matrices and final production/Lighthouse evidence remain pending; do not reuse RC4 evidence for this round.

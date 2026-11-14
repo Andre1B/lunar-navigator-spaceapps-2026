@@ -37,3 +37,5 @@ The [NASA announcement](https://science.nasa.gov/directorates/smd/2023-nasa-inte
 ## Release gates
 
 The independent QA records the actual matrix, failures and retests in `tests/PROGRESS.md`. The release record must identify the current commit/deployment and distinguish development from production. Do not claim exhaustive bug-freedom or measured first-time comprehension without those checks and real user feedback. The previous 24-project study remains in [WINNER-LESSONS.md](WINNER-LESSONS.md).
+
+A narrow development smoke on Chrome157 detected NVIDIA RTX3060 / Direct3D11 without forcing software rendering: Play/Pause, Sun aiming, lit terrain and terrain drag rendered with finite camera values and no page errors. The full matrix uses SwiftShader; this narrow hardware check does not replace broader device testing. A stale-cache guard also revalidates the manifest, versions JSON requests and rejects mismatched height/series shapes before exposing calculations.
