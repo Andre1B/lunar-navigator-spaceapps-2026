@@ -121,3 +121,8 @@ Claude feb63b33 now owns integration, following the accepted handoff; tests stay
 - Native mobile Chrome, direction-based measurement after a matching ready rendered frame: one-finger 1px control 0.115deg; two-finger primary 1px move 0.115deg (previous defect 2.64deg). pointercancel stopped movement at 0.000deg; a new drag resumed at 0.115deg.
 - No console, network or page errors in this directed check. The strengthened 280-state /49-transition rendered matrix is still running. Frame serial may reset on canvas remount; test waits require changed serial plus matching view/site/height and ready state rather than assuming a global increasing counter.
 - Local npm test130/130 and check:data8/8 passed in the root run after the pointer fix. Production has not been replaced.
+
+### Local release gate complete (clarity/fixes)
+- Independent QA handed tests back:130/130 unit/data checks;280/280 post-render combinations;49/49 view pairs;8/8 playback/reduced-motion/gesture flows; Compare inspection1/1, coherent cache/mixed-shape2/2, Review semantics1/1 and U9/HUD2/2. No errors in the recorded flows. See tests/PROGRESS.md for method and raw-report locations.
+- Root reran npm test130/130, check:data8/8, credits163/0 missing repositories and production build. New tests committed together with the five-height contract before pushing; prior public RC4 remains unchanged until this candidate is deployed.
+- Next: clean-tree candidate build, named Lunar-only deployment, final current-source production QA and serial Lighthouse. Laboratory coverage does not prove absence of every possible bug or user comprehension; those limits remain explicit.

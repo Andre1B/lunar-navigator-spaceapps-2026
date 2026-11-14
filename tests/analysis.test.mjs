@@ -151,6 +151,17 @@ test('formatters',()=>{
   assert.equal(hours({hours:12,censored:true}),'≥ 12 h');
 });
 
+test('percent preserves exact hidden/full states and does not round tiny visible slivers to zero',()=>{
+  assert.equal(percent(0),'0.0%');
+  assert.equal(percent(1),'100.0%');
+  assert.equal(percent(0.0004),'<0.1%');
+  assert.equal(percent(0.9996),'>99.9%');
+  assert.equal(percent(0.001),'0.1%');
+  assert.equal(percent(0.999),'99.9%');
+  assert.equal(percent(NaN),'Not calculated');
+  assert.equal(percent(Infinity),'Not calculated');
+});
+
 // Regression: an unparsable date used to throw RangeError (Date#toISOString).
 test('windowBounds returns null (does not throw) for an unparsable date',()=>{
   assert.equal(windowBounds(period,'not a date',1),null);

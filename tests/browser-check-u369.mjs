@@ -7,7 +7,7 @@ import {chromium} from 'playwright';
 import {mkdirSync,writeFileSync,readFileSync,existsSync} from 'node:fs';
 import {dirname,join,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {horizonAt} from '../src/lib/analysis.mjs';
+import {horizonAt,percent} from '../src/lib/analysis.mjs';
 import {arrivalSeries} from '../src/lib/arrivalSeries.mjs';
 
 const ROOT=resolve(dirname(fileURLToPath(import.meta.url)),'..');
@@ -34,7 +34,8 @@ async function launch(){
   throw new Error('no usable browser');
 }
 async function check(name,fn){
-  if(process.env.QA_ONLY&&!name.includes(process.env.QA_ONLY))return;
+  const only=process.env.QA_ONLY?.toLowerCase().split('|').filter(Boolean)??[];
+  if(only.length&&!only.some(fragment=>name.toLowerCase().includes(fragment)))return;
   const t=Date.now();
   try{const detail=await fn();results.push({name,ok:true,detail:detail??'',ms:Date.now()-t});console.log('PASS',name);}
   catch(e){results.push({name,ok:false,detail:String(e.message||e).split('\n')[0],ms:Date.now()-t});console.log('FAIL',name,'-',String(e.message||e).split('\n')[0]);}
@@ -237,12 +238,11 @@ await check('U9: Faithful shows the labelled live region below NextEvents; the t
   expect(fullText.test(text),'description text: '+text.slice(0,160));
   expect(text.startsWith(utcAt(s.index).slice(0,16).replace('T',' ')+' UTC, Connecting ridge, observer 1 m above the ground.'),'time/site/height lead: '+text.slice(0,90));
   // HUD (world-reading) must agree with the description
-  const hud=await page.locator('.world-reading').innerText();
-  const sunHud=+/Sun disc\s*([\d.]+)%/.exec(hud)[1],earthHud=+/Earth disc\s*([\d.]+)%/.exec(hud)[1];
-  expect(Math.abs(sunHud-o.sun*100)<0.06&&Math.abs(earthHud-o.earth*100)<0.06,`HUD ${sunHud}/${earthHud} vs observation ${o.sun}/${o.earth}`);
-  const phrase=(pc)=>pc>=99.95?'fully above the terrain horizon':pc<=0.05?'hidden below the terrain horizon':`${Math.round(pc)}% of the disc above the terrain horizon`;
-  expect(text.includes('Sun at azimuth')&&text.includes(phrase(sunHud)),`Sun phrase for ${sunHud}%: ${text}`);
-  expect(text.includes(phrase(earthHud)),`Earth phrase for ${earthHud}%`);
+  const hud=(await page.locator('.world-reading span').allInnerTexts()).map(t=>t.replace(/\s+/g,' ').trim()).join(' | ');
+  expect(hud.includes(`Sun in view ${percent(o.sun)}`)&&hud.includes(`Earth in view ${percent(o.earth)}`),`HUD ${hud} vs observation ${o.sun}/${o.earth}`);
+  const phrase=(f)=>f<=0?'hidden below the terrain horizon':f>=1?'fully above the terrain horizon':f<0.01?'less than 1% of the disc above the terrain horizon':f>0.99?'more than 99% of the disc above the terrain horizon':`${Math.round(f*100)}% of the disc above the terrain horizon`;
+  expect(text.includes('Sun at azimuth')&&text.includes(phrase(o.sun)),`Sun phrase for ${o.sun}: ${text}`);
+  expect(text.includes(phrase(o.earth)),`Earth phrase for ${o.earth}`);
   // geometry matches the dataset at an integer sample (interpolated scene vs published sample)
   expect(Number.isInteger(s.index),'default index is an integer sample: '+s.index);
   const d=sites['connecting-ridge'];
@@ -297,6 +297,24 @@ await check('U9: during Play the live region is quiet ("Paused description"), af
   expect(full.length===1&&full[0].startsWith(want),`after Pause the live region must announce ONLY the settled time (${want}); it announced ${full.length}: ${JSON.stringify(full.map(t=>t.slice(0,18)))} (stale text from before Play is shown first)`);
   await page.close();
 });
+await check('U9: short Sun/Earth in-view text precedes the detailed sky values and matches the observation',async()=>{
+  const page=await explore(desktop,'u9-plain');
+  await page.locator('.sky-description-plain').waitFor({timeout:8000});
+  const s=await snap(page);
+  const hud=await page.locator('.world-reading').evaluate(el=>el.textContent.replace(/\s+/g,' ').trim());
+  expect(hud.includes(`Sun in view ${percent(s.observation.sun)}`)&&hud.includes(`Earth in view ${percent(s.observation.earth)}`),`HUD percentages must use the shared truthful formatter for the current fractions (${s.observation.sun}, ${s.observation.earth}): ${hud}`);
+  const observed=await page.locator('.sky-description-plain').innerText();
+  const order=await page.evaluate(()=>{
+    const plain=document.querySelector('.sky-description-plain'),detail=document.querySelector('.sky-description p[aria-live]');
+    return !!plain&&!!detail&&!!(plain.compareDocumentPosition(detail)&Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+  const sun=s.observation.sun>0?'The Sun is in view.':'The Sun is hidden by the terrain.';
+  const earth=s.observation.earth>0?'Earth is in view.':'Earth is hidden by the terrain.';
+  expect(observed.startsWith(`${sun} ${earth}`),`plain status does not match fractions: ${observed}`);
+  expect(order,'short text should precede the detailed live region');
+  expect(!/azimuth|relative to the local horizontal/i.test(observed),'plain summary should be short and precede geometry values');
+  await page.close();return observed;
+});
 await check('U9: scrubbing the slider announces only the settled instant (no flood)',async()=>{
   const page=await explore(desktop,'u9-scrub');
   await page.waitForFunction(()=>/UTC, /.test(document.querySelector('.sky-description p[aria-live]').textContent),null,{timeout:8000});
@@ -343,6 +361,8 @@ await check('U9: describeObservation unit cases (imported from the dev server)',
       nullObs:d(null,ctx),missingEarth:d({sunDetail:det(1,1,1,1)},ctx),missingSun:d({earthDetail:det(1,1,1,1)},ctx),
       full:d({sunDetail:det(1,2.5,122.6,0.4),earthDetail:det(0,-7.123,359.6,-0.95)},ctx),
       partial:d({sunDetail:det(0.348,-0.2,10,-0.5),earthDetail:det(0.999,0.1,5,-0.5)},ctx),
+      justVisible:d({sunDetail:det(0.003,-0.2,10,-0.5),earthDetail:det(0.0001,-0.3,11,-0.6)},ctx),
+      almostFull:d({sunDetail:det(0.997,0.2,10,-0.5),earthDetail:det(0.9999,0.3,11,-0.6)},ctx),
       nan:d({sunDetail:det(1,NaN,1,1),earthDetail:det(0,-1,1,1)},ctx),
       zero:d({sunDetail:det(0,-0,0,0),earthDetail:det(1,0,0,0)},ctx)};
   });
@@ -351,8 +371,12 @@ await check('U9: describeObservation unit cases (imported from the dev server)',
   expect2(r.full.startsWith('2027-03-01 12:00 UTC, Test point, observer 5 m above the ground. '),'lead: '+r.full.slice(0,80));
   expect2(/Sun at azimuth 123°, 2\.50° relative to the local horizontal; terrain horizon in that direction 0\.40°; fully above the terrain horizon\./.test(r.full),'Sun sentence (rounding, sign): '+r.full);
   expect2(/Earth at azimuth 360°, −7\.12° relative to the local horizontal; terrain horizon in that direction −0\.95°; hidden below the terrain horizon\./.test(r.full),'Earth sentence (minus sign, hidden, azimuth rounds to 360°): '+r.full);
+  expect2(/Sun at azimuth 10°, −0\.20° relative to the local horizontal; terrain horizon in that direction −0\.50°; less than 1% of the disc above the terrain horizon\./.test(r.justVisible),'a small positive fraction is partial, not hidden: '+r.justVisible);
+  expect2(/Earth at azimuth 11°, −0\.30° relative to the local horizontal; terrain horizon in that direction −0\.60°; less than 1% of the disc above the terrain horizon\./.test(r.justVisible),'fraction near zero remains visible: '+r.justVisible);
+  expect2(/Sun at azimuth 10°, 0\.20° relative to the local horizontal; terrain horizon in that direction −0\.50°; more than 99% of the disc above the terrain horizon\./.test(r.almostFull),'fraction just below one is not labelled fully above: '+r.almostFull);
+  expect2(/Earth at azimuth 11°, 0\.30° relative to the local horizontal; terrain horizon in that direction −0\.60°; more than 99% of the disc above the terrain horizon\./.test(r.almostFull),'fraction near one remains partially blocked: '+r.almostFull);
   expect2(/Sun at azimuth 10°, −0\.20°.*35% of the disc above the terrain horizon/.test(r.partial),'35% partial: '+r.partial);
-  expect2(/Earth at.*100% of the disc above the terrain horizon/.test(r.partial)||/Earth at.*fully above/.test(r.partial),'0.999 rounds to 100%: '+r.partial);
+  expect2(/Earth at.*more than 99% of the disc above the terrain horizon/.test(r.partial),'0.999 remains partial rather than becoming full through rounding: '+r.partial);
   expect2(/Sun: not available\./.test(r.nan)&&/Earth at azimuth 1°/.test(r.nan),'NaN elevation -> not available: '+r.nan);
   expect2(!/NaN|undefined/.test(JSON.stringify(r)),'no NaN/undefined in any sentence');
   await page.close();

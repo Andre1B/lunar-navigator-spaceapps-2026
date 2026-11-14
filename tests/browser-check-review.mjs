@@ -50,7 +50,7 @@ async function download(page){
   return {name:dl.suggestedFilename(),text,json:JSON.parse(text)};
 }
 const setLimit=(page,v)=>page.fill('#dark-limit',String(v));
-async function compareReady(ctx,tag){const page=await open(ctx,'compare',tag);await page.locator('table').first().locator('tbody tr').first().waitFor({timeout:20000});return page;}
+async function compareReady(ctx,tag){const page=await open(ctx,'compare',tag);const detail=page.locator('details.comparison-details').first();if(await detail.getAttribute('open')===null)await detail.locator('summary').click();await detail.locator('table tbody tr').first().waitFor({timeout:20000});return page;}
 
 const browser=await launch();
 console.log('browser',browser.version(),'base',BASE);
@@ -103,15 +103,30 @@ await check('review: every link/CTA works (Compare, Simulator, Evidence, Learn, 
   await page.close();return hrefs.join(' ');
 });
 
-await check('review numbers equal the Compare table for the same default settings',async()=>{
+await check('Review and answer cards show time with some sunlight; the detailed table keeps mean Sun-disc fraction',async()=>{
   const cmp=await compareReady(desktop,'cmp-numbers');
-  const rows=await cmp.locator('table').first().locator('tbody tr').allInnerTexts();
-  const pct=(t)=>t.match(/\d+(\.\d)?%/g)||[];
+  const detail=cmp.locator('details.comparison-details').first();
+  if(await detail.getAttribute('open')===null)await detail.locator('summary').click();
+  const report=(await download(cmp)).json;
+  const rows=await detail.locator('table tbody tr').allInnerTexts();
+  const answer=await cmp.locator('.answer-scenario').allInnerTexts();
   const rev=await open(desktop,'review','rev-numbers',900);
-  const text=await rev.locator('main').innerText();
-  let matched=0;
-  for(const r of rows)for(const p of pct(r)){if(text.includes(p))matched++;else throw new Error(`Compare shows ${p} that is absent from Review`);}
-  expect(matched>=3,'too few shared percentages: '+matched);
+  const cards=rev.locator('.review-results article');
+  expect(await answer.length===3&&await cards.count()===3&&report.scenarios.length===3,'expected three scenarios in answer, Review and export');
+  const samePercent=(x)=>`${(x*100).toFixed(1)}%`;
+  let distinct=0;
+  for(let i=0;i<3;i++){
+    const scenario=report.scenarios[i],direct=samePercent(scenario.summary.directSunTimeFraction),mean=samePercent(scenario.summary.meanVisibleSolarDiscFraction);
+    const answerText=answer[i],reviewText=await cards.nth(i).innerText();
+    expect(answerText.includes(direct),`${scenario.label}: Compare answer card should show time fraction ${direct}`);
+    expect(reviewText.includes(direct),`${scenario.label}: Review should show time fraction ${direct}`);
+    expect(/Time with some sunlight/.test(answerText)&&/Time with some sunlight/.test(reviewText),`${scenario.label}: short summary label missing`);
+    expect(!/Average Sun disc/.test(answerText+reviewText),`${scenario.label}: short summary conflates duration with mean disk area`);
+    expect(rows[i].includes(mean),`${scenario.label}: detailed table should show mean visible disc ${mean}: ${rows[i]}`);
+    if(Math.abs(scenario.summary.directSunTimeFraction-scenario.summary.meanVisibleSolarDiscFraction)>1e-6)distinct++;
+  }
+  expect(distinct>0,'test data must demonstrate that time-with-sun and mean visible disc are different measures');
+  expect((await detail.locator('thead').innerText()).includes('Average Sun disc in view'),'detailed-table heading should retain the disc-area measure');
   await cmp.close();await rev.close();
 });
 

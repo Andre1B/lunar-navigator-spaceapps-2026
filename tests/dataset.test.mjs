@@ -2,6 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
+import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {dirname,join} from 'node:path';
 import {visibleDiskFraction,horizonAt,runs} from '../src/lib/analysis.mjs';
@@ -14,7 +15,7 @@ const sky=load('sky.json');
 const validation=load('validation.json');
 const SITE_IDS=['connecting-ridge','shackleton-rim','nobile-rim-1','malapert-massif'];
 const sites=Object.fromEntries(manifest.sites.map(s=>[s.id,load(s.file)]));
-const N=1393,H=['1','5'];
+const N=1393,H=['0.5','1','2','5','10'],OLD_H=['1','5'];
 const finite=(a)=>a.every(Number.isFinite);
 const inRange=(a,lo,hi)=>a.every(v=>v>=lo&&v<=hi);
 
@@ -25,7 +26,7 @@ test('manifest period, step and sample count agree (58 days hourly, 1393 samples
   assert.equal(Date.parse(p.endUtc)-Date.parse(p.startUtc),(N-1)*p.stepMinutes*60000);
   assert.equal(p.startUtc,'2027-03-01T00:00:00Z');
   assert.deepEqual(sky.period,p);
-  assert.deepEqual(manifest.observerHeightsM,[1,5]);
+  assert.deepEqual(manifest.observerHeightsM,[0.5,1,2,5,10]);
 });
 
 test('manifest declares exactly the 4 expected sites with sane coordinates and no landing-site claim',()=>{
@@ -51,6 +52,9 @@ test('manifest has conventions, provenance and disclosures required by the proje
   for(const k of ['azimuth','elevation','longitude','frame','time','visibleFraction','censored'])assert.ok(manifest.conventions[k],`convention ${k}`);
   assert.match(manifest.conventions.azimuth,/clockwise from local north/);
   assert.match(manifest.conventions.longitude,/east/);
+  assert.equal(manifest.conventions.geometryReferenceHeightM,1);
+  assert.match(manifest.conventions.heightCalculation,/Shared azDeg, elDeg, angularRadiusDeg and rangeKm refer to the 1 m observer/);
+  assert.match(manifest.conventions.heightCalculation,/no interpolation between heights/i);
   assert.ok(manifest.provenance.kernels.length>=5);
   for(const k of manifest.provenance.kernels)assert.match(k.sha256,/^[0-9a-f]{64}$/,k.file);
   assert.equal(manifest.provenance.dems.length,6);
@@ -89,20 +93,22 @@ for(const id of SITE_IDS){
     }
   });
 
-  test(`site ${id}: horizon has 720 azimuths at 0.5 deg for 1 m and 5 m, 5 m horizon not above 1 m`,()=>{
+  test(`site ${id}: horizon has 720 azimuths at 0.5 deg for each observer height`,()=>{
     const hz=sites[id].horizon;
     assert.equal(hz.azimuthStepDeg,0.5);
     assert.equal(hz.azimuthDeg0,0);
     for(const h of H){assert.equal(hz.elevationDeg[h].length,720);assert.ok(finite(hz.elevationDeg[h]));assert.ok(inRange(hz.elevationDeg[h],-30,30),`${h} m horizon range`);}
-    // A taller observer cannot see a higher (blocking) horizon: 5 m <= 1 m (+ rounding 0.0005)
-    for(let i=0;i<720;i++)assert.ok(hz.elevationDeg['5'][i]<=hz.elevationDeg['1'][i]+5e-4,`az index ${i}`);
+    // Each successive observer height sees the same or a lower blocking horizon.
+    for(let j=1;j<H.length;j++)for(let i=0;i<720;i++)assert.ok(hz.elevationDeg[H[j]][i]<=hz.elevationDeg[H[j-1]][i]+5e-4,`${H[j]} m vs ${H[j-1]} m, az index ${i}`);
     assert.ok(hz.minReachKm>300,'sight lines reach beyond 300 km (V3 convergence)');
   });
 
-  test(`site ${id}: taller observer never sees less of the Sun or Earth`,()=>{
+  test(`site ${id}: every taller observer never sees less of the Sun or Earth`,()=>{
     for(const body of ['sun','earth']){
-      const a=sites[id][body].visibleFraction['1'],b=sites[id][body].visibleFraction['5'];
-      for(let i=0;i<N;i++)assert.ok(b[i]>=a[i]-2e-3,`${body} sample ${i}: 5 m ${b[i]} < 1 m ${a[i]}`);
+      for(let j=1;j<H.length;j++){
+        const a=sites[id][body].visibleFraction[H[j-1]],b=sites[id][body].visibleFraction[H[j]];
+        for(let i=0;i<N;i++)assert.ok(b[i]>=a[i]-2e-3,`${body} sample ${i}: ${H[j]} m ${b[i]} < ${H[j-1]} m ${a[i]}`);
+      }
     }
   });
 
@@ -123,7 +129,7 @@ for(const id of SITE_IDS){
     assert.ok(d.events.length>0);
     for(const e of d.events){
       assert.ok(['sunrise','sunset','earthrise','earthset'].includes(e.type),e.type);
-      assert.ok([1,5].includes(e.heightM));
+      assert.ok(manifest.observerHeightsM.includes(e.heightM));
       assert.match(e.utc,/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$/);
       const t=Date.parse(e.utc);assert.ok(t>=t0&&t<=t1,`${e.type} ${e.utc} outside period`);
       assert.ok(e.resolutionMin>0&&e.resolutionMin<=5);
@@ -131,7 +137,7 @@ for(const id of SITE_IDS){
     const key=(e)=>e.heightM+e.utc;
     const sorted=[...d.events].sort((a,b)=>a.heightM-b.heightM||(a.utc<b.utc?-1:a.utc>b.utc?1:0));
     assert.deepEqual(d.events.map(key),sorted.map(key),'sorted by height then time');
-    for(const h of [1,5])for(const [rise,set] of [['sunrise','sunset'],['earthrise','earthset']]){
+    for(const h of manifest.observerHeightsM)for(const [rise,set] of [['sunrise','sunset'],['earthrise','earthset']]){
       const seq=d.events.filter(e=>e.heightM===h&&(e.type===rise||e.type===set)).map(e=>e.type);
       for(let i=1;i<seq.length;i++)assert.notEqual(seq[i],seq[i-1],`${h} m ${rise}/${set} must alternate`);
     }
@@ -141,12 +147,20 @@ for(const id of SITE_IDS){
     const d=sites[id];const t0=Date.parse(manifest.period.startUtc);
     for(const e of d.events){
       const body=e.type.startsWith('sun')?'sun':'earth';const rising=/rise$/.test(e.type);
-      const f=d[body].visibleFraction[String(e.heightM)];
-      const x=(Date.parse(e.utc)-t0)/3600000;const lo=Math.floor(x),hi=Math.ceil(x);
-      // The hourly series cannot resolve sub-hour blips, but it must never contradict the event:
-      // before a rise (sample at floor(t)) and after a set (sample at ceil(t)) the body is not visible.
-      if(rising)assert.equal(f[lo],0,`${e.type} ${e.utc} h=${e.heightM}: already visible before the event`);
-      else assert.equal(f[hi],0,`${e.type} ${e.utc} h=${e.heightM}: still visible after the event`);
+      const sameBody=d.events.filter(x=>x.heightM===e.heightM&&x.type.startsWith(body));
+      const eventMs=Date.parse(e.utc),x=(eventMs-t0)/3600000;
+      const sampleIndex=rising?Math.ceil(x)-1:Math.ceil(x);
+      const sampleMs=t0+sampleIndex*3600000;
+      const intervalEvents=sameBody.filter(x=>rising
+        ? Date.parse(x.utc)>sampleMs&&Date.parse(x.utc)<=eventMs
+        : Date.parse(x.utc)>=eventMs&&Date.parse(x.utc)<=sampleMs);
+      // The hourly series cannot resolve multiple sub-hour transitions. Only
+      // assert the expected side when this is the sole same-body event between
+      // the adjacent hourly sample and the refined event.
+      if(intervalEvents.length===1){
+        const f=d[body].visibleFraction[String(e.heightM)];
+        assert.equal(f[sampleIndex],0,`${e.type} ${e.utc} h=${e.heightM}: hourly sample on the non-visible side`);
+      }
     }
   });
 
@@ -180,6 +194,29 @@ test('sites are not interchangeable: different horizons and different series',()
   assert.equal(new Set(sig).size,4);
   const s2=SITE_IDS.map(id=>sites[id].metrics['1'].meanSunVisibleFraction);
   assert.ok(new Set(s2).size>=3);
+});
+
+test('legacy 1 m and 5 m data remain byte-identical to the pre-expansion baseline',()=>{
+  // SHA-256 of compact JSON projections from the immutable two-height baseline.
+  // The projection includes the shared 1 m geometry arrays, height-specific
+  // horizon/fractions/events/metrics, metadata and eclipses for each old height.
+  const expected={
+    'connecting-ridge':{'1':'534f76ed98dc2cf65f0060b19223ef57d82749cbdbd000a147ccc4b53bc18ca8','5':'3bec7b0e6fb8907af4fd6380b34bd2119a124250007679469f9d983448bbff4c'},
+    'shackleton-rim':{'1':'a7ff912fcd264c3134891d86354f647c2a304dfb05a610d743796853c3dee703','5':'a4c432df9b8021212d18be11400f579987fcf0fb0612fbfd3435cbd77b11c362'},
+    'nobile-rim-1':{'1':'ff3345b47d4df82adc6d14864f0ad03bf5a6e8531b94ac50a2ae26ef5e588169','5':'694c0d046d6218b360a36d89a31a3d73b4968859c69649fb18c0a176ee8b939c'},
+    'malapert-massif':{'1':'4537a5875a918a54f623fc8c49b4fe8ad2b7c2f00f00d567329609ee32da9aeb','5':'dfdacfcfd0a6ccc8d1cca07aa5c711b7eb5cb599ed314a3411aa3f50cc43d410'},
+  };
+  const projection=(d,h)=>({
+    schemaVersion:d.schemaVersion,siteId:d.siteId,
+    horizon:{azimuthStepDeg:d.horizon.azimuthStepDeg,azimuthDeg0:d.horizon.azimuthDeg0,minReachKm:d.horizon.minReachKm,elevationDeg:d.horizon.elevationDeg[h]},
+    sun:{azDeg:d.sun.azDeg,elDeg:d.sun.elDeg,angularRadiusDeg:d.sun.angularRadiusDeg,rangeKm:d.sun.rangeKm,visibleFraction:d.sun.visibleFraction[h]},
+    earth:{azDeg:d.earth.azDeg,elDeg:d.earth.elDeg,angularRadiusDeg:d.earth.angularRadiusDeg,rangeKm:d.earth.rangeKm,visibleFraction:d.earth.visibleFraction[h]},
+    events:d.events.filter(e=>e.heightM===Number(h)),metrics:d.metrics[h],eclipses:d.eclipses,
+  });
+  for(const id of SITE_IDS)for(const h of OLD_H){
+    const bytes=JSON.stringify(projection(sites[id],h));
+    assert.equal(createHash('sha256').update(bytes).digest('hex'),expected[id][h],`${id} h=${h} m projection`);
+  }
 });
 
 test('sky.json: time-aligned arrays, unit quaternions and expected radii',()=>{
@@ -237,11 +274,20 @@ test('validation results satisfy their own stated targets (re-checked independen
   if(t.V3.status==='pass'){assert.equal(t.V3.result.length,4);for(const r of t.V3.result)assert.ok(r.maxAbsDiffDeg<0.01,r.site);}
   if(t.V4.status==='pass')for(const r of t.V4.result)assert.ok(r.meanVisibleFraction2024to2026At1m>0.7,r.site);
   if(t.V5.status==='pass'){
-    for(const r of t.V5.result){
-      if('horizon5mNotAbove1m' in r)assert.equal(r.horizon5mNotAbove1m,true);
-      if(r.psrPixel)assert.equal(r.psrPixel.maxSunFraction2024to2026,0);
+    const pairs=[[0.5,1],[1,2],[2,5],[5,10]];
+    const perSite=t.V5.result.filter(r=>r.site);
+    assert.equal(perSite.length,SITE_IDS.length);
+    for(const r of perSite){
+      assert.ok(SITE_IDS.includes(r.site),r.site);
+      assert.deepEqual(r.adjacentHeightPairs.map(p=>[p.lowerM,p.upperM]),pairs,r.site);
+      for(const p of r.adjacentHeightPairs){
+        assert.equal(p.higherHorizonNotAboveLower,true,`${r.site} ${p.lowerM}/${p.upperM} horizon`);
+        assert.deepEqual(p.higherVisibleFractionNotBelowLower,{sun:true,earth:true},`${r.site} ${p.lowerM}/${p.upperM} fractions`);
+      }
     }
-    assert.ok(t.V5.result.some(r=>r.psrPixel),'PSR pixel test present');
+    const psr=t.V5.result.find(r=>r.psrPixel);
+    assert.ok(psr,'PSR pixel check present');
+    assert.equal(psr.psrPixel.maxSunFraction2024to2026,0);
   }
 });
 

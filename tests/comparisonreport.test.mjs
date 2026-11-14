@@ -109,6 +109,7 @@ test('comparisonReport: three scenarios mirror the rows (same windows, height, m
     assert.equal(s.point.id,rows[i].id);assert.equal(s.point.notALandingSite,true);
     assert.equal(s.status,'calculated');
     close(s.summary.meanVisibleSolarDiscFraction,rows[i].summary.meanSun,1e-12);
+    close(s.summary.directSunTimeFraction,rows[i].summary.sunlitFraction,1e-12);
     close(s.summary.earthVisibleTimeFraction,rows[i].summary.earthFraction,1e-12);
     assert.deepEqual(s.summary.longestDarkness,rows[i].summary.dark);
     assert.ok(['exceeds','undetermined','within'].includes(s.exampleDarknessAssessment.status));
