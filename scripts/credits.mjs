@@ -42,7 +42,11 @@ for (const dir of paths) {
       .replace(/^git\+/, "")
       .replace(/^git:\/\//, "https://")
       .replace(/^ssh:\/\/git@github.com\//, "https://github.com/")
+      .replace(/^git@github.com:/, "https://github.com/")
+      .replace(/^github:/, "https://github.com/")
       .replace(/\.git$/, "");
+  if (repository && /^[\w.-]+\/[\w.-]+$/.test(repository))
+    repository = "https://github.com/" + repository;
   const license =
     typeof p.license === "string"
       ? p.license

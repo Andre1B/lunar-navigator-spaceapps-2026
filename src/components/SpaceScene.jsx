@@ -120,160 +120,172 @@ export default function SpaceScene({
       render();
     });
     observer.observe(el);
+    let rendering = false;
     let previousView = "",
       previousSite = "",
       lookAz = 0,
       lookEl = 0,
       drag = null;
     function render() {
-      if (disposed) return;
-      const { sky, planets, index, freeze, view, site, siteData, height } =
-        latest.current;
-      if (sky) {
-        const i = Math.max(0, Math.min(index, sky.sunPosKm.length - 1));
-        const mi = freeze.moonRotation ?? i,
-          ei = freeze.earthPosition ?? i,
-          eri = freeze.earthRotation ?? i,
-          si = freeze.sunPosition ?? i;
-        moon.quaternion.copy(bodyQuaternion(sky.moonOrientationQuat[mi]));
-        earth.quaternion.copy(bodyQuaternion(sky.earthOrientationQuat[eri]));
-        const ep = vector(sky.earthPosKm[ei]),
-          sp = vector(sky.sunPosKm[si]);
-        light.position.copy(sp.clone().normalize().multiplyScalar(100));
-        const exact = view === "sky";
-        for (const [order, p] of (planets?.planets ?? []).entries()) {
-          if (!planetMeshes.has(p.id)) {
-            const mesh = new THREE.Mesh(
-              new THREE.SphereGeometry(1, 24, 16),
-              new THREE.MeshStandardMaterial({ color: p.color, roughness: 1 }),
-            );
-            scene.add(mesh);
-            planetMeshes.set(p.id, mesh);
-          }
-          const mesh = planetMeshes.get(p.id),
-            v = vector(p.posKm[freeze["planet-" + p.id] ?? i]);
-          mesh.position.copy(
-            exact
-              ? v.divideScalar(sky.radiiKm.moon)
-              : v.normalize().multiplyScalar(14 + order * 0.8),
-          );
-          mesh.scale.setScalar(
-            exact
-              ? p.radiusKm / sky.radiiKm.moon
-              : THREE.MathUtils.clamp(
-                  (p.radiusKm / sky.radiiKm.moon) * 0.035,
-                  0.025,
-                  0.24,
-                ),
-          );
-        }
-        earth.position.copy(
-          exact
-            ? ep.divideScalar(sky.radiiKm.moon)
-            : ep.normalize().multiplyScalar(8),
-        );
-        earth.scale.setScalar(
-          exact ? sky.radiiKm.earth / sky.radiiKm.moon / 0.45 : 1,
-        );
-        sunMarker.position.copy(
-          exact
-            ? sp.divideScalar(sky.radiiKm.moon)
-            : sp.normalize().multiplyScalar(12),
-        );
-        sunMarker.scale.setScalar(
-          exact ? sky.radiiKm.sun / sky.radiiKm.moon / 0.1 : 1,
-        );
-        let local = new THREE.Vector3(0, 1, 0);
-        if (site) {
-          const lat = (site.latitudeDeg * Math.PI) / 180,
-            lon = (site.longitudeEastDeg * Math.PI) / 180;
-          local.set(
-            Math.cos(lat) * Math.cos(lon),
-            Math.sin(lat),
-            -Math.cos(lat) * Math.sin(lon),
-          );
-        }
-        marker.position.copy(
-          local.clone().multiplyScalar(1.008).applyQuaternion(moon.quaternion),
-        );
-        marker.visible = !exact;
-        const Z = local.clone().applyQuaternion(moon.quaternion).normalize();
-        const E = new THREE.Vector3(0, 1, 0)
-          .applyQuaternion(moon.quaternion)
-          .cross(Z)
-          .normalize();
-        const N = Z.clone().cross(E).normalize();
-        localFrame = { N, E, Z };
-        if (view !== previousView || site?.id !== previousSite) {
-          camera.fov = exact ? 20 : 42;
-          camera.updateProjectionMatrix();
-          if (exact) {
-            const d = earth.position.clone().sub(Z);
-            lookAz = Math.atan2(d.dot(E), d.dot(N));
-            lookEl = 0;
-          } else {
-            controls.target.set(0, 0, 0);
-            camera.up.set(0, 1, 0);
-            camera.position.set(0, 1.2, 5.6);
-            controls.minDistance = 1.03;
-            controls.maxDistance = 60;
-          }
-          previousView = view;
-          previousSite = site?.id;
-        }
-        controls.enabled = !exact;
-        moon.visible = !exact;
-        terrain.visible = exact && !!siteData;
-        if (exact) {
-          const r =
-            1 +
-            ((site?.terrainElevationM ?? 0) + height) /
-              (sky.radiiKm.moon * 1000);
-          camera.position.copy(Z.clone().multiplyScalar(r));
-          camera.up.copy(Z);
-          const dir = N.clone()
-            .multiplyScalar(Math.cos(lookEl) * Math.cos(lookAz))
-            .addScaledVector(E, Math.cos(lookEl) * Math.sin(lookAz))
-            .addScaledVector(Z, Math.sin(lookEl));
-          camera.lookAt(camera.position.clone().add(dir));
-          if (siteData) {
-            const horizon = siteData.horizon.elevationDeg[String(height)],
-              vertices = [];
-            function point(a, e) {
-              return N.clone()
-                .multiplyScalar(Math.cos(e) * Math.cos(a))
-                .addScaledVector(E, Math.cos(e) * Math.sin(a))
-                .addScaledVector(Z, Math.sin(e))
-                .multiplyScalar(10)
-                .add(camera.position);
-            }
-            for (let j = 0; j < horizon.length; j++) {
-              const a = (j * 2 * Math.PI) / horizon.length,
-                b = ((j + 1) * 2 * Math.PI) / horizon.length;
-              const p = point(a, (horizon[j] * Math.PI) / 180),
-                q = point(
-                  b,
-                  (horizon[(j + 1) % horizon.length] * Math.PI) / 180,
-                ),
-                bottom = point(a, -Math.PI / 2);
-              vertices.push(
-                ...p.toArray(),
-                ...q.toArray(),
-                ...bottom.toArray(),
+      if (disposed || rendering) return;
+      rendering = true;
+      try {
+        const { sky, planets, index, freeze, view, site, siteData, height } =
+          latest.current;
+        if (sky) {
+          const i = Math.max(0, Math.min(index, sky.sunPosKm.length - 1));
+          const mi = freeze.moonRotation ?? i,
+            ei = freeze.earthPosition ?? i,
+            eri = freeze.earthRotation ?? i,
+            si = freeze.sunPosition ?? i;
+          moon.quaternion.copy(bodyQuaternion(sky.moonOrientationQuat[mi]));
+          earth.quaternion.copy(bodyQuaternion(sky.earthOrientationQuat[eri]));
+          const ep = vector(sky.earthPosKm[ei]),
+            sp = vector(sky.sunPosKm[si]);
+          light.position.copy(sp.clone().normalize().multiplyScalar(100));
+          const exact = view === "sky";
+          for (const [order, p] of (planets?.planets ?? []).entries()) {
+            if (!planetMeshes.has(p.id)) {
+              const mesh = new THREE.Mesh(
+                new THREE.SphereGeometry(1, 24, 16),
+                new THREE.MeshStandardMaterial({
+                  color: p.color,
+                  roughness: 1,
+                }),
               );
+              scene.add(mesh);
+              planetMeshes.set(p.id, mesh);
             }
-            terrain.geometry.dispose();
-            terrain.geometry = new THREE.BufferGeometry();
-            terrain.geometry.setAttribute(
-              "position",
-              new THREE.Float32BufferAttribute(vertices, 3),
+            const mesh = planetMeshes.get(p.id),
+              v = vector(p.posKm[freeze["planet-" + p.id] ?? i]);
+            mesh.position.copy(
+              exact
+                ? v.divideScalar(sky.radiiKm.moon)
+                : v.normalize().multiplyScalar(14 + order * 0.8),
             );
-            terrain.geometry.computeBoundingSphere();
+            mesh.scale.setScalar(
+              exact
+                ? p.radiusKm / sky.radiiKm.moon
+                : THREE.MathUtils.clamp(
+                    (p.radiusKm / sky.radiiKm.moon) * 0.035,
+                    0.025,
+                    0.24,
+                  ),
+            );
+          }
+          earth.position.copy(
+            exact
+              ? ep.divideScalar(sky.radiiKm.moon)
+              : ep.normalize().multiplyScalar(8),
+          );
+          earth.scale.setScalar(
+            exact ? sky.radiiKm.earth / sky.radiiKm.moon / 0.45 : 1,
+          );
+          sunMarker.position.copy(
+            exact
+              ? sp.divideScalar(sky.radiiKm.moon)
+              : sp.normalize().multiplyScalar(12),
+          );
+          sunMarker.scale.setScalar(
+            exact ? sky.radiiKm.sun / sky.radiiKm.moon / 0.1 : 1,
+          );
+          let local = new THREE.Vector3(0, 1, 0);
+          if (site) {
+            const lat = (site.latitudeDeg * Math.PI) / 180,
+              lon = (site.longitudeEastDeg * Math.PI) / 180;
+            local.set(
+              Math.cos(lat) * Math.cos(lon),
+              Math.sin(lat),
+              -Math.cos(lat) * Math.sin(lon),
+            );
+          }
+          marker.position.copy(
+            local
+              .clone()
+              .multiplyScalar(1.008)
+              .applyQuaternion(moon.quaternion),
+          );
+          marker.visible = !exact;
+          const Z = local.clone().applyQuaternion(moon.quaternion).normalize();
+          const E = new THREE.Vector3(0, 1, 0)
+            .applyQuaternion(moon.quaternion)
+            .cross(Z)
+            .normalize();
+          const N = Z.clone().cross(E).normalize();
+          localFrame = { N, E, Z };
+          if (view !== previousView || site?.id !== previousSite) {
+            camera.fov = exact ? 20 : 42;
+            camera.updateProjectionMatrix();
+            if (exact) {
+              const d = earth.position.clone().sub(Z);
+              lookAz = Math.atan2(d.dot(E), d.dot(N));
+              lookEl = 0;
+            } else {
+              controls.target.set(0, 0, 0);
+              camera.up.set(0, 1, 0);
+              camera.position.set(0, 1.2, 5.6);
+              controls.minDistance = 1.03;
+              controls.maxDistance = 60;
+            }
+            previousView = view;
+            previousSite = site?.id;
+          }
+          controls.enabled = !exact;
+          moon.visible = !exact;
+          terrain.visible = exact && !!siteData;
+          if (exact) {
+            const r =
+              1 +
+              ((site?.terrainElevationM ?? 0) + height) /
+                (sky.radiiKm.moon * 1000);
+            camera.position.copy(Z.clone().multiplyScalar(r));
+            camera.up.copy(Z);
+            const dir = N.clone()
+              .multiplyScalar(Math.cos(lookEl) * Math.cos(lookAz))
+              .addScaledVector(E, Math.cos(lookEl) * Math.sin(lookAz))
+              .addScaledVector(Z, Math.sin(lookEl));
+            camera.lookAt(camera.position.clone().add(dir));
+            if (siteData) {
+              const horizon = siteData.horizon.elevationDeg[String(height)],
+                vertices = [];
+              function point(a, e) {
+                return N.clone()
+                  .multiplyScalar(Math.cos(e) * Math.cos(a))
+                  .addScaledVector(E, Math.cos(e) * Math.sin(a))
+                  .addScaledVector(Z, Math.sin(e))
+                  .multiplyScalar(10)
+                  .add(camera.position);
+              }
+              for (let j = 0; j < horizon.length; j++) {
+                const a = (j * 2 * Math.PI) / horizon.length,
+                  b = ((j + 1) * 2 * Math.PI) / horizon.length;
+                const p = point(a, (horizon[j] * Math.PI) / 180),
+                  q = point(
+                    b,
+                    (horizon[(j + 1) % horizon.length] * Math.PI) / 180,
+                  ),
+                  bottom = point(a, -Math.PI / 2);
+                vertices.push(
+                  ...p.toArray(),
+                  ...q.toArray(),
+                  ...bottom.toArray(),
+                );
+              }
+              terrain.geometry.dispose();
+              terrain.geometry = new THREE.BufferGeometry();
+              terrain.geometry.setAttribute(
+                "position",
+                new THREE.Float32BufferAttribute(vertices, 3),
+              );
+              terrain.geometry.computeBoundingSphere();
+            }
           }
         }
+        if (latest.current.view !== "sky") controls.update();
+        renderer.render(scene, camera);
+      } finally {
+        rendering = false;
       }
-      if (latest.current.view !== "sky") controls.update();
-      renderer.render(scene, camera);
     }
     const down = (e) => {
       if (latest.current.view === "sky") {

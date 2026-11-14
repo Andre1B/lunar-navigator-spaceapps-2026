@@ -1,5 +1,5 @@
 {
-  "generatedAtUtc": "2026-11-14T13:44:15.838Z",
+  "generatedAtUtc": "2026-11-14T13:46:03.832Z",
   "scope": "Installed direct and transitive runtime, build and verification packages",
   "packages": [
     {
@@ -69,7 +69,7 @@
       "name": "@formatjs/ecma402-abstract",
       "version": "2.3.6",
       "license": "MIT",
-      "repository": "git@github.com:formatjs/formatjs",
+      "repository": "https://github.com/formatjs/formatjs",
       "repositoryNote": null,
       "url": "https://github.com/formatjs/formatjs",
       "noticeFile": "/licenses/@formatjs__ecma402-abstract.txt"
@@ -78,7 +78,7 @@
       "name": "@formatjs/fast-memoize",
       "version": "2.2.7",
       "license": "MIT",
-      "repository": "formatjs/formatjs",
+      "repository": "https://github.com/formatjs/formatjs",
       "repositoryNote": null,
       "url": "https://github.com/formatjs/formatjs#readme",
       "noticeFile": "/licenses/@formatjs__fast-memoize.txt"
@@ -105,7 +105,7 @@
       "name": "@formatjs/intl-localematcher",
       "version": "0.6.2",
       "license": "MIT",
-      "repository": "formatjs/formatjs",
+      "repository": "https://github.com/formatjs/formatjs",
       "repositoryNote": null,
       "url": "https://github.com/formatjs/formatjs#readme",
       "noticeFile": "/licenses/@formatjs__intl-localematcher.txt"
@@ -177,7 +177,7 @@
       "name": "@opentelemetry/api",
       "version": "1.10.0",
       "license": "Apache-2.0",
-      "repository": "open-telemetry/opentelemetry-js",
+      "repository": "https://github.com/open-telemetry/opentelemetry-js",
       "repositoryNote": null,
       "url": "https://github.com/open-telemetry/opentelemetry-js/tree/main/api",
       "noticeFile": "/licenses/@opentelemetry__api.txt"
@@ -330,7 +330,7 @@
       "name": "@sindresorhus/is",
       "version": "7.2.0",
       "license": "MIT",
-      "repository": "sindresorhus/is",
+      "repository": "https://github.com/sindresorhus/is",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/@sindresorhus/is",
       "noticeFile": "/licenses/@sindresorhus__is.txt"
@@ -366,7 +366,7 @@
       "name": "ajv",
       "version": "8.20.0",
       "license": "MIT",
-      "repository": "ajv-validator/ajv",
+      "repository": "https://github.com/ajv-validator/ajv",
       "repositoryNote": null,
       "url": "https://ajv.js.org",
       "noticeFile": "/licenses/ajv.txt"
@@ -384,7 +384,7 @@
       "name": "ansi-colors",
       "version": "4.1.3",
       "license": "MIT",
-      "repository": "doowb/ansi-colors",
+      "repository": "https://github.com/doowb/ansi-colors",
       "repositoryNote": null,
       "url": "https://github.com/doowb/ansi-colors",
       "noticeFile": "/licenses/ansi-colors.txt"
@@ -393,7 +393,7 @@
       "name": "ansi-regex",
       "version": "5.0.1",
       "license": "MIT",
-      "repository": "chalk/ansi-regex",
+      "repository": "https://github.com/chalk/ansi-regex",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/ansi-regex",
       "noticeFile": "/licenses/ansi-regex.txt"
@@ -402,7 +402,7 @@
       "name": "ansi-styles",
       "version": "6.2.3",
       "license": "MIT",
-      "repository": "chalk/ansi-styles",
+      "repository": "https://github.com/chalk/ansi-styles",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/ansi-styles",
       "noticeFile": "/licenses/ansi-styles.txt"
@@ -411,7 +411,7 @@
       "name": "atomically",
       "version": "2.1.1",
       "license": "MIT",
-      "repository": "github:fabiospampinato/atomically",
+      "repository": "https://github.com/fabiospampinato/atomically",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/atomically",
       "noticeFile": "/licenses/atomically.txt"
@@ -456,7 +456,7 @@
       "name": "bundle-name",
       "version": "4.1.1",
       "license": "MIT",
-      "repository": "sindresorhus/bundle-name",
+      "repository": "https://github.com/sindresorhus/bundle-name",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/bundle-name",
       "noticeFile": "/licenses/bundle-name.txt"
@@ -483,7 +483,7 @@
       "name": "cliui",
       "version": "9.0.1",
       "license": "ISC",
-      "repository": "yargs/cliui",
+      "repository": "https://github.com/yargs/cliui",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/cliui",
       "noticeFile": "/licenses/cliui.txt"
@@ -492,7 +492,7 @@
       "name": "configstore",
       "version": "8.0.0",
       "license": "BSD-2-Clause",
-      "repository": "sindresorhus/configstore",
+      "repository": "https://github.com/sindresorhus/configstore",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/configstore",
       "noticeFile": "/licenses/configstore.txt"
@@ -501,7 +501,7 @@
       "name": "cookie",
       "version": "1.1.1",
       "license": "MIT",
-      "repository": "jshttp/cookie",
+      "repository": "https://github.com/jshttp/cookie",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/cookie",
       "noticeFile": "/licenses/cookie.txt"
@@ -537,7 +537,7 @@
       "name": "default-browser",
       "version": "5.5.1",
       "license": "MIT",
-      "repository": "sindresorhus/default-browser",
+      "repository": "https://github.com/sindresorhus/default-browser",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/default-browser",
       "noticeFile": "/licenses/default-browser.txt"
@@ -546,7 +546,7 @@
       "name": "default-browser-id",
       "version": "5.0.1",
       "license": "MIT",
-      "repository": "sindresorhus/default-browser-id",
+      "repository": "https://github.com/sindresorhus/default-browser-id",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/default-browser-id",
       "noticeFile": "/licenses/default-browser-id.txt"
@@ -555,7 +555,7 @@
       "name": "define-lazy-prop",
       "version": "3.0.0",
       "license": "MIT",
-      "repository": "sindresorhus/define-lazy-prop",
+      "repository": "https://github.com/sindresorhus/define-lazy-prop",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/define-lazy-prop",
       "noticeFile": "/licenses/define-lazy-prop.txt"
@@ -582,7 +582,7 @@
       "name": "dot-prop",
       "version": "10.2.0",
       "license": "MIT",
-      "repository": "sindresorhus/dot-prop",
+      "repository": "https://github.com/sindresorhus/dot-prop",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/dot-prop",
       "noticeFile": "/licenses/dot-prop.txt"
@@ -609,7 +609,7 @@
       "name": "enquirer",
       "version": "2.4.1",
       "license": "MIT",
-      "repository": "enquirer/enquirer",
+      "repository": "https://github.com/enquirer/enquirer",
       "repositoryNote": null,
       "url": "https://github.com/enquirer/enquirer",
       "noticeFile": "/licenses/enquirer.txt"
@@ -636,7 +636,7 @@
       "name": "escalade",
       "version": "3.2.0",
       "license": "MIT",
-      "repository": "lukeed/escalade",
+      "repository": "https://github.com/lukeed/escalade",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/escalade",
       "noticeFile": "/licenses/escalade.txt"
@@ -645,7 +645,7 @@
       "name": "escape-string-regexp",
       "version": "4.0.0",
       "license": "MIT",
-      "repository": "sindresorhus/escape-string-regexp",
+      "repository": "https://github.com/sindresorhus/escape-string-regexp",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/escape-string-regexp",
       "noticeFile": "/licenses/escape-string-regexp.txt"
@@ -690,7 +690,7 @@
       "name": "get-east-asian-width",
       "version": "1.7.0",
       "license": "MIT",
-      "repository": "sindresorhus/get-east-asian-width",
+      "repository": "https://github.com/sindresorhus/get-east-asian-width",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/get-east-asian-width",
       "noticeFile": "/licenses/get-east-asian-width.txt"
@@ -699,7 +699,7 @@
       "name": "glob",
       "version": "14.0.6",
       "license": "BlueOak-1.0.0",
-      "repository": "git@github.com:isaacs/node-glob",
+      "repository": "https://github.com/isaacs/node-glob",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/glob",
       "noticeFile": "/licenses/glob.txt"
@@ -726,7 +726,7 @@
       "name": "image-ssim",
       "version": "0.2.0",
       "license": "MIT",
-      "repository": "darosh/image-ssim-js",
+      "repository": "https://github.com/darosh/image-ssim-js",
       "repositoryNote": null,
       "url": "https://github.com/darosh/image-ssim-js/issues",
       "noticeFile": "/licenses/image-ssim.txt"
@@ -735,7 +735,7 @@
       "name": "intl-messageformat",
       "version": "10.7.18",
       "license": "BSD-3-Clause",
-      "repository": "git@github.com:formatjs/formatjs",
+      "repository": "https://github.com/formatjs/formatjs",
       "repositoryNote": null,
       "url": "https://github.com/formatjs/formatjs",
       "noticeFile": "/licenses/intl-messageformat.txt"
@@ -744,7 +744,7 @@
       "name": "is-docker",
       "version": "2.2.1",
       "license": "MIT",
-      "repository": "sindresorhus/is-docker",
+      "repository": "https://github.com/sindresorhus/is-docker",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/is-docker",
       "noticeFile": "/licenses/is-docker.txt"
@@ -753,7 +753,7 @@
       "name": "is-in-ssh",
       "version": "1.0.0",
       "license": "MIT",
-      "repository": "sindresorhus/is-in-ssh",
+      "repository": "https://github.com/sindresorhus/is-in-ssh",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/is-in-ssh",
       "noticeFile": "/licenses/is-in-ssh.txt"
@@ -762,7 +762,7 @@
       "name": "is-inside-container",
       "version": "1.0.0",
       "license": "MIT",
-      "repository": "sindresorhus/is-inside-container",
+      "repository": "https://github.com/sindresorhus/is-inside-container",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/is-inside-container",
       "noticeFile": "/licenses/is-inside-container.txt"
@@ -771,7 +771,7 @@
       "name": "is-safe-filename",
       "version": "0.1.1",
       "license": "MIT",
-      "repository": "sindresorhus/is-safe-filename",
+      "repository": "https://github.com/sindresorhus/is-safe-filename",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/is-safe-filename",
       "noticeFile": "/licenses/is-safe-filename.txt"
@@ -780,7 +780,7 @@
       "name": "is-wsl",
       "version": "2.2.0",
       "license": "MIT",
-      "repository": "sindresorhus/is-wsl",
+      "repository": "https://github.com/sindresorhus/is-wsl",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/is-wsl",
       "noticeFile": "/licenses/is-wsl.txt"
@@ -816,7 +816,7 @@
       "name": "kleur",
       "version": "4.1.5",
       "license": "MIT",
-      "repository": "lukeed/kleur",
+      "repository": "https://github.com/lukeed/kleur",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/kleur",
       "noticeFile": "/licenses/kleur.txt"
@@ -843,7 +843,7 @@
       "name": "lighthouse-stack-packs",
       "version": "1.12.3",
       "license": "Apache-2.0",
-      "repository": "GoogleChrome/lighthouse-stack-packs",
+      "repository": "https://github.com/GoogleChrome/lighthouse-stack-packs",
       "repositoryNote": null,
       "url": "https://github.com/GoogleChrome/lighthouse-stack-packs#readme",
       "noticeFile": "/licenses/lighthouse-stack-packs.txt"
@@ -924,7 +924,7 @@
       "name": "mitt",
       "version": "3.0.1",
       "license": "MIT",
-      "repository": "developit/mitt",
+      "repository": "https://github.com/developit/mitt",
       "repositoryNote": null,
       "url": "https://github.com/developit/mitt",
       "noticeFile": "/licenses/mitt.txt"
@@ -942,7 +942,7 @@
       "name": "ms",
       "version": "2.1.3",
       "license": "MIT",
-      "repository": "vercel/ms",
+      "repository": "https://github.com/vercel/ms",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/ms",
       "noticeFile": "/licenses/ms.txt"
@@ -951,7 +951,7 @@
       "name": "nanoid",
       "version": "3.3.20",
       "license": "MIT",
-      "repository": "ai/nanoid",
+      "repository": "https://github.com/ai/nanoid",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/nanoid",
       "noticeFile": "/licenses/nanoid.txt"
@@ -960,7 +960,7 @@
       "name": "open",
       "version": "11.0.4",
       "license": "MIT",
-      "repository": "sindresorhus/open",
+      "repository": "https://github.com/sindresorhus/open",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/open",
       "noticeFile": "/licenses/open.txt"
@@ -996,7 +996,7 @@
       "name": "pathe",
       "version": "2.0.3",
       "license": "MIT",
-      "repository": "unjs/pathe",
+      "repository": "https://github.com/unjs/pathe",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/pathe",
       "noticeFile": "/licenses/pathe.txt"
@@ -1005,7 +1005,7 @@
       "name": "picocolors",
       "version": "1.1.1",
       "license": "ISC",
-      "repository": "alexeyraspopov/picocolors",
+      "repository": "https://github.com/alexeyraspopov/picocolors",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/picocolors",
       "noticeFile": "/licenses/picocolors.txt"
@@ -1014,7 +1014,7 @@
       "name": "picomatch",
       "version": "4.0.7",
       "license": "MIT",
-      "repository": "micromatch/picomatch",
+      "repository": "https://github.com/micromatch/picomatch",
       "repositoryNote": null,
       "url": "https://github.com/micromatch/picomatch",
       "noticeFile": "/licenses/picomatch.txt"
@@ -1041,7 +1041,7 @@
       "name": "postcss",
       "version": "8.5.33",
       "license": "MIT",
-      "repository": "postcss/postcss",
+      "repository": "https://github.com/postcss/postcss",
       "repositoryNote": null,
       "url": "https://postcss.org/",
       "noticeFile": "/licenses/postcss.txt"
@@ -1050,7 +1050,7 @@
       "name": "powershell-utils",
       "version": "0.2.1",
       "license": "MIT",
-      "repository": "sindresorhus/powershell-utils",
+      "repository": "https://github.com/sindresorhus/powershell-utils",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/powershell-utils",
       "noticeFile": "/licenses/powershell-utils.txt"
@@ -1059,7 +1059,7 @@
       "name": "prettier",
       "version": "3.10.1",
       "license": "MIT",
-      "repository": "prettier/prettier",
+      "repository": "https://github.com/prettier/prettier",
       "repositoryNote": null,
       "url": "https://prettier.io",
       "noticeFile": "/licenses/prettier.txt"
@@ -1095,7 +1095,7 @@
       "name": "require-from-string",
       "version": "2.0.2",
       "license": "MIT",
-      "repository": "floatdrop/require-from-string",
+      "repository": "https://github.com/floatdrop/require-from-string",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/require-from-string",
       "noticeFile": "/licenses/require-from-string.txt"
@@ -1122,7 +1122,7 @@
       "name": "run-applescript",
       "version": "7.1.0",
       "license": "MIT",
-      "repository": "sindresorhus/run-applescript",
+      "repository": "https://github.com/sindresorhus/run-applescript",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/run-applescript",
       "noticeFile": "/licenses/run-applescript.txt"
@@ -1167,7 +1167,7 @@
       "name": "source-map-js",
       "version": "1.2.2",
       "license": "BSD-3-Clause",
-      "repository": "7rulnik/source-map-js",
+      "repository": "https://github.com/7rulnik/source-map-js",
       "repositoryNote": null,
       "url": "https://github.com/7rulnik/source-map-js",
       "noticeFile": "/licenses/source-map-js.txt"
@@ -1185,7 +1185,7 @@
       "name": "string-width",
       "version": "8.3.0",
       "license": "MIT",
-      "repository": "sindresorhus/string-width",
+      "repository": "https://github.com/sindresorhus/string-width",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/string-width",
       "noticeFile": "/licenses/string-width.txt"
@@ -1194,7 +1194,7 @@
       "name": "strip-ansi",
       "version": "6.0.1",
       "license": "MIT",
-      "repository": "chalk/strip-ansi",
+      "repository": "https://github.com/chalk/strip-ansi",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/strip-ansi",
       "noticeFile": "/licenses/strip-ansi.txt"
@@ -1203,7 +1203,7 @@
       "name": "stubborn-fs",
       "version": "2.0.0",
       "license": "MIT",
-      "repository": "github:fabiospampinato/stubborn-fs",
+      "repository": "https://github.com/fabiospampinato/stubborn-fs",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/stubborn-fs",
       "noticeFile": "/licenses/stubborn-fs.txt"
@@ -1212,7 +1212,7 @@
       "name": "stubborn-utils",
       "version": "1.0.2",
       "license": "MIT",
-      "repository": "github:fabiospampinato/stubborn-utils",
+      "repository": "https://github.com/fabiospampinato/stubborn-utils",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/stubborn-utils",
       "noticeFile": "/licenses/stubborn-utils.txt"
@@ -1221,7 +1221,7 @@
       "name": "supports-color",
       "version": "10.2.2",
       "license": "MIT",
-      "repository": "chalk/supports-color",
+      "repository": "https://github.com/chalk/supports-color",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/supports-color",
       "noticeFile": "/licenses/supports-color.txt"
@@ -1230,7 +1230,7 @@
       "name": "tagged-tag",
       "version": "1.0.0",
       "license": "MIT",
-      "repository": "sindresorhus/tagged-tag",
+      "repository": "https://github.com/sindresorhus/tagged-tag",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/tagged-tag",
       "noticeFile": "/licenses/tagged-tag.txt"
@@ -1293,7 +1293,7 @@
       "name": "type-fest",
       "version": "5.10.0",
       "license": "(MIT OR CC0-1.0)",
-      "repository": "sindresorhus/type-fest",
+      "repository": "https://github.com/sindresorhus/type-fest",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/type-fest",
       "noticeFile": null
@@ -1302,7 +1302,7 @@
       "name": "typed-query-selector",
       "version": "2.12.3",
       "license": "MIT",
-      "repository": "g-plane/typed-query-selector",
+      "repository": "https://github.com/g-plane/typed-query-selector",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/typed-query-selector",
       "noticeFile": "/licenses/typed-query-selector.txt"
@@ -1329,7 +1329,7 @@
       "name": "unenv",
       "version": "2.0.0-rc.24",
       "license": "MIT",
-      "repository": "unjs/unenv",
+      "repository": "https://github.com/unjs/unenv",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/unenv",
       "noticeFile": "/licenses/unenv.txt"
@@ -1356,7 +1356,7 @@
       "name": "when-exit",
       "version": "2.1.5",
       "license": "MIT",
-      "repository": "github:fabiospampinato/when-exit",
+      "repository": "https://github.com/fabiospampinato/when-exit",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/when-exit",
       "noticeFile": "/licenses/when-exit.txt"
@@ -1383,7 +1383,7 @@
       "name": "wrap-ansi",
       "version": "9.0.2",
       "license": "MIT",
-      "repository": "chalk/wrap-ansi",
+      "repository": "https://github.com/chalk/wrap-ansi",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/wrap-ansi",
       "noticeFile": "/licenses/wrap-ansi.txt"
@@ -1401,7 +1401,7 @@
       "name": "wsl-utils",
       "version": "1.0.1",
       "license": "MIT",
-      "repository": "sindresorhus/wsl-utils",
+      "repository": "https://github.com/sindresorhus/wsl-utils",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/wsl-utils",
       "noticeFile": "/licenses/wsl-utils.txt"
@@ -1410,7 +1410,7 @@
       "name": "xdg-basedir",
       "version": "5.1.0",
       "license": "MIT",
-      "repository": "sindresorhus/xdg-basedir",
+      "repository": "https://github.com/sindresorhus/xdg-basedir",
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/xdg-basedir",
       "noticeFile": "/licenses/xdg-basedir.txt"
@@ -1419,7 +1419,7 @@
       "name": "y18n",
       "version": "5.0.8",
       "license": "ISC",
-      "repository": "yargs/y18n",
+      "repository": "https://github.com/yargs/y18n",
       "repositoryNote": null,
       "url": "https://github.com/yargs/y18n",
       "noticeFile": "/licenses/y18n.txt"
