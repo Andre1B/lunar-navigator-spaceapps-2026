@@ -361,15 +361,6 @@ export default function SimulatorV2({
                 </small>
               </div>
             ) : null}
-            {!immersive ? (
-              <p className="scene-gesture-hint">
-                {view === "sky" ? "Drag to look" : "Drag to orbit"} · Wheel to
-                zoom
-                {view === "earth" || inspection === "earth"
-                  ? " · illustrative clouds"
-                  : ""}
-              </p>
-            ) : null}
             {immersive ? (
               <>
                 <button
@@ -391,6 +382,17 @@ export default function SimulatorV2({
               </>
             ) : null}
           </section>
+          {!immersive ? (
+            <p className="readout-guide scene-navigation-help">
+              {view === "sky"
+                ? "Drag to look around."
+                : "Drag to orbit the view."}{" "}
+              Scroll to zoom, or open Navigation for camera buttons.
+              {view === "earth" || inspection === "earth"
+                ? " Clouds are an illustration, not live weather."
+                : ""}
+            </p>
+          ) : null}
           {!immersive && mode === "faithful" ? (
             <p className="readout-guide">
               Sun / Earth in view: the percentage of each disc above the hills{" "}

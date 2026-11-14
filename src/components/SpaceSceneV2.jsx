@@ -63,6 +63,7 @@ export default function SpaceSceneV2({
     const el = host.current,
       mobile = matchMedia("(max-width:720px)").matches,
       reduced = matchMedia("(prefers-reduced-motion:reduce)").matches;
+    const qaMode = new URLSearchParams(location.search).has("qa");
     let disposed = false,
       frame = 0,
       renderer,
@@ -85,7 +86,8 @@ export default function SpaceSceneV2({
       uploadFrame = 0;
     let pendingFocus = null;
     let observationKey = "",
-      currentObservation = null;
+      currentObservation = null,
+      lastRendered = null;
     let terrainGrid = null,
       terrainTile = null;
     try {
@@ -991,7 +993,21 @@ export default function SpaceSceneV2({
           },
         );
       }
-      if (shadersReady) renderer.render(scene, renderCamera);
+      if (shadersReady) {
+        renderer.render(scene, renderCamera);
+        if (qaMode)
+          lastRendered = {
+            serial: (lastRendered?.serial ?? 0) + 1,
+            view: p.view,
+            siteId: p.site?.id,
+            height: p.height,
+            index: p.index,
+            ready:
+              imageryReady &&
+              globeReady &&
+              (p.view !== "terrain" || terrainSite === p.site?.id),
+          };
+      }
       settingCamera = false;
     }
     const change = () => {
@@ -1195,13 +1211,15 @@ export default function SpaceSceneV2({
       }
     };
     renderer.domElement.addEventListener("keydown", keyboard);
-    if (new URLSearchParams(location.search).has("qa")) {
+    if (qaMode) {
       renderer.domElement.lunarSnapshot = () => ({
         view: latest.current.view,
         index: latest.current.index,
         trackedBody,
         camera: {
           position: camera.position.toArray(),
+          direction: camera.getWorldDirection(new THREE.Vector3()).toArray(),
+          quaternion: camera.quaternion.toArray(),
           target: controls.target.toArray(),
           up: camera.up.toArray(),
           fov: camera.fov,
@@ -1224,6 +1242,7 @@ export default function SpaceSceneV2({
         origin: scene.position.toArray(),
         transition: !!transition,
         observation: currentObservation,
+        rendered: lastRendered,
       });
     }
     schedule();

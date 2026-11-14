@@ -155,7 +155,13 @@ export function eventSummary(data, height, bounds, period) {
     durationMethod: "5-minute event search, boundaries refined to <=1 minute",
   };
 }
-export const percent = (v) =>
-  v == null ? "Not calculated" : (v * 100).toFixed(1) + "%";
+export const percent = (v) => {
+  if (!Number.isFinite(v)) return "Not calculated";
+  // A thin visible sliver must not be labelled 0% (hidden), nor an almost
+  // complete disc 100% (fully visible), merely because of display rounding.
+  if (v > 0 && v < 0.001) return "<0.1%";
+  if (v > 0.999 && v < 1) return ">99.9%";
+  return (v * 100).toFixed(1) + "%";
+};
 export const hours = (r) =>
   !r ? "Not calculated" : (r.censored ? "≥ " : "") + r.hours.toFixed(0) + " h";
