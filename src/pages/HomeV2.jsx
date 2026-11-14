@@ -35,8 +35,8 @@ export default function HomeV2({ onStart, onTour }) {
             </button>
             <a href="#/learn">How it works</a>
           </div>
-          <a className="quick-review" href="#/compare">
-            Just evaluating? Open the comparison →
+          <a className="quick-review" href="#/review">
+            Just evaluating? Review the project in 3 minutes →
           </a>
         </div>
         <div className="home-moon">
@@ -172,9 +172,9 @@ export default function HomeV2({ onStart, onTour }) {
             <strong>I want to experiment.</strong>
             <span>Open the 3D explorer with no locked stages.</span>
           </a>
-          <a href="#/compare">
+          <a href="#/review">
             <strong>I’m reviewing the project.</strong>
-            <span>Compare scenarios, then open the sources.</span>
+            <span>Question, experiment and evidence in three minutes.</span>
           </a>
         </div>
       </section>

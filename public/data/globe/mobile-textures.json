@@ -1,0 +1,57 @@
+{
+ "schemaVersion": "1.0.0",
+ "purpose": "Mobile texture variants for screens about 720 px wide or less. Visual only; grids, UV conventions, sources, licences and credits are those of the parent files (see globe/visual-assets.json, globe/earth-layers.json, starmap/starmap.json).",
+ "conversion": "Lanczos downsample of the 2048x1024 parent to 1024x512, JPEG q88 (4:4:4 for colour). No colour or content change.",
+ "files": [
+  {
+   "file": "globe/moon-color-lroc-1024x512.jpg",
+   "derivedFrom": "globe/moon-color-lroc-2048x1024.jpg",
+   "derivedFromSha256": "59997274bc8c0520b645e66183c9653bb5c679a71eb9bb4edcbc29e87be2a514",
+   "width": 1024,
+   "height": 512,
+   "bytes": 121491,
+   "sha256": "13ee65fc00aa81037c0890504927b8051ce8418f4c3a2c7f482ae2579f0b2155"
+  },
+  {
+   "file": "globe/earth-visual-1k.jpg",
+   "derivedFrom": "globe/earth-visual-2k.jpg",
+   "derivedFromSha256": "fab3f7cc43251b6e7727525cb480aae0e3c085da96354e906781540609156831",
+   "width": 1024,
+   "height": 512,
+   "bytes": 96921,
+   "sha256": "65bb9115900fb28969d73faf528e23263df241024c8b399fadbb27f1fe757f70"
+  },
+  {
+   "file": "globe/earth-clouds-illustrative-1k.jpg",
+   "derivedFrom": "globe/earth-clouds-illustrative-2k.jpg",
+   "derivedFromSha256": "6170abddf783c2291ef0ae515666023345d7a91a4ef3fe602450ca0c35258f10",
+   "width": 1024,
+   "height": 512,
+   "bytes": 172432,
+   "sha256": "aef102cf882792b4eca4c11394b2e4955fce5b9e1fd45d0bf30895a0b50e10de"
+  },
+  {
+   "file": "globe/earth-ocean-specular-1k.jpg",
+   "derivedFrom": "globe/earth-ocean-specular-2k.jpg",
+   "derivedFromSha256": "8a4dfc229ec46c65aef22236722d7a604976d7675ddb450959fcdbc7c4986d30",
+   "width": 1024,
+   "height": 512,
+   "bytes": 67303,
+   "sha256": "68ce993ae1445bdd1f4499d82f323e94e66b1cd01d8ffa4cc337a880a579496e"
+  },
+  {
+   "file": "starmap/starmap-2020-celestial-1024x512.jpg",
+   "derivedFrom": "starmap/starmap-2020-celestial-2048x1024.jpg",
+   "derivedFromSha256": "f4264c496ef231db35135a8efea9385d70f8b9be76f7639a1760c8c30c32473e",
+   "width": 1024,
+   "height": 512,
+   "bytes": 96154,
+   "sha256": "a6905bd853fa5ba20dfe62c137c1ef08f912cb2f13a07dca28f66c8aa5ab9f63"
+  }
+ ],
+ "notes": [
+  "Star map at 1024x512 is about 0.35 deg per pixel: individual faint stars average into the background and look dimmer; star positions are unchanged.",
+  "Specular and cloud layers keep their illustrative status (Solar System Scope, CC BY 4.0)."
+ ],
+ "generator": "scientific/build_mobile_textures.py"
+}

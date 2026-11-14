@@ -5,7 +5,7 @@
     {
       "name": "Codex",
       "configuredModel": "GPT-6.1 Sol",
-      "effort": "medium",
+      "effort": "medium for implementation and high for difficult diagnosis/review, as recorded in project checkpoints",
       "uses": [
         "implementation",
         "research assistance",

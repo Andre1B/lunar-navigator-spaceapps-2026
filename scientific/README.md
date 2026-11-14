@@ -10,12 +10,14 @@ pip install -r requirements.txt
 ./fetch_data.sh                                   # ~520 MB into cache/ (not versioned)
 PYTHONPATH=. python -P build_scenes.py            # writes public/data/{manifest,sky}.json and sites/*.json
 PYTHONPATH=. python -P validate.py --horizons     # writes public/data/validation.json
+python -P hash_dataset.py                         # after build + validate (+ planets): public/data/integrity.json, SHA-256 of derived files
 PYTHONPATH=. python -P build_planets.py           # optional visual context: public/data/planets.json
 PYTHONPATH=. python -P build_globe.py             # globe relief (needs cache/svs/ldem_4.tif from SVS 4720)
 PYTHONPATH=. python -P build_terrain_tiles.py     # 20 km local terrain tiles
 PYTHONPATH=. python -P build_starmap.py           # star background (needs cache/svs/starmap_2020_4k.exr from SVS 4851; OpenEXR + Pillow)
 PYTHONPATH=. python -P build_visual_assets.py     # Moon colour 4k/2k and Earth 4k/2k JPEGs (Pillow, tifffile + imagecodecs)
 PYTHONPATH=. python -P build_earth_layers.py      # illustrative Earth clouds + ocean specular (Solar System Scope, CC BY 4.0)
+PYTHONPATH=. python -P build_mobile_textures.py   # 1024x512 mobile variants from the 2k files
 ```
 
 `--horizons` sends 8 serial requests to the JPL Horizons API (one at a time, identifying User-Agent, responses cached in `cache/horizons/`). Omit it to keep V1 pending.

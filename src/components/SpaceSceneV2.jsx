@@ -78,6 +78,11 @@ export default function SpaceSceneV2({
       trackedBody = "moon",
       previousTrackedPosition = new THREE.Vector3(),
       settingCamera = false;
+    let shadersReady = false,
+      preparingShaders = false,
+      imageryReady = false,
+      globeReady = false,
+      uploadFrame = 0;
     let pendingFocus = null;
     let observationKey = "",
       currentObservation = null;
@@ -131,33 +136,36 @@ export default function SpaceSceneV2({
       controls._quatInverse.copy(controls._quat).invert();
       controls.update();
     }
-    const loader = new THREE.TextureLoader();
+    const manager = new THREE.LoadingManager();
+    const loader = new THREE.TextureLoader(manager);
     THREE.Cache.enabled = true;
     const moonMap = loader.load(
       "/data/globe/moon-color-lroc-" +
-        (mobile ? "2048x1024" : "4096x2048") +
+        (mobile ? "1024x512" : "4096x2048") +
         ".jpg",
       schedule,
     );
     moonMap.colorSpace = THREE.SRGBColorSpace;
     moonMap.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
     const earthMap = loader.load(
-      "/data/globe/earth-visual-" + (mobile ? "2k" : "4k") + ".jpg",
+      "/data/globe/earth-visual-" + (mobile ? "1k" : "4k") + ".jpg",
       schedule,
     );
     earthMap.colorSpace = THREE.SRGBColorSpace;
     earthMap.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
     const oceanMap = loader.load(
-      "/data/globe/earth-ocean-specular-2k.jpg",
+      "/data/globe/earth-ocean-specular-" + (mobile ? "1k" : "2k") + ".jpg",
       schedule,
     );
     const cloudMap = loader.load(
-      "/data/globe/earth-clouds-illustrative-2k.jpg",
+      "/data/globe/earth-clouds-illustrative-" +
+        (mobile ? "1k" : "2k") +
+        ".jpg",
       schedule,
     );
     const starsMap = loader.load(
       "/data/starmap/starmap-2020-celestial-" +
-        (mobile ? "2048x1024" : "4096x2048") +
+        (mobile ? "1024x512" : "4096x2048") +
         ".jpg",
       schedule,
     );
@@ -165,6 +173,24 @@ export default function SpaceSceneV2({
     starsMap.wrapS = THREE.RepeatWrapping;
     starsMap.repeat.x = -1;
     starsMap.offset.x = 1;
+    manager.onLoad = () => {
+      // Spread texture uploads over frames rather than blocking one large first
+      // draw. These are real preparation steps, with no artificial loading delay.
+      const textures = [moonMap, earthMap, oceanMap, cloudMap, starsMap];
+      let next = 0;
+      const upload = () => {
+        if (disposed) return;
+        const texture = textures[next++];
+        if (texture?.image) renderer.initTexture(texture);
+        if (next < textures.length) uploadFrame = requestAnimationFrame(upload);
+        else {
+          imageryReady = true;
+          if (globeReady) setStatus("");
+          schedule();
+        }
+      };
+      uploadFrame = requestAnimationFrame(upload);
+    };
     const stars = new THREE.Mesh(
       new THREE.SphereGeometry(5e7, 48, 24),
       new THREE.MeshBasicMaterial({
@@ -319,28 +345,63 @@ export default function SpaceSceneV2({
       .then((grid) => {
         if (disposed) return;
         const install = (g) => {
-          if (disposed) { g.dispose(); return; }
-          moon.geometry.dispose(); moon.geometry = g; setStatus(""); schedule();
+          if (disposed) {
+            g.dispose();
+            return;
+          }
+          moon.geometry.dispose();
+          moon.geometry = g;
+          globeReady = true;
+          if (imageryReady) setStatus("");
+          schedule();
         };
-        const fallback = () => install(displacedGlobe(grid, mobile ? 180 : 360));
+        const fallback = () =>
+          install(displacedGlobe(grid, mobile ? 180 : 360));
         try {
-          globeWorker = new Worker(new URL("../workers/globe.worker.mjs", import.meta.url), {type:"module"});
-          globeWorker.onmessage = ({data}) => {
-            globeWorker?.terminate(); globeWorker = null;
+          globeWorker = new Worker(
+            new URL("../workers/globe.worker.mjs", import.meta.url),
+            { type: "module" },
+          );
+          globeWorker.onmessage = ({ data }) => {
+            globeWorker?.terminate();
+            globeWorker = null;
             if (disposed) return;
-            if (data.error) { fallback(); return; }
+            if (data.error) {
+              fallback();
+              return;
+            }
             const g = new THREE.BufferGeometry();
-            g.setAttribute("position",new THREE.BufferAttribute(data.position,3));
-            g.setAttribute("normal",new THREE.BufferAttribute(data.normal,3));
-            g.setAttribute("uv",new THREE.BufferAttribute(data.uv,2));
-            g.setIndex(new THREE.BufferAttribute(data.index,1));
-            g.boundingSphere = new THREE.Sphere(new THREE.Vector3().fromArray(data.sphere.center),data.sphere.radius);
+            g.setAttribute(
+              "position",
+              new THREE.BufferAttribute(data.position, 3),
+            );
+            g.setAttribute("normal", new THREE.BufferAttribute(data.normal, 3));
+            g.setAttribute("uv", new THREE.BufferAttribute(data.uv, 2));
+            g.setIndex(new THREE.BufferAttribute(data.index, 1));
+            g.boundingSphere = new THREE.Sphere(
+              new THREE.Vector3().fromArray(data.sphere.center),
+              data.sphere.radius,
+            );
             install(g);
           };
-          globeWorker.onerror = () => { globeWorker?.terminate(); globeWorker = null; if (!disposed) fallback(); };
+          globeWorker.onerror = () => {
+            globeWorker?.terminate();
+            globeWorker = null;
+            if (!disposed) fallback();
+          };
           const buffer = grid.values.slice().buffer;
-          globeWorker.postMessage({buffer,width:grid.width,height:grid.height,segments:mobile?360:720},[buffer]);
-        } catch { fallback(); }
+          globeWorker.postMessage(
+            {
+              buffer,
+              width: grid.width,
+              height: grid.height,
+              segments: mobile ? 360 : 720,
+            },
+            [buffer],
+          );
+        } catch {
+          fallback();
+        }
       })
       .catch(() => {
         if (!disposed)
@@ -437,7 +498,7 @@ export default function SpaceSceneV2({
     }
     function draw(now) {
       frame = 0;
-      if (disposed) return;
+      if (disposed || !imageryReady) return;
       const p = latest.current,
         { sky, index, freeze, view, site, siteData, height } = p;
       settingCamera = true;
@@ -875,7 +936,25 @@ export default function SpaceSceneV2({
       renderCamera.copy(camera, false);
       renderCamera.position.set(0, 0, 0);
       renderCamera.updateMatrixWorld();
-      renderer.render(scene, renderCamera);
+      // Precompile GPU programs without synchronously stalling the first frame.
+      // Camera/time state can keep updating while compilation is in progress.
+      if (!shadersReady && !preparingShaders) {
+        preparingShaders = true;
+        renderer.compileAsync(scene, renderCamera).then(
+          () => {
+            if (disposed) return;
+            shadersReady = true;
+            schedule();
+          },
+          () => {
+            if (disposed) return;
+            // The regular renderer remains the compatibility fallback.
+            shadersReady = true;
+            schedule();
+          },
+        );
+      }
+      if (shadersReady) renderer.render(scene, renderCamera);
       settingCamera = false;
     }
     const change = () => {
@@ -1110,6 +1189,7 @@ export default function SpaceSceneV2({
     return () => {
       disposed = true;
       cancelAnimationFrame(frame);
+      cancelAnimationFrame(uploadFrame);
       globeWorker?.terminate();
       resize.disconnect();
       controls.dispose();

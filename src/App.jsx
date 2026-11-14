@@ -7,20 +7,22 @@ import {
   scientificSoftware,
   researchProjects,
 } from "./lib/content.js";
-import {
-  windowBounds,
-  eventSummary,
-  percent,
-  hours,
-  timeAt,
-} from "./lib/analysis.mjs";
+import { percent, hours, timeAt } from "./lib/analysis.mjs";
 import Horizon from "./components/Horizon.jsx";
 import Timeline from "./components/TimelineV2.jsx";
 import HomeV2 from "./pages/HomeV2.jsx";
+import Review from "./pages/Review.jsx";
 import SimulatorV2 from "./pages/SimulatorV2.jsx";
 import InteractiveTour from "./components/InteractiveTour.jsx";
+import {
+  comparisonRows,
+  comparisonReport,
+  downloadComparison,
+  assessDarkness,
+} from "./lib/comparisonReport.mjs";
 const Learn = lazy(() => import("./pages/Learn.jsx"));
 const links = [
+  ["review", "3-min review"],
   ["learn", "How it works"],
   ["mission", "Guided analysis"],
   ["simulator", "Simulator"],
@@ -277,34 +279,8 @@ function Compare({ dataset, settings, setters, index, setIndex, mode }) {
   const { manifest, sites } = dataset;
   const [limit, setLimit] = useState(72);
   const rows = useMemo(
-    () =>
-      !manifest
-        ? []
-        : [
-            ["Original arrival", settings.siteId, 0],
-            ["Delayed arrival", settings.siteId, settings.delay],
-            ["Alternative point", settings.alternative, settings.delay],
-          ].map(([label, id, offset]) => {
-            const bounds = windowBounds(
-              manifest.period,
-              settings.date,
-              settings.days,
-              offset,
-            );
-            return {
-              label,
-              id,
-              offset,
-              summary: eventSummary(
-                sites[id],
-                settings.height,
-                bounds,
-                manifest.period,
-              ),
-              bounds,
-            };
-          }),
-    [manifest, sites, settings],
+    () => comparisonRows(dataset, settings),
+    [dataset, settings],
   );
   const data = sites[settings.siteId];
   return (
@@ -329,16 +305,67 @@ function Compare({ dataset, settings, setters, index, setIndex, mode }) {
               </aside>
             ) : null}
             <section>
-              <h2>Three scenarios. One set of assumptions.</h2>
+              <div className="section-heading">
+                <h2>Three scenarios. One set of assumptions.</h2>
+                <button
+                  onClick={() =>
+                    downloadComparison(
+                      comparisonReport(dataset, settings, limit),
+                    )
+                  }
+                >
+                  Download comparison · JSON
+                </button>
+              </div>
+              <p className="caption">
+                A local, reproducible record of these settings, results, source
+                hashes and limitations. Nothing is uploaded.
+              </p>
               <div className="table-wrap" data-tour="scenario-table">
                 <table>
                   <thead>
                     <tr>
                       <th>Scenario</th>
-                      <th>Mean visible Sun</th>
-                      <th>Longest darkness</th>
-                      <th>Earth visible</th>
-                      <th>Longest Earth gap</th>
+                      <th>
+                        Mean visible Sun{" "}
+                        <a
+                          className="metric-method"
+                          href="#/evidence?metric=solar"
+                          aria-label="Mean visible Sun: data and method"
+                        >
+                          Method ↗
+                        </a>
+                      </th>
+                      <th>
+                        Longest darkness{" "}
+                        <a
+                          className="metric-method"
+                          href="#/evidence?metric=darkness"
+                          aria-label="Longest darkness: data and method"
+                        >
+                          Method ↗
+                        </a>
+                      </th>
+                      <th>
+                        Earth visible{" "}
+                        <a
+                          className="metric-method"
+                          href="#/evidence?metric=earth"
+                          aria-label="Earth visibility: data and method"
+                        >
+                          Method ↗
+                        </a>
+                      </th>
+                      <th>
+                        Longest Earth gap{" "}
+                        <a
+                          className="metric-method"
+                          href="#/evidence?metric=earth-gap"
+                          aria-label="Longest Earth gap: data and method"
+                        >
+                          Method ↗
+                        </a>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -380,30 +407,77 @@ function Compare({ dataset, settings, setters, index, setIndex, mode }) {
                   min="0"
                   max="1000"
                   value={limit}
-                  onChange={(e) =>
-                    setLimit(Math.max(0, Number(e.target.value)))
-                  }
+                  onChange={(e) => {
+                    const value = e.target.valueAsNumber;
+                    setLimit(
+                      Number.isFinite(value)
+                        ? Math.min(1000, Math.max(0, value))
+                        : 0,
+                    );
+                  }}
                 />
                 <span>hours · user-defined, not a NASA requirement</span>
               </div>
-              <ul>
-                {rows.map((r) => (
-                  <li key={r.label}>
-                    <strong>{r.label}: </strong>
-                    {!r.summary
-                      ? "Outside calculated coverage"
-                      : r.summary.dark.hours > limit
-                        ? "Exceeds this darkness limit by " +
-                          (r.summary.dark.hours - limit).toFixed(0) +
-                          " h"
-                        : r.summary.dark.censored
-                          ? "Lower bound observed; full interval is not known."
-                          : "Within this limit, with " +
-                            (limit - r.summary.dark.hours).toFixed(0) +
-                            " h margin."}
-                  </li>
-                ))}
-              </ul>
+              <div className="constraint-results" aria-live="polite">
+                {rows.map((r) => {
+                  const assessment = assessDarkness(r.summary, limit);
+                  const scale =
+                    Math.max(limit, r.summary?.dark.hours ?? 0, 1) * 1.12;
+                  return (
+                    <article
+                      className={"constraint-result " + assessment.status}
+                      key={r.label}
+                    >
+                      <h3>{r.label}</h3>
+                      {r.summary ? (
+                        <>
+                          <p>
+                            <strong>
+                              {r.summary.dark.censored ? "≥ " : ""}
+                              {r.summary.dark.hours.toFixed(1)} h darkness
+                            </strong>
+                            <span> · your limit {limit} h</span>
+                          </p>
+                          <svg
+                            viewBox="0 0 280 30"
+                            role="img"
+                            aria-label={`Observed darkness ${r.summary.dark.censored ? "at least " : ""}${r.summary.dark.hours.toFixed(1)} hours; example limit ${limit} hours.`}
+                          >
+                            <rect
+                              className="constraint-track"
+                              x="0"
+                              y="10"
+                              width="280"
+                              height="10"
+                            />
+                            <rect
+                              className="constraint-fill"
+                              x="0"
+                              y="10"
+                              width={(280 * r.summary.dark.hours) / scale}
+                              height="10"
+                            />
+                            <line
+                              className="constraint-marker"
+                              x1={(280 * limit) / scale}
+                              x2={(280 * limit) / scale}
+                              y1="3"
+                              y2="27"
+                            />
+                            {r.summary.dark.censored ? (
+                              <path
+                                className="constraint-open"
+                                d={`M ${(280 * r.summary.dark.hours) / scale - 5} 5 l 8 10 l -8 10`}
+                              />
+                            ) : null}
+                          </svg>
+                        </>
+                      ) : null}
+                      <p>{assessment.message}</p>
+                    </article>
+                  );
+                })}
+              </div>
               <p className="caption">
                 Darkness alone does not determine battery survival. Earth
                 visibility does not guarantee an operational link. Evaluate the
@@ -432,12 +506,52 @@ function Compare({ dataset, settings, setters, index, setIndex, mode }) {
 }
 function Evidence({ dataset }) {
   const { manifest, validation } = dataset;
+  const readMetric = () =>
+    new URLSearchParams(location.hash.split("?")[1] ?? "").get("metric");
+  const [metric, setMetric] = useState(readMetric);
+  useEffect(() => {
+    const change = () => setMetric(readMetric());
+    window.addEventListener("hashchange", change);
+    return () => window.removeEventListener("hashchange", change);
+  }, []);
+  const methods = {
+    solar: [
+      "Mean visible Sun",
+      "The time average of the visible solar-disc fraction above the terrain horizon. Computed by trapezoidal integration of hourly samples. Not sunlight hours, electrical power or a battery model.",
+    ],
+    darkness: [
+      "Longest darkness",
+      "The longest interval with no part of the Sun above the terrain horizon. A five-minute event search is refined to at most one minute; shorter events can be missed. An interval touching a window edge is a lower bound (≥), never a complete duration claim.",
+    ],
+    earth: [
+      "Earth visible",
+      "The fraction of the operating window with any part of Earth above the terrain horizon, using refined rise/set events. This optimistic geometric criterion does not guarantee a radio link, antenna pointing, DSN availability or weather conditions on Earth.",
+    ],
+    "earth-gap": [
+      "Longest Earth gap",
+      "The longest interval with no part of Earth above the terrain horizon. The same event resolution and censored-window rules apply as for darkness. It does not include relay satellites or link budgets.",
+    ],
+  };
   return (
     <main id="main" tabIndex={-1} className="page prose">
       <h1>Show your work.</h1>
       <p className="lead">
         A decision should come with a trail someone else can follow.
       </p>
+      {methods[metric] ? (
+        <section className="metric-explanation">
+          <h2>{methods[metric][0]} · method</h2>
+          <p>{methods[metric][1]}</p>
+          <p>
+            <a href="/data/manifest.json">
+              Dataset, coordinates & source hashes ↗
+            </a>
+            {" · "}
+            <a href="/data/integrity.json">Derived-file checksums ↗</a>
+          </p>
+          <a href="#/compare">Return to your comparison →</a>
+        </section>
+      ) : null}
       <section>
         <h2>What the model does</h2>
         <p>
@@ -768,6 +882,16 @@ export default function App() {
             go("simulator");
           }}
         />
+      ) : route === "review" ? (
+        <Suspense
+          fallback={
+            <main id="main" tabIndex={-1} className="page">
+              <h1>Loading the short review…</h1>
+            </main>
+          }
+        >
+          <Review dataset={dataset} settings={settings} />
+        </Suspense>
       ) : route === "learn" ? (
         <Suspense
           fallback={

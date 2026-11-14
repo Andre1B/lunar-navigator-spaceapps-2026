@@ -6,11 +6,13 @@ Team An0r4k’s NASA Space Apps 2026 educational prototype for [Lunar Landing Si
 
 ## Use the project
 
-- Guided Mission: approximately ten minutes, with freely accessible chapters.
+- Guided analysis: approximately ten minutes, with freely accessible chapters.
 - Open Workspace: Home, Simulator, Compare, Evidence and Credits are separate screens, never locked behind mission progress.
 - Faithful Mode: shared astronomical time.
 - Free Mode: independently freeze selected body positions/orientations; experimental configurations never supply mission recommendations.
 - Explore space: hide the surrounding interface; return with the visible control or Escape.
+- [Three-minute review](https://lunar-navigator-2026.pages.dev/#/review): question, current scenario results and executed evidence, with direct navigation to every tool.
+- Compare: editable example darkness limit, lower-bound-aware feedback and a downloadable JSON recording the same results, provenance, derived-data hashes and build identity.
 
 Data covers four published polar points, 2027-03-01 through 2027-04-28, observer heights 1/5 m. Locations are **not selected/certified landing sites**. Window comparisons use visible solar fractions, darkness intervals and direct Earth visibility. Out-of-coverage windows are not calculated.
 
@@ -32,13 +34,15 @@ npm run preview
 
 The public site needs no login, server-side account, API key or installation. Its documented data is generated offline and served statically. The WebGL renderer is loaded only on the simulator route; data and comparisons remain available without WebGL.
 
+Mobile visual textures are 1024 x 512 derivatives of the credited parent images; desktop retains 4k ground imagery. GPU preparation is split into texture uploads and asynchronous shader compilation. Globe geometry is computed in a worker. Numerical data and terrain visibility are unchanged by the visual quality tier.
+
 ## Science and verification
 
 [scientific/README.md](scientific/README.md) documents the source products, model, conventions and reproducible generator. [public/data/manifest.json](public/data/manifest.json) records versions, checksums and coverage. [public/data/validation.json](public/data/validation.json) contains executed checks and evidence, including caveats about exploratory target selection and limited sampled agreement. Independent tests are in tests/.
 
 Mean solar-disc fraction is an hourly approximation. Duration events use a five-minute search and refined boundaries of at most one minute; shorter events may be missed. The comparison does not mix those duration estimates with the generator's whole-period metrics. Boundary-touching intervals are lower bounds.
 
-The orbital overview is **not to scale**. The surface sky uses true body radii/distances and a local terrain-horizon silhouette. The globe's appearance is not the elevation model. Earth appearance is historical Blue Marble imagery; orientation is the visual-only IAU_EARTH model.
+All solid 3D bodies share the same **physical scale for radii and distances**. Named camera views change viewpoint and zoom, never body size. Labels and the optical solar glare are illustrative overlays. The surface sky uses true angular sizes and a local terrain-horizon silhouette. The globe's appearance is separate from the elevation model used for visibility calculations. Earth appearance is a historical Blue Marble composite with fixed illustrative clouds; orientation is the visual-only IAU_EARTH model.
 
 ## Rights and acknowledgments
 
@@ -57,6 +61,8 @@ AI-assisted research, code, explanatory text, documentation and verification are
 - [Scientific checkpoint](scientific/PROGRESS.md)
 - [Test checkpoint](tests/PROGRESS.md)
 - [Design rationale](docs/DESIGN.md)
+- [Lessons applied from four global-winner repositories](docs/WINNER-LESSONS.md)
+- [Independent review of those changes](docs/review-winners-transfer.md)
 
 ## Limits
 

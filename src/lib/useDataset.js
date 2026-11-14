@@ -7,6 +7,7 @@ export function useDataset() {
     planets: null,
     sites: {},
     validation: null,
+    integrity: null,
     error: null,
   });
   useEffect(() => {
@@ -25,12 +26,14 @@ export function useDataset() {
           !Array.isArray(manifest.sites)
         )
           throw Error("Unsupported dataset schema");
-        const [sky, validation, planets, ...sites] = await Promise.all([
-          read("sky.json"),
-          read(manifest.validation.file),
-          read("planets.json").catch(() => null),
-          ...manifest.sites.map((s) => read(s.file)),
-        ]);
+        const [sky, validation, planets, integrity, ...sites] =
+          await Promise.all([
+            read("sky.json"),
+            read(manifest.validation.file),
+            read("planets.json").catch(() => null),
+            read("integrity.json").catch(() => null),
+            ...manifest.sites.map((s) => read(s.file)),
+          ]);
         if (!ac.signal.aborted)
           setState({
             status: "ready",
@@ -38,6 +41,7 @@ export function useDataset() {
             sky,
             planets,
             validation,
+            integrity,
             sites: Object.fromEntries(sites.map((s) => [s.siteId, s])),
             error: null,
           });

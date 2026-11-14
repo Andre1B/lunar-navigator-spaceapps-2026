@@ -1,4 +1,12 @@
-# PAUSED BY USER - urgent shutdown, 2026-11-14
+# RESUMED by user, 2026-11-14 — previous shutdown checkpoint below
+
+The user explicitly resumed work after commit 54b7984. Development/preview and bounded independent QA/research may continue. Do not interpret the historical pause below as a current stop order. New scope: inspect several verified global-winner GitHub repositories, retain findings in the existing private TXT, then implement and verify transferable improvements. No claim can guarantee an award.
+
+Codex usage at resume: 92%. User authorized up to TWO manual-limit-reset credits at 99%, but no exposed tool or supported desktop automation runtime can execute a reset in this session. The dedicated guardian reported this limitation without clicking anything. Root will notify the user; no reset has been consumed. Keep this count distinct from paid credits.
+
+Current work: Claude feb63b33 owns private winner-repository research only; df6de34e owns tests/ only. Root owns frontend/integration. Globe-worker build passed; 84/84 unit tests passed again after resume. Saved worker Lighthouse still scores 83 Performance, so it is NOT a release pass. Asynchronous GPU precompilation is being evaluated; final browser and production Lighthouse gates remain pending.
+
+## Historical pause
 
 User explicitly ordered all work stopped and saved. Do NOT resume automatically or publish. Wait for the user's next instruction.
 

@@ -170,6 +170,16 @@ export const scientificSoftware = [
 ];
 export const researchProjects = [
   [
+    "Spacebee — Moonquakes 2023",
+    "https://github.com/spacebee-technologies/Moonquakes-SpaceApps2023",
+    "Offline source-data pipeline and accessible exploration; ideas studied, no code reused",
+  ],
+  [
+    "42 Quake Heroes interface",
+    "https://github.com/gabrielchayb/42-quake-heroes",
+    "A guided route to inspectable results; ideas studied, no code reused",
+  ],
+  [
     "Connected Earth Museum",
     "https://github.com/connected-earth/connected-earth-museum",
     "Guided scientific exploration",

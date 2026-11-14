@@ -39,3 +39,7 @@ Written with AI assistance. This summary describes the implemented prototype; re
 
 TRUE-SCALE SIMULATOR REVISION
 The default entry opens the ephemeris-driven scientific simulator directly. No 3D planetary body has an enlarged radius or compressed distance. Camera inspection is distinct from physical size. Earth has credited 4k NASA ground imagery, a fixed illustrative cloud layer and ocean specular mask attributed to Solar System Scope (CC BY 4.0); these do not describe current weather. Solar glare and atmosphere are inexpensive optical illustrations. Scene visibility is computed from the same interpolated positions and terrain profile as the displayed time; the comparison timelines retain documented hourly source samples and refined events. Free experiments remain artificial and do not show mission metrics on the scene.
+
+REVIEW AND REPRODUCIBILITY
+A three-minute Review screen connects the problem, your current scenario results and executed evidence, without blocking any tool. Compare visualizes a user-defined darkness limit with lower-bound-aware feedback. Download its JSON to retain UTC windows, numerical summaries, selected coordinates, source provenance, derived-file checksums, build identity and limitations. Each metric links to its own explanation. Architecture and communication ideas were studied in four past global-winner repositories, including two Brazilian teams; no competitor code was reused. Observations are not the judges' reasons for their awards.
+

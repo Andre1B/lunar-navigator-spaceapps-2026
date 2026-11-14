@@ -54,3 +54,13 @@ User requires scientific simulation instead of game framing. Complete compressed
 
 
 USER PAUSE: urgent shutdown. All work stopped; see PAUSED-CHECKPOINT.md. No deployment. Final worker/browser/performance gates pending.
+
+## Resumed: winner-source research and review workflow (2026-11-14)
+User explicitly resumed. Four official global-winner repositories were cloned/read outside the application, including two Brazilian teams; no installs or competitor code reuse. Competition-era revisions were distinguished from later rewrites. See WINNER-LESSONS.md and review-winners-transfer.md; detailed corrected notes appended to the existing private research TXT.
+Implemented: three-minute Review route, shared comparison calculation path, local JSON export with UTC windows/provenance/derived-file integrity/build identity, lower-bound-aware constraint feedback and metric-specific explanations. Review source-point wording corrected after independent scientific review. Mobile imagery is now 1k, with recorded conversions; physical/visibility data unchanged. Worker, asynchronous shader preparation and staggered texture uploads retained. Preview mobile simulator Lighthouse improved from83 to96 performance (100 accessibility/best practices/SEO; TBT230ms). Those are preview measurements, NOT production validation. Review performance is being checked after removing its loading waterfall.
+84 unit/data/geometry tests re-passed at resume; new report/browser tests remain with independent Claude test agent. Root source and docs edits do not count as their test pass. No new deployment yet. Codex94% last read; two user-authorized resets remain unused because reset execution is not exposed. Cloudflare protected projects untouched.
+
+
+## User expanded research scope: 24 global winners
+Explicit new request: study more than20 projects and transfer applicable strengths. Opus feb63b33 coordinates16 dossiers (4 refreshed,12 new); Sonnet464900fb studies8 additional2025 winners. Exact division is recorded in the private expanded-study files under epic/tmp. They do not edit the app. Findings must distinguish official awards, team claims, source evidence and hypotheses; no presumed judges' motives, invented repositories or execution of competitor scripts. Deeper source inspection is prioritized for the6-8 closest tools; absent repositories remain an explicit gap. Root will append the completed studies to the existing TXT and apply only compatible, testable changes. Pending independent QA still blocks production publication.
+
