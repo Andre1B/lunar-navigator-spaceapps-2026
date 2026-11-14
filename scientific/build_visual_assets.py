@@ -48,6 +48,7 @@ def main():
 
     earth_im = Image.open(EARTH_SRC).convert("RGB")
     earth_src_size = list(earth_im.size)
+    earth4k = save(earth_im.resize((4096, 2048), Image.Resampling.LANCZOS), "earth-visual-4k.jpg", 90)
     earth = save(earth_im.resize((2048, 1024), Image.Resampling.LANCZOS), "earth-visual-2k.jpg", 90)
 
     meta = {
@@ -67,8 +68,8 @@ def main():
             "note": "A colour-enhanced albedo map without shadows, designed for rendering. Lighting must come from the true Sun direction.",
         },
         "earthColor": {
-            "files": [earth],
-            "conversion": f"PNG {earth_src_size[0]}x{earth_src_size[1]} -> Lanczos 2048x1024 -> JPEG q90, 4:4:4. No colour change.",
+            "files": [earth4k, earth],
+            "conversion": f"PNG {earth_src_size[0]}x{earth_src_size[1]} -> Lanczos 4096x2048 and 2048x1024 -> JPEG q90, 4:4:4. No colour change.",
             "source": {
                 "product": "NASA Blue Marble Next Generation, March 2004 monthly composite (world.topo.2004-03)",
                 "url": "https://svs.gsfc.nasa.gov/12564/",
@@ -76,13 +77,14 @@ def main():
                 "inputSha256": sha_file(EARTH_SRC),
                 "credit": "NASA Goddard Space Flight Center; Blue Marble data courtesy of Reto Stockli (NASA/GSFC)",
             },
-            "note": "Historical appearance (March 2004). Not 2027 weather or cloud cover. Earth rotation in sky.json is the low-precision IAU_EARTH model, visual only.",
+            "grid": "simple cylindrical, centred on 0 deg longitude, row 0 north (Blue Marble convention)",
+            "note": "Cloud-free composite, historical appearance (March 2004). Not 2027 weather or cloud cover. Earth rotation in sky.json is the low-precision IAU_EARTH model, visual only.",
         },
         "generator": "scientific/build_visual_assets.py",
     }
     with open(os.path.join(OUT_DIR, "visual-assets.json"), "w", encoding="utf-8") as f:
         json.dump(meta, f, indent=1)
-    print(json.dumps([moon, moon_small, earth], indent=1))
+    print(json.dumps([moon, moon_small, earth4k, earth], indent=1))
 
 
 if __name__ == "__main__":

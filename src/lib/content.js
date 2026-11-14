@@ -1,6 +1,6 @@
 export const chapters = [
   {
-    title: "Your mission begins.",
+    title: "Set up the observation.",
     minutes: "1 minute",
     body: "You are reviewing a lunar surface mission. Your task is to find a location and arrival window with useful sunlight and direct Earth visibility. These are educational scenarios, not approved mission requirements.",
     action: "Locate your point of interest",
@@ -9,7 +9,7 @@ export const chapters = [
       "Before you move time: do you expect a high ridge or a crater floor to see more of the low polar Sun?",
   },
   {
-    title: "A small ridge. A hidden Sun.",
+    title: "Inspect the terrain horizon.",
     minutes: "2 minutes",
     body: "At the lunar south pole, terrain can interrupt a line of sight near the horizon. Inspect the actual horizon profile, then advance time. Watch the Sun cross terrain rather than an imaginary flat edge.",
     action: "Inspect the horizon",
@@ -18,7 +18,7 @@ export const chapters = [
       "Find a time when the Sun is above the geometric horizon but partly or completely hidden by terrain.",
   },
   {
-    title: "Light is only half the plan.",
+    title: "Compare light and Earth visibility.",
     minutes: "2 minutes",
     body: "A sunlit location may still lose its direct view of Earth. Compare the two timelines. Visibility of any part of Earth is a geometric indicator, not a guarantee that a ground station can receive a signal.",
     action: "Compare light and Earth visibility",
@@ -27,7 +27,7 @@ export const chapters = [
       "Does the brightest location also have the shortest gaps in Earth visibility?",
   },
   {
-    title: "The landing is delayed.",
+    title: "Shift the arrival date.",
     minutes: "3 minutes",
     body: "The arrival date changes. Test a delay, keep the operating duration fixed and compare your original location with another point. Examine both the benefit and the cost of changing the plan.",
     action: "Test your delay",
@@ -36,7 +36,7 @@ export const chapters = [
       "Would you change the location or accept a different window? Explain the trade-off using the measured intervals.",
   },
   {
-    title: "Make a decision you can explain.",
+    title: "Record the conclusion and limits.",
     minutes: "2 minutes",
     body: "A result is useful when someone else can check it. Review your scenarios, observer height, data coverage and verification evidence. Identify one limitation that could change your conclusion.",
     action: "Open the evidence",
@@ -45,6 +45,11 @@ export const chapters = [
   },
 ];
 export const sources = [
+  {
+    title: "Solar System Scope · illustrative cloud and ocean layers",
+    url: "https://extension.solarsystemscope.com/textures/",
+    use: "Cloud opacity and ocean specular masks, based on NASA imagery, converted to greyscale JPEG. Attribution: Solar System Scope, CC BY 4.0. Fixed illustrative clouds, not weather for any simulated date. NASA Blue Marble remains the ground-colour source. Exact files and changes: data/globe/earth-layers.json.",
+  },
   {
     title: "NASA Deep Star Maps 2020",
     url: "https://svs.gsfc.nasa.gov/4851/",

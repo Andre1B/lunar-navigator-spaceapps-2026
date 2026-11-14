@@ -32,6 +32,13 @@
  "earthColor": {
   "files": [
    {
+    "file": "globe/earth-visual-4k.jpg",
+    "width": 4096,
+    "height": 2048,
+    "bytes": 1204141,
+    "sha256": "7b9dbb83aa31c698124b1cb93e93c0e3e6a233fe99f0150273b3086810964f91"
+   },
+   {
     "file": "globe/earth-visual-2k.jpg",
     "width": 2048,
     "height": 1024,
@@ -39,7 +46,7 @@
     "sha256": "fab3f7cc43251b6e7727525cb480aae0e3c085da96354e906781540609156831"
    }
   ],
-  "conversion": "PNG 5400x2700 -> Lanczos 2048x1024 -> JPEG q90, 4:4:4. No colour change.",
+  "conversion": "PNG 5400x2700 -> Lanczos 4096x2048 and 2048x1024 -> JPEG q90, 4:4:4. No colour change.",
   "source": {
    "product": "NASA Blue Marble Next Generation, March 2004 monthly composite (world.topo.2004-03)",
    "url": "https://svs.gsfc.nasa.gov/12564/",
@@ -47,7 +54,8 @@
    "inputSha256": "f52cd7195d75d83f519e9c92c180969601665a77607e61e37fe9830b615ac9d0",
    "credit": "NASA Goddard Space Flight Center; Blue Marble data courtesy of Reto Stockli (NASA/GSFC)"
   },
-  "note": "Historical appearance (March 2004). Not 2027 weather or cloud cover. Earth rotation in sky.json is the low-precision IAU_EARTH model, visual only."
+  "grid": "simple cylindrical, centred on 0 deg longitude, row 0 north (Blue Marble convention)",
+  "note": "Cloud-free composite, historical appearance (March 2004). Not 2027 weather or cloud cover. Earth rotation in sky.json is the low-precision IAU_EARTH model, visual only."
  },
  "generator": "scientific/build_visual_assets.py"
 }

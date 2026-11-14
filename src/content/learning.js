@@ -8,7 +8,7 @@ export const intro = {
   facts: [
     {
       q: "What is it?",
-      a: "A free, educational explorer. It replays the real Sun, Earth and Moon geometry over four published points near the lunar south pole.",
+      a: "A lunar sky simulator using astronomical ephemerides and published terrain. It replays the real Sun, Earth and Moon geometry over four published points near the lunar south pole.",
     },
     {
       q: "Who is it for?",
@@ -214,7 +214,7 @@ export const steps = [
     title: "Explain a decision",
     body: "Write a short note: which place and window would you choose, and what do you give up? A good answer names a trade-off.",
     route: "mission",
-    action: "Open the Guided Mission",
+    action: "Open the Guided analysis",
   },
 ];
 

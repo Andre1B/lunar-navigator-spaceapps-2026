@@ -48,3 +48,9 @@ Read this file, scientific/PROGRESS.md, tests/PROGRESS.md and docs/review-sol.md
 
 ## Active V2 checkpoint
 The major tutorial/visual redesign is implemented locally and under independent verification. See docs/REDESIGN-V2.md for precise source/assets/ownership. V1 evidence above is historical and must not be reused as V2 evidence. Root allowance 81% used, two manual resets unconsumed. New unit/data/geometry suite 84/84; browser V2 is running independently; production V2 and Lighthouse not yet run. No additional Cloudflare project changes are authorized or needed. Keep credentials and private research outside git.
+
+## Active physical-scale correction
+User requires scientific simulation instead of game framing. Complete compressed/enlarged-body rendering removed. Full physical positions/radii, camera-only inspection, floating origin, improved Earth layers, true solar lighting, optical glare and camera bug fixes implemented. See REDESIGN-V2.md. Bounded Sol high review closed3P2 findings after native-rendered verification; broad independent QA still running. Build/unit suite passed locally (84); production not yet replaced. Allowance88%, no reset used. Preserve source/data ownership and do not touch other Cloudflare projects.
+
+
+USER PAUSE: urgent shutdown. All work stopped; see PAUSED-CHECKPOINT.md. No deployment. Final worker/browser/performance gates pending.

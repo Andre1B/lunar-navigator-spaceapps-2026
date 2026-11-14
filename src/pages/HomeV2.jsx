@@ -4,7 +4,7 @@ export default function HomeV2({ onStart, onTour }) {
       <section className="home-intro" data-tour="purpose">
         <div className="home-copy">
           <h1>
-            Explore the Moon.
+            Simulate the lunar sky.
             <br />
             <span>See what a delay changes.</span>
           </h1>
@@ -19,15 +19,14 @@ export default function HomeV2({ onStart, onTour }) {
           </p>
           <div className="home-actions">
             <button className="button" onClick={() => onStart("faithful")}>
-              Start a Faithful Mission{" "}
-              <small>Guided investigation · about 10 minutes</small>
+              Open the simulator{" "}
+              <small>Physical scale · shared astronomical time</small>
             </button>
             <button
               className="button secondary"
               onClick={() => onStart("free")}
             >
-              Experiment in Free Mode{" "}
-              <small>Open workspace · artificial freezes</small>
+              Free experiment <small>Open workspace · artificial freezes</small>
             </button>
           </div>
           <div className="home-help">
@@ -114,7 +113,7 @@ export default function HomeV2({ onStart, onTour }) {
           <p>
             A landing is delayed. Keep your location or find an alternative.
           </p>
-          <span>Take the guided mission →</span>
+          <span>Open the guided analysis →</span>
         </a>
       </section>
       <section className="home-how">

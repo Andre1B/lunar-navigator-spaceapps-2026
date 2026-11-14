@@ -53,6 +53,12 @@ Exact source URLs, transformations, checksums and limitations accompany the asse
 
 ## AI assistance and review
 
+### True-scale simulator revision
+
+Every 3D solid body now uses its documented physical radius and apparent ephemeris position in the same unit system; earlier compressed distances and enlarged planetary meshes were removed. Camera inspection changes viewpoint only. Floating rendering origin avoids loss of precision far from the Moon. Surface normals, optical exposure, atmosphere and glare are rendering approximations, not validated photometry or a weather forecast.
+
+Earth ground: NASA Blue Marble, 4096×2048 desktop / 2048×1024 mobile conversions, unchanged source colours. Additional cloud alpha and ocean-specular layers: **Solar System Scope**, [source textures](https://extension.solarsystemscope.com/textures/), [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), based on NASA imagery; converted to greyscale JPEG for this project. The fixed cloud pattern is illustrative and does not represent weather at the simulated time. Source URLs, input/output hashes, changes and limitations are preserved in `public/data/globe/earth-layers.json`. These attributed assets retain CC BY 4.0 and are not relicensed as Apache-2.0.
+
 Claude and Codex assisted research, implementation, explanation, testing and documentation. See [public/ai-use.json](public/ai-use.json). Scientific numbers come from deterministic code processing the cited resources; no ephemeris/terrain values are invented by an LLM. A generated UI design reference was used privately, with visible labeling; it is not shipped as scientific imagery. The real-time scene is a code rendering of cited data, not a generated photograph.
 
 ## Brand and rights

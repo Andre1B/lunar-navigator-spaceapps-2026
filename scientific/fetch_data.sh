@@ -20,6 +20,10 @@ mkdir -p cache/svs
 curl -fL -o cache/svs/ldem_4.tif https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/ldem_4.tif
 curl -fL -o cache/svs/starmap_2020_4k.exr https://svs.gsfc.nasa.gov/vis/a000000/a004800/a004851/starmap_2020_4k.exr
 curl -fL -o cache/svs/lroc_color_16bit_srgb_4k.tif https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/lroc_color_16bit_srgb_4k.tif
+# Illustrative Earth layers, Solar System Scope (CC BY 4.0):
+mkdir -p cache/sss
+curl -fL -o cache/sss/2k_earth_clouds.jpg https://extension.solarsystemscope.com/textures/download/2k_earth_clouds.jpg
+curl -fL -o cache/sss/2k_earth_specular_map.tif https://extension.solarsystemscope.com/textures/download/2k_earth_specular_map.tif
 # Verify a real binary was received (some PGDA links return an HTML page with HTTP 200).
 for f in cache/dem/*/*.tif; do head -c 4 "$f" | grep -q "II" || { echo "Not a TIFF: $f"; exit 1; }; done
 echo "Inputs ready. Then run: PYTHONPATH=. python -P build_scenes.py && PYTHONPATH=. python -P validate.py --horizons"

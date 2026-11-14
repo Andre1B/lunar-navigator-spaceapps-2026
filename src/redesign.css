@@ -1708,4 +1708,94 @@
     min-height: 240px;
   }
 }
-.home-v2 .home-actions .button small{color:#fff}
+.home-v2 .home-actions .button small {
+  color: #fff;
+}
+.home-help button {
+  min-height: 36px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+.manual-camera-controls {
+  position: relative;
+  font-size: 12px;
+}
+.manual-camera-controls > summary {
+  cursor: pointer;
+  padding: 9px 12px;
+  border: 1px solid #536d88;
+  background: #0b1728;
+  border-radius: 3px;
+  min-height: 36px;
+  list-style: none;
+  color: #e7eef7;
+}
+.manual-camera-controls > div {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  gap: 6px;
+  padding: 10px;
+  background: #0b1728;
+  border: 1px solid #536d88;
+  border-radius: 4px;
+  box-shadow: 0 8px 24px #0007;
+}
+.manual-camera-controls:not([open]) > div {
+  display: none;
+}
+.world-reading small {
+  order: -1;
+}
+.space-canvas canvas:focus-visible {
+  outline: 2px solid #f6c36f;
+  outline-offset: -3px;
+}
+.scene-gesture-hint {
+  position: absolute;
+  left: 16px;
+  bottom: 13px;
+  pointer-events: none;
+  font-size: 12px;
+  color: #d6e1ee;
+  background: #07101cc9;
+  padding: 6px 9px;
+  margin: 0;
+  border-radius: 3px;
+}
+.immersive .scene-gesture-hint {
+  display: none;
+}
+@media (max-width: 720px) {
+  .scene-gesture-hint {
+    bottom: 60px;
+    left: 10px;
+    font-size: 11px;
+  }
+}
+@media (min-width: 721px) {
+  .camera-presets {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .camera-presets > h3,
+  .camera-presets > select {
+    grid-column: 1/-1;
+  }
+  .camera-presets > button {
+    margin: 0;
+    min-height: 46px;
+    padding: 9px 7px;
+    text-align: left;
+  }
+  .camera-presets > button span {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .camera-presets > button small {
+    display: none;
+  }
+}

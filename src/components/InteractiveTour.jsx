@@ -70,7 +70,7 @@ export const tourSteps = [
     target: '[data-tour="validation"]',
     title: "Check before you trust.",
     body: "Evidence links the calculations to source data and executed checks. Credits identifies the open-source projects and their licenses.",
-    try: "You are ready to explore. Open the guided mission for a story, or use any screen directly.",
+    try: "You are ready to explore. Open the guided analysis for a walkthrough, or use any screen directly.",
   },
 ];
 const PAD = 16,

@@ -3,13 +3,16 @@ import Timeline from "../components/TimelineV2.jsx";
 import { percent, timeAt } from "../lib/analysis.mjs";
 const Scene = lazy(() => import("../components/SpaceSceneV2.jsx"));
 const cameras = [
-  ["overview", "Moon & Earth", "See the relationship"],
+  ["overview", "Moon orbit", "Inspect the lunar globe"],
+  ["earth", "Earth", "Inspect our home planet"],
   ["south", "South pole", "Look down on the region"],
   ["sky", "Surface sky", "Look above the terrain"],
   ["terrain", "Local terrain", "Explore a 20 km window"],
-  ["system", "Solar context", "Find the other planets"],
+  ["pair", "Earth–Moon scale", "See the real separation"],
+  ["system", "Solar system", "True sizes and distances"],
 ];
 const name = (s) => s?.name?.split(" (")[0] ?? "Loading…";
+const NO_FREEZE = Object.freeze({});
 export default function SimulatorV2({
   dataset,
   index,
@@ -30,6 +33,11 @@ export default function SimulatorV2({
     [speed, setSpeed] = useState(6),
     [freeze, setFreeze] = useState({}),
     [insight, setInsight] = useState("time");
+  const [inspection, setInspection] = useState(null);
+  const [observation, setObservation] = useState(null);
+  useEffect(() => {
+    setInspection(null);
+  }, [view]);
   const [setupOpen, setSetupOpen] = useState(
     () => tourActive || !matchMedia("(max-width:720px)").matches,
   );
@@ -42,8 +50,7 @@ export default function SimulatorV2({
     clock = useRef(index);
   clock.current = index;
   const site = manifest?.sites.find((s) => s.id === siteId),
-    data = sites[siteId],
-    sample = Math.round(index);
+    data = sites[siteId];
   useEffect(() => {
     const f = (e) => {
       if (e.key === "Escape") setImmersive(false);
@@ -98,10 +105,10 @@ export default function SimulatorV2({
     >
       <div className="explorer-heading">
         <div>
-          <h1>Explore the Moon. Follow the light.</h1>
+          <h1>Lunar sunlight & visibility simulator</h1>
           <p>
-            See how terrain, sunlight and a view of Earth change a lunar surface
-            mission.
+            Choose a viewpoint, move time, then compare sunlight and Earth
+            visibility at four lunar study points.
           </p>
         </div>
         <div className="explorer-actions">
@@ -259,47 +266,83 @@ export default function SimulatorV2({
                 sky={sky}
                 planets={planets}
                 index={index}
-                freeze={mode === "free" ? freeze : {}}
+                freeze={mode === "free" ? freeze : NO_FREEZE}
                 view={view}
                 site={site}
                 siteData={data}
                 height={height}
+                onViewChange={setView}
+                onFocusChange={setInspection}
+                onObservation={setObservation}
               />
             </Suspense>
             <div className="world-meta">
-              <span>{cameras.find((c) => c[0] === view)?.[1]}</span>
+              <span>
+                {inspection
+                  ? "Inspecting " +
+                    inspection[0].toUpperCase() +
+                    inspection.slice(1)
+                  : cameras.find((c) => c[0] === view)?.[1]}
+              </span>
               <span>
                 {view === "sky"
                   ? "True apparent sizes · terrain horizon"
                   : view === "terrain"
                     ? "20 km terrain window · visual geometry"
-                    : "Overview · distances compressed, not to scale"}
+                    : "Physical sizes & distances · camera zoom only"}
               </span>
             </div>
-            {!immersive && data ? (
+            {!immersive &&
+            data &&
+            mode === "faithful" &&
+            (view === "sky" ||
+              view === "terrain" ||
+              (!inspection && ["overview", "south"].includes(view))) ? (
               <div className="world-reading">
                 <span>
                   <i className="sun-dot" />
-                  Sun{" "}
+                  Sun disc{" "}
                   <strong>
-                    {percent(data.sun.visibleFraction[String(height)][sample])}
+                    {percent(
+                      observation?.siteId === siteId &&
+                        observation?.index === index &&
+                        observation?.height === height
+                        ? observation.sun
+                        : null,
+                    )}
                   </strong>
                 </span>
                 <span>
                   <i className="earth-dot" />
-                  Earth{" "}
+                  Earth disc{" "}
                   <strong>
                     {percent(
-                      data.earth.visibleFraction[String(height)][sample],
+                      observation?.siteId === siteId &&
+                        observation?.index === index &&
+                        observation?.height === height
+                        ? observation.earth
+                        : null,
                     )}
                   </strong>
                 </span>
                 <small>
                   {mode === "free"
                     ? "Separate faithful reference · not the artificial sky"
-                    : "Visible at " + height + " m · nearest hourly reference"}
+                    : name(site) +
+                      " · " +
+                      height +
+                      " m · interpolated geometry"}
                 </small>
               </div>
+            ) : null}
+            {!immersive ? (
+              <p className="scene-gesture-hint">
+                {view === "sky" ? "Drag to look" : "Drag to orbit"} · Wheel to
+                zoom
+                {view === "earth" || inspection === "earth"
+                  ? " · illustrative clouds"
+                  : ""}
+              </p>
             ) : null}
             {immersive ? (
               <>
@@ -317,7 +360,7 @@ export default function SimulatorV2({
                   ·{" "}
                   {view === "sky"
                     ? "true angular scale"
-                    : "overview scale adjusted"}
+                    : "physical body sizes & distances"}
                 </span>
               </>
             ) : null}
@@ -441,10 +484,13 @@ export default function SimulatorV2({
                 separate horizon calculation uses other source resolutions.
               </p>
               <p>
-                Overview distances are compressed; planet markers are enlarged.
+                Body radii and distances use the same physical scale in every
+                view. Camera presets change the viewpoint, never body size.
                 Surface-sky discs use true radii and distances. Stars are
-                catalogue-based with illustrative brightness. Earth imagery is
-                historical, not current weather.
+                catalogue-based with illustrative brightness. Sun glare and the
+                thin Earth-atmosphere shading are optical illustrations, not
+                ray-traced forecasts. Earth imagery is historical. Clouds are a
+                fixed illustrative pattern, not weather for the selected date.
               </p>
               <p>
                 Other planets use system barycentre proxies where applicable,

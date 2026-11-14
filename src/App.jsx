@@ -22,8 +22,8 @@ import InteractiveTour from "./components/InteractiveTour.jsx";
 const Learn = lazy(() => import("./pages/Learn.jsx"));
 const links = [
   ["learn", "How it works"],
-  ["mission", "Guided Mission"],
-  ["simulator", "Explore 3D"],
+  ["mission", "Guided analysis"],
+  ["simulator", "Simulator"],
   ["compare", "Compare"],
   ["evidence", "Evidence"],
   ["credits", "Credits"],
@@ -89,13 +89,13 @@ function Mission({ chapter, setChapter, mode, journal, setJournal }) {
     <main id="main" tabIndex={-1} className="page mission-page">
       <div className="page-heading">
         <p className="section-label">
-          Guided Mission · {mode === "faithful" ? "Faithful" : "Free"} Mode
+          Guided analysis · {mode === "faithful" ? "Faithful" : "Free"} Mode
         </p>
         <h1>{c.title}</h1>
         <p className="lead">{c.body}</p>
       </div>
       <div className="mission-layout">
-        <ol className="chapter-list" aria-label="Mission chapters">
+        <ol className="chapter-list" aria-label="Analysis steps">
           {chapters.map((x, i) => (
             <li key={x.title}>
               <button
@@ -120,7 +120,7 @@ function Mission({ chapter, setChapter, mode, journal, setJournal }) {
           </p>
           <Button onClick={() => go(c.route)}>{c.action}</Button>
           <div className="mission-journal">
-            <label htmlFor="mission-note">Your mission notes</label>
+            <label htmlFor="mission-note">Analysis notes</label>
             <textarea
               id="mission-note"
               rows="3"
@@ -191,7 +191,7 @@ function Setup({
 }) {
   return (
     <aside className="setup">
-      <h2>Mission setup</h2>
+      <h2>Scenario setup</h2>
       <p className="caption">
         Published points of interest, not selected or certified landing sites.
       </p>
@@ -313,7 +313,7 @@ function Compare({ dataset, settings, setters, index, setIndex, mode }) {
         <h1>Does your plan still work?</h1>
         <p className="lead">
           Change the arrival. Compare the consequences. Open every step without
-          completing the mission.
+          completing the guided analysis.
         </p>
       </div>
       <DataStatus dataset={dataset} />
@@ -696,7 +696,8 @@ export default function App() {
   const [route, setRoute] = useState(routeNow),
     [mode, setMode] = useState("faithful"),
     [chapter, setChapter] = useState(0),
-    [index, setIndex] = useState(0),
+    // A documented study epoch, shown explicitly in UTC; not the user's clock.
+    [index, setIndex] = useState(12),
     [journal, setJournal] = useState({}),
     [tourStep, setTourStep] = useState(null);
   const tourOrigin = useRef(null);
@@ -764,7 +765,7 @@ export default function App() {
           onStart={(m) => {
             setMode(m);
             setChapter(0);
-            go(m === "free" ? "simulator" : "mission");
+            go("simulator");
           }}
         />
       ) : route === "learn" ? (

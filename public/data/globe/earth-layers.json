@@ -1,0 +1,49 @@
+{
+ "schemaVersion": "1.0.0",
+ "purpose": "Illustrative Earth layers for appearance only: a cloud alpha/greyscale layer and an ocean specular (water) mask. Not used by any calculation.",
+ "clouds": {
+  "file": "globe/earth-clouds-illustrative-2k.jpg",
+  "width": 2048,
+  "height": 1024,
+  "bytes": 661286,
+  "sha256": "6170abddf783c2291ef0ae515666023345d7a91a4ef3fe602450ca0c35258f10",
+  "meaning": "Fixed illustrative cloud pattern (greyscale, 0 = clear, 255 = opaque cloud). NOT weather or cloud cover for 2027 or any specific date.",
+  "source": {
+   "file": "https://extension.solarsystemscope.com/textures/download/2k_earth_clouds.jpg",
+   "sourceSha256": "fffd7f68d41b37274822150e54a6ef605af1d3ec35624d9f628c3b896bfa42ed"
+  },
+  "conversion": "RGB JPEG -> mean of channels -> 8-bit greyscale JPEG q88. No other change."
+ },
+ "specular": {
+  "file": "globe/earth-ocean-specular-2k.jpg",
+  "width": 2048,
+  "height": 1024,
+  "bytes": 180913,
+  "sha256": "8a4dfc229ec46c65aef22236722d7a604976d7675ddb450959fcdbc7c4986d30",
+  "meaning": "Water mask for ocean specular reflection (bright = water). Derived from imagery by Solar System Scope; may differ from the Blue Marble coastline in detail.",
+  "source": {
+   "file": "https://extension.solarsystemscope.com/textures/download/2k_earth_specular_map.tif",
+   "sourceSha256": "6b90ecfce248591a1ecc9a3e49acca1a7059b6828877e718302ed9a6b4471bd7"
+  },
+  "conversion": "TIFF (deflate, RGB) -> mean of channels -> 8-bit greyscale JPEG q88. No other change."
+ },
+ "grid": "simple cylindrical, 2048x1024, centred on 0 deg longitude, row 0 north: same UV as earth-visual-2k/4k.jpg",
+ "orientationCheck": {
+  "correlationWithBlueMarbleOceanByLongitudeShiftPx": {
+   "0": 0.913,
+   "512": 0.268,
+   "1024": 0.311,
+   "-512": 0.268
+  },
+  "note": "Correlation of the specular water mask with dark-blue ocean pixels of the NASA Blue Marble ground texture; it should peak at shift 0."
+ },
+ "license": {
+  "name": "CC BY 4.0",
+  "url": "https://creativecommons.org/licenses/by/4.0/",
+  "attribution": "Textures: Solar System Scope (https://www.solarsystemscope.com/), CC BY 4.0, based on NASA imagery; converted to greyscale JPEG for this project.",
+  "sourcePage": "https://extension.solarsystemscope.com/textures/",
+  "sourceNotes": "Per the source page: based on NASA elevation and imagery data, colours tuned and slightly saturated, gaps may be filled with fictional terrain."
+ },
+ "groundNote": "The ground colour stays NASA Blue Marble (globe/earth-visual-*.jpg). The Solar System Scope colour map is not used.",
+ "generator": "scientific/build_earth_layers.py"
+}
