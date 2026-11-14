@@ -46,6 +46,14 @@ This record distinguishes executed checks from pending release gates. It does no
 - Real-device GPU, Safari, Firefox and a full screen-reader audit were not tested.
 - The full true-scale browser matrix was not re-run in production.
 
+**Current deployment, RC4:** commit `42e12dc`, tag `release-candidate-2026-11-14-4`, deployment `52b32426` at 2026-11-14T20:00:08Z.
+- **Change from RC3:** only the line endings of the dataset JSON (LF) and of the generators. No data values changed.
+- **Why it was needed:** CI had failed `check:data` since `a7ab3f6`, because the integrity hashes covered Windows CRLF bytes.
+- **CI on `42e12dc`:** success.
+- **Production data:** `manifest.json` hashes to the same value recorded in `integrity.json`.
+- **Confirmation Lighthouse on RC4:** simulator mobile 99/99/100/100, desktop 100/100/100/100.
+- **Not re-run on RC4:** the RC3 browser QA, because only line endings changed.
+
 ## Historical v1 record (superseded)
 
 The sections below describe the earlier v1 deployment `254df20f`. They do not certify the current version.

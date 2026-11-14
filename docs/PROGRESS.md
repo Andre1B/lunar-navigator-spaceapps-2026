@@ -87,3 +87,4 @@ Claude feb63b33 now owns integration, following the accepted handoff; tests stay
 - **Lighthouse on RC3:** 8 runs, performance 98–100 and accessibility 99–100.
 - **Deployment and evidence:** RC3 is deployment `61c81cc1`. Evidence is in `docs/VERIFICATION.md` and `docs/release-evidence.json`.
 - **Not done:** no NASA submission was made and no submission tag was created.
+- **RC4 `42e12dc`:** LF line endings fix, after CI had failed `check:data` since a7ab3f6. CI is green, deployment is `52b32426`, the production data hashes match, and the simulator Lighthouse confirmation is 99/100.

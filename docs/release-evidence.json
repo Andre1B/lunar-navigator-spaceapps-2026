@@ -168,5 +168,40 @@
     "testedDeployment": "254df20f",
     "sourceCommit": "318e7d705995c2b2c3ebc414a4c63fa386c45905",
     "note": "v1 evidence; does not certify the current version"
+  },
+  "currentDeployment": {
+    "testedDeployment": "52b32426",
+    "deployedAtUtc": "2026-11-14T20:00:08Z",
+    "sourceCommit": "42e12dc301e0b563b1d3281a5782f04bc5ce0fb2",
+    "releaseCandidateTag": "release-candidate-2026-11-14-4",
+    "buildDirty": false,
+    "change": "RC3 plus LF line endings in dataset JSON and generators (no data change); CI green on this commit; production manifest bytes match integrity.json",
+    "ci": "GitHub Actions \"Verify public source and dataset\": success",
+    "lighthouseConfirmation": [
+      {
+        "formFactor": "mobile",
+        "requestedUrl": "https://lunar-navigator-2026.pages.dev/#/simulator",
+        "fetchTime": "2026-11-14T20:00:20.326Z",
+        "scores": {
+          "performance": 99,
+          "accessibility": 99,
+          "best-practices": 100,
+          "seo": 100
+        },
+        "rawReportSha256": "3e717ec386a280cc5206c0d66e521c5626fa22563896b676ef072079e83107fa"
+      },
+      {
+        "formFactor": "desktop",
+        "requestedUrl": "https://lunar-navigator-2026.pages.dev/#/simulator",
+        "fetchTime": "2026-11-14T20:00:32.900Z",
+        "scores": {
+          "performance": 100,
+          "accessibility": 100,
+          "best-practices": 100,
+          "seo": 100
+        },
+        "rawReportSha256": "7fdf59dc598002b8fdaa883b27697db8414d781c541e6b52b6d365fff6d52d9c"
+      }
+    ]
   }
 }
