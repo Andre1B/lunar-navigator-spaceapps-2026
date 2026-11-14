@@ -1,5 +1,5 @@
 {
-  "generatedAtUtc": "2026-11-14T13:29:04.010Z",
+  "generatedAtUtc": "2026-11-14T13:44:15.838Z",
   "scope": "Installed direct and transitive runtime, build and verification packages",
   "packages": [
     {
@@ -7,6 +7,7 @@
       "version": "0.5.0",
       "license": "MIT OR Apache-2.0",
       "repository": "https://github.com/cloudflare/workers-sdk",
+      "repositoryNote": null,
       "url": "https://github.com/cloudflare/workers-sdk#readme",
       "noticeFile": null
     },
@@ -15,6 +16,7 @@
       "version": "2.16.2",
       "license": "MIT OR Apache-2.0",
       "repository": "https://github.com/cloudflare/workers-sdk",
+      "repositoryNote": null,
       "url": "https://github.com/cloudflare/workers-sdk#readme",
       "noticeFile": null
     },
@@ -23,6 +25,7 @@
       "version": "1.20261113.1",
       "license": "Apache-2.0",
       "repository": "https://github.com/cloudflare/workerd",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/@cloudflare/workerd-windows-64",
       "noticeFile": null
     },
@@ -31,6 +34,7 @@
       "version": "0.8.1",
       "license": "MIT",
       "repository": "https://github.com/cspotcode/node-source-map-support",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/@cspotcode/source-map-support",
       "noticeFile": "/licenses/@cspotcode__source-map-support.txt"
     },
@@ -39,6 +43,7 @@
       "version": "0.28.2",
       "license": "MIT",
       "repository": "https://github.com/evanw/esbuild",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/@esbuild/win32-x64",
       "noticeFile": null
     },
@@ -47,6 +52,7 @@
       "version": "5.3.0",
       "license": "OFL-1.1",
       "repository": "https://github.com/fontsource/font-files",
+      "repositoryNote": null,
       "url": "https://fontsource.org/fonts/fira-code",
       "noticeFile": "/licenses/@fontsource__fira-code.txt"
     },
@@ -55,6 +61,7 @@
       "version": "5.3.0",
       "license": "OFL-1.1",
       "repository": "https://github.com/fontsource/font-files",
+      "repositoryNote": null,
       "url": "https://fontsource.org/fonts/overpass",
       "noticeFile": "/licenses/@fontsource__overpass.txt"
     },
@@ -63,6 +70,7 @@
       "version": "2.3.6",
       "license": "MIT",
       "repository": "git@github.com:formatjs/formatjs",
+      "repositoryNote": null,
       "url": "https://github.com/formatjs/formatjs",
       "noticeFile": "/licenses/@formatjs__ecma402-abstract.txt"
     },
@@ -71,6 +79,7 @@
       "version": "2.2.7",
       "license": "MIT",
       "repository": "formatjs/formatjs",
+      "repositoryNote": null,
       "url": "https://github.com/formatjs/formatjs#readme",
       "noticeFile": "/licenses/@formatjs__fast-memoize.txt"
     },
@@ -79,6 +88,7 @@
       "version": "2.11.4",
       "license": "MIT",
       "repository": "https://github.com/formatjs/formatjs",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/@formatjs/icu-messageformat-parser",
       "noticeFile": "/licenses/@formatjs__icu-messageformat-parser.txt"
     },
@@ -87,6 +97,7 @@
       "version": "1.8.16",
       "license": "MIT",
       "repository": "https://github.com/formatjs/formatjs",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/@formatjs/icu-skeleton-parser",
       "noticeFile": "/licenses/@formatjs__icu-skeleton-parser.txt"
     },
@@ -95,6 +106,7 @@
       "version": "0.6.2",
       "license": "MIT",
       "repository": "formatjs/formatjs",
+      "repositoryNote": null,
       "url": "https://github.com/formatjs/formatjs#readme",
       "noticeFile": "/licenses/@formatjs__intl-localematcher.txt"
     },
@@ -103,6 +115,7 @@
       "version": "1.1.0",
       "license": "MIT",
       "repository": "https://github.com/lovell/colour",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/@img/colour",
       "noticeFile": "/licenses/@img__colour.txt"
     },
@@ -111,6 +124,7 @@
       "version": "0.35.5",
       "license": "Apache-2.0 AND LGPL-3.0-or-later AND MIT",
       "repository": "https://github.com/lovell/sharp",
+      "repositoryNote": null,
       "url": "https://sharp.pixelplumbing.com",
       "noticeFile": "/licenses/@img__sharp-wasm32.txt"
     },
@@ -119,6 +133,7 @@
       "version": "0.35.5",
       "license": "Apache-2.0 AND LGPL-3.0-or-later",
       "repository": "https://github.com/lovell/sharp",
+      "repositoryNote": null,
       "url": "https://sharp.pixelplumbing.com",
       "noticeFile": "/licenses/@img__sharp-win32-x64.txt"
     },
@@ -126,7 +141,8 @@
       "name": "@isaacs/nonrecursive-glob-match",
       "version": "1.1.0",
       "license": "BlueOak-1.0.0",
-      "repository": null,
+      "repository": "https://github.com/isaacs/nonrecursive-glob-match",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/@isaacs/nonrecursive-glob-match",
       "noticeFile": "/licenses/@isaacs__nonrecursive-glob-match.txt"
     },
@@ -135,6 +151,7 @@
       "version": "3.1.3",
       "license": "MIT",
       "repository": "https://github.com/jridgewell/resolve-uri",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/@jridgewell/resolve-uri",
       "noticeFile": "/licenses/@jridgewell__resolve-uri.txt"
     },
@@ -143,6 +160,7 @@
       "version": "1.6.0",
       "license": "MIT",
       "repository": "https://github.com/jridgewell/sourcemaps",
+      "repositoryNote": null,
       "url": "https://github.com/jridgewell/sourcemaps/tree/main/packages/sourcemap-codec",
       "noticeFile": "/licenses/@jridgewell__sourcemap-codec.txt"
     },
@@ -151,6 +169,7 @@
       "version": "0.3.9",
       "license": "MIT",
       "repository": "https://github.com/jridgewell/trace-mapping",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/@jridgewell/trace-mapping",
       "noticeFile": "/licenses/@jridgewell__trace-mapping.txt"
     },
@@ -159,6 +178,7 @@
       "version": "1.10.0",
       "license": "Apache-2.0",
       "repository": "open-telemetry/opentelemetry-js",
+      "repositoryNote": null,
       "url": "https://github.com/open-telemetry/opentelemetry-js/tree/main/api",
       "noticeFile": "/licenses/@opentelemetry__api.txt"
     },
@@ -167,6 +187,7 @@
       "version": "0.152.0",
       "license": "MIT",
       "repository": "https://github.com/oxc-project/oxc",
+      "repositoryNote": null,
       "url": "https://oxc.rs/docs/guide/usage/parser",
       "noticeFile": null
     },
@@ -175,6 +196,7 @@
       "version": "0.156.0",
       "license": "MIT",
       "repository": "https://github.com/oxc-project/oxc",
+      "repositoryNote": null,
       "url": "https://oxc.rs",
       "noticeFile": "/licenses/@oxc-project__types.txt"
     },
@@ -182,7 +204,8 @@
       "name": "@paulirish/trace_engine",
       "version": "0.0.67",
       "license": "BSD-3-Clause",
-      "repository": null,
+      "repository": "https://github.com/ChromeDevTools/devtools-frontend",
+      "repositoryNote": "Upstream DevTools trace engine source; the npm distribution has no separate repository in its metadata.",
       "url": "https://www.npmjs.com/package/@paulirish/trace_engine",
       "noticeFile": "/licenses/@paulirish__trace_engine.txt"
     },
@@ -191,6 +214,7 @@
       "version": "4.1.6",
       "license": "MIT",
       "repository": "https://github.com/poppinss/colors",
+      "repositoryNote": null,
       "url": "https://github.com/poppinss/colors#readme",
       "noticeFile": "/licenses/@poppinss__colors.txt"
     },
@@ -199,6 +223,7 @@
       "version": "0.6.5",
       "license": "MIT",
       "repository": "https://github.com/poppinss/dumper",
+      "repositoryNote": null,
       "url": "https://github.com/poppinss/dumper#readme",
       "noticeFile": "/licenses/@poppinss__dumper.txt"
     },
@@ -207,6 +232,7 @@
       "version": "1.2.3",
       "license": "MIT",
       "repository": "https://github.com/poppinss/exception",
+      "repositoryNote": null,
       "url": "https://github.com/poppinss/exception#readme",
       "noticeFile": "/licenses/@poppinss__exception.txt"
     },
@@ -215,6 +241,7 @@
       "version": "3.2.7",
       "license": "Apache-2.0",
       "repository": "https://github.com/puppeteer/puppeteer/tree/main/packages/browsers",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/@puppeteer/browsers",
       "noticeFile": null
     },
@@ -223,6 +250,7 @@
       "version": "1.2.19",
       "license": "MIT",
       "repository": "https://github.com/rolldown/rolldown",
+      "repositoryNote": null,
       "url": "https://rolldown.rs/",
       "noticeFile": null
     },
@@ -231,6 +259,7 @@
       "version": "1.1.1",
       "license": "MIT",
       "repository": "https://github.com/rolldown/plugins",
+      "repositoryNote": null,
       "url": "https://github.com/rolldown/plugins/tree/main/packages/pluginutils#readme",
       "noticeFile": "/licenses/@rolldown__pluginutils.txt"
     },
@@ -239,6 +268,7 @@
       "version": "11.12.0",
       "license": "MIT",
       "repository": "https://github.com/getsentry/sentry-javascript",
+      "repositoryNote": null,
       "url": "https://github.com/getsentry/sentry-javascript/tree/main/packages/bundler-plugins",
       "noticeFile": "/licenses/@sentry__bundler-plugins.txt"
     },
@@ -247,6 +277,7 @@
       "version": "0.32.0",
       "license": "MIT",
       "repository": "https://github.com/getsentry/sentry-conventions",
+      "repositoryNote": null,
       "url": "https://github.com/getsentry/sentry-conventions#readme",
       "noticeFile": "/licenses/@sentry__conventions.txt"
     },
@@ -255,6 +286,7 @@
       "version": "11.12.0",
       "license": "MIT",
       "repository": "https://github.com/getsentry/sentry-javascript",
+      "repositoryNote": null,
       "url": "https://github.com/getsentry/sentry-javascript/tree/master/packages/core",
       "noticeFile": "/licenses/@sentry__core.txt"
     },
@@ -263,6 +295,7 @@
       "version": "11.12.0",
       "license": "MIT",
       "repository": "https://github.com/getsentry/sentry-javascript",
+      "repositoryNote": null,
       "url": "https://github.com/getsentry/sentry-javascript/tree/master/packages/node",
       "noticeFile": "/licenses/@sentry__node.txt"
     },
@@ -271,6 +304,7 @@
       "version": "11.12.0",
       "license": "MIT",
       "repository": "https://github.com/getsentry/sentry-javascript",
+      "repositoryNote": null,
       "url": "https://github.com/getsentry/sentry-javascript/tree/master/packages/opentelemetry",
       "noticeFile": "/licenses/@sentry__opentelemetry.txt"
     },
@@ -279,6 +313,7 @@
       "version": "11.12.0",
       "license": "MIT",
       "repository": "https://github.com/getsentry/sentry-javascript",
+      "repositoryNote": null,
       "url": "https://github.com/getsentry/sentry-javascript/tree/master/packages/server-runtime-injection",
       "noticeFile": "/licenses/@sentry__server-runtime-injection.txt"
     },
@@ -287,6 +322,7 @@
       "version": "11.12.0",
       "license": "MIT",
       "repository": "https://github.com/getsentry/sentry-javascript",
+      "repositoryNote": null,
       "url": "https://github.com/getsentry/sentry-javascript/tree/master/packages/server-utils",
       "noticeFile": "/licenses/@sentry__server-utils.txt"
     },
@@ -295,6 +331,7 @@
       "version": "7.2.0",
       "license": "MIT",
       "repository": "sindresorhus/is",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/@sindresorhus/is",
       "noticeFile": "/licenses/@sindresorhus__is.txt"
     },
@@ -303,6 +340,7 @@
       "version": "1.2.24",
       "license": "CC0-1.0",
       "repository": "https://github.com/speed-highlight/core",
+      "repositoryNote": null,
       "url": "https://github.com/speed-highlight/core#readme",
       "noticeFile": "/licenses/@speed-highlight__core.txt"
     },
@@ -311,6 +349,7 @@
       "version": "26.6.6",
       "license": "MIT",
       "repository": "https://github.com/DefinitelyTyped/DefinitelyTyped",
+      "repositoryNote": null,
       "url": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/node",
       "noticeFile": "/licenses/@types__node.txt"
     },
@@ -319,6 +358,7 @@
       "version": "6.3.0",
       "license": "MIT",
       "repository": "https://github.com/vitejs/vite-plugin-react",
+      "repositoryNote": null,
       "url": "https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#readme",
       "noticeFile": "/licenses/@vitejs__plugin-react.txt"
     },
@@ -327,6 +367,7 @@
       "version": "8.20.0",
       "license": "MIT",
       "repository": "ajv-validator/ajv",
+      "repositoryNote": null,
       "url": "https://ajv.js.org",
       "noticeFile": "/licenses/ajv.txt"
     },
@@ -335,6 +376,7 @@
       "version": "3.0.1",
       "license": "MIT",
       "repository": "https://github.com/ajv-validator/ajv-formats",
+      "repositoryNote": null,
       "url": "https://github.com/ajv-validator/ajv-formats#readme",
       "noticeFile": "/licenses/ajv-formats.txt"
     },
@@ -343,6 +385,7 @@
       "version": "4.1.3",
       "license": "MIT",
       "repository": "doowb/ansi-colors",
+      "repositoryNote": null,
       "url": "https://github.com/doowb/ansi-colors",
       "noticeFile": "/licenses/ansi-colors.txt"
     },
@@ -351,6 +394,7 @@
       "version": "5.0.1",
       "license": "MIT",
       "repository": "chalk/ansi-regex",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/ansi-regex",
       "noticeFile": "/licenses/ansi-regex.txt"
     },
@@ -359,6 +403,7 @@
       "version": "6.2.3",
       "license": "MIT",
       "repository": "chalk/ansi-styles",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/ansi-styles",
       "noticeFile": "/licenses/ansi-styles.txt"
     },
@@ -367,6 +412,7 @@
       "version": "2.1.1",
       "license": "MIT",
       "repository": "github:fabiospampinato/atomically",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/atomically",
       "noticeFile": "/licenses/atomically.txt"
     },
@@ -375,6 +421,7 @@
       "version": "4.14.0",
       "license": "MPL-2.0",
       "repository": "https://github.com/dequelabs/axe-core",
+      "repositoryNote": null,
       "url": "https://www.deque.com/axe/",
       "noticeFile": "/licenses/axe-core.txt"
     },
@@ -383,6 +430,7 @@
       "version": "4.0.4",
       "license": "MIT",
       "repository": "https://github.com/juliangruber/balanced-match",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/balanced-match",
       "noticeFile": "/licenses/balanced-match.txt"
     },
@@ -391,6 +439,7 @@
       "version": "2.1.5",
       "license": "MIT",
       "repository": "https://github.com/connor4312/blake3",
+      "repositoryNote": null,
       "url": "https://github.com/connor4312/blake3#readme",
       "noticeFile": "/licenses/blake3-wasm.txt"
     },
@@ -399,6 +448,7 @@
       "version": "5.0.13",
       "license": "MIT",
       "repository": "https://github.com/juliangruber/brace-expansion",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/brace-expansion",
       "noticeFile": "/licenses/brace-expansion.txt"
     },
@@ -407,6 +457,7 @@
       "version": "4.1.1",
       "license": "MIT",
       "repository": "sindresorhus/bundle-name",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/bundle-name",
       "noticeFile": "/licenses/bundle-name.txt"
     },
@@ -415,6 +466,7 @@
       "version": "1.2.3",
       "license": "Apache-2.0",
       "repository": "https://github.com/GoogleChrome/chrome-launcher",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/chrome-launcher",
       "noticeFile": "/licenses/chrome-launcher.txt"
     },
@@ -423,6 +475,7 @@
       "version": "157.0.8090-0",
       "license": "Apache-2.0",
       "repository": "https://github.com/GoogleChromeLabs/chromium-bidi",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/chromium-bidi",
       "noticeFile": "/licenses/chromium-bidi.txt"
     },
@@ -431,6 +484,7 @@
       "version": "9.0.1",
       "license": "ISC",
       "repository": "yargs/cliui",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/cliui",
       "noticeFile": "/licenses/cliui.txt"
     },
@@ -439,6 +493,7 @@
       "version": "8.0.0",
       "license": "BSD-2-Clause",
       "repository": "sindresorhus/configstore",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/configstore",
       "noticeFile": "/licenses/configstore.txt"
     },
@@ -447,6 +502,7 @@
       "version": "1.1.1",
       "license": "MIT",
       "repository": "jshttp/cookie",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/cookie",
       "noticeFile": "/licenses/cookie.txt"
     },
@@ -455,6 +511,7 @@
       "version": "1.1.8",
       "license": "Apache-2.0",
       "repository": "https://github.com/google/csp-evaluator",
+      "repositoryNote": null,
       "url": "https://csp-evaluator.withgoogle.com/",
       "noticeFile": "/licenses/csp_evaluator.txt"
     },
@@ -463,6 +520,7 @@
       "version": "4.4.3",
       "license": "MIT",
       "repository": "https://github.com/debug-js/debug",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/debug",
       "noticeFile": "/licenses/debug.txt"
     },
@@ -471,6 +529,7 @@
       "version": "10.6.0",
       "license": "MIT",
       "repository": "https://github.com/MikeMcl/decimal.js",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/decimal.js",
       "noticeFile": "/licenses/decimal.js.txt"
     },
@@ -479,6 +538,7 @@
       "version": "5.5.1",
       "license": "MIT",
       "repository": "sindresorhus/default-browser",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/default-browser",
       "noticeFile": "/licenses/default-browser.txt"
     },
@@ -487,6 +547,7 @@
       "version": "5.0.1",
       "license": "MIT",
       "repository": "sindresorhus/default-browser-id",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/default-browser-id",
       "noticeFile": "/licenses/default-browser-id.txt"
     },
@@ -495,6 +556,7 @@
       "version": "3.0.0",
       "license": "MIT",
       "repository": "sindresorhus/define-lazy-prop",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/define-lazy-prop",
       "noticeFile": "/licenses/define-lazy-prop.txt"
     },
@@ -503,6 +565,7 @@
       "version": "2.1.2",
       "license": "Apache-2.0",
       "repository": "https://github.com/lovell/detect-libc",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/detect-libc",
       "noticeFile": "/licenses/detect-libc.txt"
     },
@@ -511,6 +574,7 @@
       "version": "0.0.1727723",
       "license": "BSD-3-Clause",
       "repository": "https://github.com/ChromeDevTools/devtools-protocol",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/devtools-protocol",
       "noticeFile": "/licenses/devtools-protocol.txt"
     },
@@ -519,6 +583,7 @@
       "version": "10.2.0",
       "license": "MIT",
       "repository": "sindresorhus/dot-prop",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/dot-prop",
       "noticeFile": "/licenses/dot-prop.txt"
     },
@@ -527,6 +592,7 @@
       "version": "17.4.2",
       "license": "BSD-2-Clause",
       "repository": "https://github.com/motdotla/dotenv",
+      "repositoryNote": null,
       "url": "https://github.com/motdotla/dotenv#readme",
       "noticeFile": "/licenses/dotenv.txt"
     },
@@ -535,6 +601,7 @@
       "version": "10.6.0",
       "license": "MIT",
       "repository": "https://github.com/mathiasbynens/emoji-regex",
+      "repositoryNote": null,
       "url": "https://mths.be/emoji-regex",
       "noticeFile": null
     },
@@ -543,6 +610,7 @@
       "version": "2.4.1",
       "license": "MIT",
       "repository": "enquirer/enquirer",
+      "repositoryNote": null,
       "url": "https://github.com/enquirer/enquirer",
       "noticeFile": "/licenses/enquirer.txt"
     },
@@ -551,6 +619,7 @@
       "version": "1.0.5",
       "license": "MIT",
       "repository": "https://github.com/antfu/error-stack-parser-es",
+      "repositoryNote": null,
       "url": "https://github.com/antfu/error-stack-parser-es#readme",
       "noticeFile": "/licenses/error-stack-parser-es.txt"
     },
@@ -559,6 +628,7 @@
       "version": "0.28.2",
       "license": "MIT",
       "repository": "https://github.com/evanw/esbuild",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/esbuild",
       "noticeFile": "/licenses/esbuild.txt"
     },
@@ -567,6 +637,7 @@
       "version": "3.2.0",
       "license": "MIT",
       "repository": "lukeed/escalade",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/escalade",
       "noticeFile": "/licenses/escalade.txt"
     },
@@ -575,6 +646,7 @@
       "version": "4.0.0",
       "license": "MIT",
       "repository": "sindresorhus/escape-string-regexp",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/escape-string-regexp",
       "noticeFile": "/licenses/escape-string-regexp.txt"
     },
@@ -583,6 +655,7 @@
       "version": "3.1.3",
       "license": "MIT",
       "repository": "https://github.com/epoberezkin/fast-deep-equal",
+      "repositoryNote": null,
       "url": "https://github.com/epoberezkin/fast-deep-equal#readme",
       "noticeFile": "/licenses/fast-deep-equal.txt"
     },
@@ -591,6 +664,7 @@
       "version": "3.1.9",
       "license": "BSD-3-Clause",
       "repository": "https://github.com/fastify/fast-uri",
+      "repositoryNote": null,
       "url": "https://github.com/fastify/fast-uri",
       "noticeFile": "/licenses/fast-uri.txt"
     },
@@ -599,6 +673,7 @@
       "version": "6.5.0",
       "license": "MIT",
       "repository": "https://github.com/thecodrr/fdir",
+      "repositoryNote": null,
       "url": "https://github.com/thecodrr/fdir#readme",
       "noticeFile": "/licenses/fdir.txt"
     },
@@ -607,6 +682,7 @@
       "version": "2.0.5",
       "license": "ISC",
       "repository": "https://github.com/stefanpenner/get-caller-file",
+      "repositoryNote": null,
       "url": "https://github.com/stefanpenner/get-caller-file#readme",
       "noticeFile": "/licenses/get-caller-file.txt"
     },
@@ -615,6 +691,7 @@
       "version": "1.7.0",
       "license": "MIT",
       "repository": "sindresorhus/get-east-asian-width",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/get-east-asian-width",
       "noticeFile": "/licenses/get-east-asian-width.txt"
     },
@@ -623,6 +700,7 @@
       "version": "14.0.6",
       "license": "BlueOak-1.0.0",
       "repository": "git@github.com:isaacs/node-glob",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/glob",
       "noticeFile": "/licenses/glob.txt"
     },
@@ -631,6 +709,7 @@
       "version": "4.2.12",
       "license": "BlueOak-1.0.0",
       "repository": "https://github.com/isaacs/node-graceful-fs",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/graceful-fs",
       "noticeFile": "/licenses/graceful-fs.txt"
     },
@@ -639,6 +718,7 @@
       "version": "1.1.4",
       "license": "MIT",
       "repository": "https://codeberg.org/jhermsmeier/node-http-link-header",
+      "repositoryNote": null,
       "url": "https://codeberg.org/jhermsmeier/node-http-link-header",
       "noticeFile": "/licenses/http-link-header.txt"
     },
@@ -647,6 +727,7 @@
       "version": "0.2.0",
       "license": "MIT",
       "repository": "darosh/image-ssim-js",
+      "repositoryNote": null,
       "url": "https://github.com/darosh/image-ssim-js/issues",
       "noticeFile": "/licenses/image-ssim.txt"
     },
@@ -655,6 +736,7 @@
       "version": "10.7.18",
       "license": "BSD-3-Clause",
       "repository": "git@github.com:formatjs/formatjs",
+      "repositoryNote": null,
       "url": "https://github.com/formatjs/formatjs",
       "noticeFile": "/licenses/intl-messageformat.txt"
     },
@@ -663,6 +745,7 @@
       "version": "2.2.1",
       "license": "MIT",
       "repository": "sindresorhus/is-docker",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/is-docker",
       "noticeFile": "/licenses/is-docker.txt"
     },
@@ -671,6 +754,7 @@
       "version": "1.0.0",
       "license": "MIT",
       "repository": "sindresorhus/is-in-ssh",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/is-in-ssh",
       "noticeFile": "/licenses/is-in-ssh.txt"
     },
@@ -679,6 +763,7 @@
       "version": "1.0.0",
       "license": "MIT",
       "repository": "sindresorhus/is-inside-container",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/is-inside-container",
       "noticeFile": "/licenses/is-inside-container.txt"
     },
@@ -687,6 +772,7 @@
       "version": "0.1.1",
       "license": "MIT",
       "repository": "sindresorhus/is-safe-filename",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/is-safe-filename",
       "noticeFile": "/licenses/is-safe-filename.txt"
     },
@@ -695,6 +781,7 @@
       "version": "2.2.0",
       "license": "MIT",
       "repository": "sindresorhus/is-wsl",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/is-wsl",
       "noticeFile": "/licenses/is-wsl.txt"
     },
@@ -703,6 +790,7 @@
       "version": "0.4.4",
       "license": "BSD-3-Clause",
       "repository": "https://github.com/eugeneware/jpeg-js",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/jpeg-js",
       "noticeFile": "/licenses/jpeg-js.txt"
     },
@@ -711,6 +799,7 @@
       "version": "6.7.0",
       "license": "MIT",
       "repository": "https://github.com/johnmichel/Library-Detector-for-Chrome",
+      "repositoryNote": null,
       "url": "https://github.com/johnmichel/Library-Detector-for-Chrome#readme",
       "noticeFile": "/licenses/js-library-detector.txt"
     },
@@ -719,6 +808,7 @@
       "version": "1.0.0",
       "license": "MIT",
       "repository": "https://github.com/epoberezkin/json-schema-traverse",
+      "repositoryNote": null,
       "url": "https://github.com/epoberezkin/json-schema-traverse#readme",
       "noticeFile": "/licenses/json-schema-traverse.txt"
     },
@@ -727,6 +817,7 @@
       "version": "4.1.5",
       "license": "MIT",
       "repository": "lukeed/kleur",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/kleur",
       "noticeFile": "/licenses/kleur.txt"
     },
@@ -735,6 +826,7 @@
       "version": "13.6.0",
       "license": "Apache-2.0",
       "repository": "https://github.com/GoogleChrome/lighthouse",
+      "repositoryNote": null,
       "url": "https://github.com/GoogleChrome/lighthouse#readme",
       "noticeFile": "/licenses/lighthouse.txt"
     },
@@ -743,6 +835,7 @@
       "version": "2.0.2",
       "license": "Apache-2.0",
       "repository": "https://github.com/GoogleChrome/lighthouse",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/lighthouse-logger",
       "noticeFile": "/licenses/lighthouse-logger.txt"
     },
@@ -751,6 +844,7 @@
       "version": "1.12.3",
       "license": "Apache-2.0",
       "repository": "GoogleChrome/lighthouse-stack-packs",
+      "repositoryNote": null,
       "url": "https://github.com/GoogleChrome/lighthouse-stack-packs#readme",
       "noticeFile": "/licenses/lighthouse-stack-packs.txt"
     },
@@ -759,6 +853,7 @@
       "version": "1.33.0",
       "license": "MPL-2.0",
       "repository": "https://github.com/parcel-bundler/lightningcss",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/lightningcss",
       "noticeFile": "/licenses/lightningcss.txt"
     },
@@ -767,6 +862,7 @@
       "version": "1.33.0",
       "license": "MPL-2.0",
       "repository": "https://github.com/parcel-bundler/lightningcss",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/lightningcss-win32-x64-msvc",
       "noticeFile": "/licenses/lightningcss-win32-x64-msvc.txt"
     },
@@ -775,6 +871,7 @@
       "version": "11.5.3",
       "license": "BlueOak-1.0.0",
       "repository": "https://github.com/isaacs/node-lru-cache",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/lru-cache",
       "noticeFile": "/licenses/lru-cache.txt"
     },
@@ -783,6 +880,7 @@
       "version": "1.4.5",
       "license": "MIT",
       "repository": "https://github.com/Rich-Harris/magic-string",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/magic-string",
       "noticeFile": "/licenses/magic-string.txt"
     },
@@ -791,6 +889,7 @@
       "version": "1.3.0",
       "license": "Apache-2.0",
       "repository": "https://github.com/nolanlawson/marky",
+      "repositoryNote": null,
       "url": "https://github.com/nolanlawson/marky#readme",
       "noticeFile": "/licenses/marky.txt"
     },
@@ -799,6 +898,7 @@
       "version": "5.20261113.0-beta",
       "license": "MIT",
       "repository": "https://github.com/cloudflare/workers-sdk",
+      "repositoryNote": null,
       "url": "https://github.com/cloudflare/workers-sdk/tree/main/packages/miniflare#readme",
       "noticeFile": null
     },
@@ -807,6 +907,7 @@
       "version": "11.0.8",
       "license": "BlueOak-1.0.0",
       "repository": "https://github.com/isaacs/minimatch",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/minimatch",
       "noticeFile": "/licenses/minimatch.txt"
     },
@@ -815,6 +916,7 @@
       "version": "7.1.3",
       "license": "BlueOak-1.0.0",
       "repository": "https://github.com/isaacs/minipass",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/minipass",
       "noticeFile": "/licenses/minipass.txt"
     },
@@ -823,6 +925,7 @@
       "version": "3.0.1",
       "license": "MIT",
       "repository": "developit/mitt",
+      "repositoryNote": null,
       "url": "https://github.com/developit/mitt",
       "noticeFile": "/licenses/mitt.txt"
     },
@@ -831,6 +934,7 @@
       "version": "0.8.6",
       "license": "MIT",
       "repository": "https://github.com/ayuhito/modern-tar",
+      "repositoryNote": null,
       "url": "https://github.com/ayuhito/modern-tar",
       "noticeFile": "/licenses/modern-tar.txt"
     },
@@ -839,6 +943,7 @@
       "version": "2.1.3",
       "license": "MIT",
       "repository": "vercel/ms",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/ms",
       "noticeFile": "/licenses/ms.txt"
     },
@@ -847,6 +952,7 @@
       "version": "3.3.20",
       "license": "MIT",
       "repository": "ai/nanoid",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/nanoid",
       "noticeFile": "/licenses/nanoid.txt"
     },
@@ -855,6 +961,7 @@
       "version": "11.0.4",
       "license": "MIT",
       "repository": "sindresorhus/open",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/open",
       "noticeFile": "/licenses/open.txt"
     },
@@ -863,6 +970,7 @@
       "version": "0.152.0",
       "license": "MIT",
       "repository": "https://github.com/oxc-project/oxc",
+      "repositoryNote": null,
       "url": "https://oxc.rs/docs/guide/usage/parser",
       "noticeFile": "/licenses/oxc-parser.txt"
     },
@@ -871,6 +979,7 @@
       "version": "3.0.0",
       "license": "BlueOak-1.0.0",
       "repository": "https://github.com/isaacs/path-scurry",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/path-scurry",
       "noticeFile": "/licenses/path-scurry.txt"
     },
@@ -879,6 +988,7 @@
       "version": "6.3.0",
       "license": "MIT",
       "repository": "https://github.com/pillarjs/path-to-regexp",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/path-to-regexp",
       "noticeFile": "/licenses/path-to-regexp.txt"
     },
@@ -887,6 +997,7 @@
       "version": "2.0.3",
       "license": "MIT",
       "repository": "unjs/pathe",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/pathe",
       "noticeFile": "/licenses/pathe.txt"
     },
@@ -895,6 +1006,7 @@
       "version": "1.1.1",
       "license": "ISC",
       "repository": "alexeyraspopov/picocolors",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/picocolors",
       "noticeFile": "/licenses/picocolors.txt"
     },
@@ -903,6 +1015,7 @@
       "version": "4.0.7",
       "license": "MIT",
       "repository": "micromatch/picomatch",
+      "repositoryNote": null,
       "url": "https://github.com/micromatch/picomatch",
       "noticeFile": "/licenses/picomatch.txt"
     },
@@ -911,6 +1024,7 @@
       "version": "1.65.1",
       "license": "Apache-2.0",
       "repository": "https://github.com/microsoft/playwright",
+      "repositoryNote": null,
       "url": "https://playwright.dev",
       "noticeFile": "/licenses/playwright.txt"
     },
@@ -919,6 +1033,7 @@
       "version": "1.65.1",
       "license": "Apache-2.0",
       "repository": "https://github.com/microsoft/playwright",
+      "repositoryNote": null,
       "url": "https://playwright.dev",
       "noticeFile": "/licenses/playwright-core.txt"
     },
@@ -927,6 +1042,7 @@
       "version": "8.5.33",
       "license": "MIT",
       "repository": "postcss/postcss",
+      "repositoryNote": null,
       "url": "https://postcss.org/",
       "noticeFile": "/licenses/postcss.txt"
     },
@@ -935,14 +1051,25 @@
       "version": "0.2.1",
       "license": "MIT",
       "repository": "sindresorhus/powershell-utils",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/powershell-utils",
       "noticeFile": "/licenses/powershell-utils.txt"
+    },
+    {
+      "name": "prettier",
+      "version": "3.10.1",
+      "license": "MIT",
+      "repository": "prettier/prettier",
+      "repositoryNote": null,
+      "url": "https://prettier.io",
+      "noticeFile": "/licenses/prettier.txt"
     },
     {
       "name": "puppeteer-core",
       "version": "25.17.0",
       "license": "Apache-2.0",
       "repository": "https://github.com/puppeteer/puppeteer/tree/main/packages/puppeteer-core",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/puppeteer-core",
       "noticeFile": null
     },
@@ -951,6 +1078,7 @@
       "version": "19.3.1",
       "license": "MIT",
       "repository": "https://github.com/react/react",
+      "repositoryNote": null,
       "url": "https://react.dev/",
       "noticeFile": "/licenses/react.txt"
     },
@@ -959,6 +1087,7 @@
       "version": "19.3.1",
       "license": "MIT",
       "repository": "https://github.com/react/react",
+      "repositoryNote": null,
       "url": "https://react.dev/",
       "noticeFile": "/licenses/react-dom.txt"
     },
@@ -967,6 +1096,7 @@
       "version": "2.0.2",
       "license": "MIT",
       "repository": "floatdrop/require-from-string",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/require-from-string",
       "noticeFile": "/licenses/require-from-string.txt"
     },
@@ -975,6 +1105,7 @@
       "version": "3.0.1",
       "license": "MIT",
       "repository": "https://github.com/samclarke/robots-parser",
+      "repositoryNote": null,
       "url": "https://github.com/samclarke/robots-parser",
       "noticeFile": "/licenses/robots-parser.txt"
     },
@@ -983,6 +1114,7 @@
       "version": "1.2.19",
       "license": "MIT",
       "repository": "https://github.com/rolldown/rolldown",
+      "repositoryNote": null,
       "url": "https://rolldown.rs/",
       "noticeFile": "/licenses/rolldown.txt"
     },
@@ -991,6 +1123,7 @@
       "version": "7.1.0",
       "license": "MIT",
       "repository": "sindresorhus/run-applescript",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/run-applescript",
       "noticeFile": "/licenses/run-applescript.txt"
     },
@@ -999,6 +1132,7 @@
       "version": "0.28.0",
       "license": "MIT",
       "repository": "https://github.com/react/react",
+      "repositoryNote": null,
       "url": "https://react.dev/",
       "noticeFile": "/licenses/scheduler.txt"
     },
@@ -1007,6 +1141,7 @@
       "version": "7.8.6",
       "license": "ISC",
       "repository": "https://github.com/npm/node-semver",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/semver",
       "noticeFile": "/licenses/semver.txt"
     },
@@ -1015,6 +1150,7 @@
       "version": "0.49.0",
       "license": "FSL-1.1-Apache-2.0",
       "repository": "https://github.com/getsentry/toolkit",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/sentry",
       "noticeFile": "/licenses/sentry.txt"
     },
@@ -1023,6 +1159,7 @@
       "version": "0.35.5",
       "license": "Apache-2.0",
       "repository": "https://github.com/lovell/sharp",
+      "repositoryNote": null,
       "url": "https://sharp.pixelplumbing.com",
       "noticeFile": "/licenses/sharp.txt"
     },
@@ -1031,6 +1168,7 @@
       "version": "1.2.2",
       "license": "BSD-3-Clause",
       "repository": "7rulnik/source-map-js",
+      "repositoryNote": null,
       "url": "https://github.com/7rulnik/source-map-js",
       "noticeFile": "/licenses/source-map-js.txt"
     },
@@ -1039,6 +1177,7 @@
       "version": "1.4.3",
       "license": "MIT",
       "repository": "https://github.com/paulirish/speedline",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/speedline-core",
       "noticeFile": null
     },
@@ -1047,6 +1186,7 @@
       "version": "8.3.0",
       "license": "MIT",
       "repository": "sindresorhus/string-width",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/string-width",
       "noticeFile": "/licenses/string-width.txt"
     },
@@ -1055,6 +1195,7 @@
       "version": "6.0.1",
       "license": "MIT",
       "repository": "chalk/strip-ansi",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/strip-ansi",
       "noticeFile": "/licenses/strip-ansi.txt"
     },
@@ -1063,6 +1204,7 @@
       "version": "2.0.0",
       "license": "MIT",
       "repository": "github:fabiospampinato/stubborn-fs",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/stubborn-fs",
       "noticeFile": "/licenses/stubborn-fs.txt"
     },
@@ -1071,6 +1213,7 @@
       "version": "1.0.2",
       "license": "MIT",
       "repository": "github:fabiospampinato/stubborn-utils",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/stubborn-utils",
       "noticeFile": "/licenses/stubborn-utils.txt"
     },
@@ -1079,6 +1222,7 @@
       "version": "10.2.2",
       "license": "MIT",
       "repository": "chalk/supports-color",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/supports-color",
       "noticeFile": "/licenses/supports-color.txt"
     },
@@ -1087,6 +1231,7 @@
       "version": "1.0.0",
       "license": "MIT",
       "repository": "sindresorhus/tagged-tag",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/tagged-tag",
       "noticeFile": "/licenses/tagged-tag.txt"
     },
@@ -1095,6 +1240,7 @@
       "version": "0.30.0",
       "license": "MIT",
       "repository": "https://github.com/patrickhulce/third-party-web",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/third-party-web",
       "noticeFile": "/licenses/third-party-web.txt"
     },
@@ -1103,6 +1249,7 @@
       "version": "0.187.0",
       "license": "MIT",
       "repository": "https://github.com/mrdoob/three.js",
+      "repositoryNote": null,
       "url": "https://threejs.org/",
       "noticeFile": "/licenses/three.txt"
     },
@@ -1111,6 +1258,7 @@
       "version": "0.2.17",
       "license": "MIT",
       "repository": "https://github.com/SuperchupuDev/tinyglobby",
+      "repositoryNote": null,
       "url": "https://superchupu.dev/tinyglobby",
       "noticeFile": "/licenses/tinyglobby.txt"
     },
@@ -1119,6 +1267,7 @@
       "version": "7.5.2",
       "license": "MIT",
       "repository": "https://github.com/remusao/tldts",
+      "repositoryNote": null,
       "url": "https://github.com/remusao/tldts#readme",
       "noticeFile": "/licenses/tldts-core.txt"
     },
@@ -1127,6 +1276,7 @@
       "version": "7.5.2",
       "license": "MIT",
       "repository": "https://github.com/remusao/tldts",
+      "repositoryNote": null,
       "url": "https://github.com/remusao/tldts#readme",
       "noticeFile": "/licenses/tldts-icann.txt"
     },
@@ -1135,6 +1285,7 @@
       "version": "2.9.1",
       "license": "0BSD",
       "repository": "https://github.com/Microsoft/tslib",
+      "repositoryNote": null,
       "url": "https://www.typescriptlang.org/",
       "noticeFile": "/licenses/tslib.txt"
     },
@@ -1143,6 +1294,7 @@
       "version": "5.10.0",
       "license": "(MIT OR CC0-1.0)",
       "repository": "sindresorhus/type-fest",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/type-fest",
       "noticeFile": null
     },
@@ -1151,6 +1303,7 @@
       "version": "2.12.3",
       "license": "MIT",
       "repository": "g-plane/typed-query-selector",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/typed-query-selector",
       "noticeFile": "/licenses/typed-query-selector.txt"
     },
@@ -1159,6 +1312,7 @@
       "version": "7.30.1",
       "license": "MIT",
       "repository": "https://github.com/nodejs/undici",
+      "repositoryNote": null,
       "url": "https://undici.nodejs.org",
       "noticeFile": "/licenses/undici.txt"
     },
@@ -1167,6 +1321,7 @@
       "version": "8.9.0",
       "license": "MIT",
       "repository": "https://github.com/nodejs/undici",
+      "repositoryNote": null,
       "url": "https://undici.nodejs.org",
       "noticeFile": "/licenses/undici-types.txt"
     },
@@ -1175,6 +1330,7 @@
       "version": "2.0.0-rc.24",
       "license": "MIT",
       "repository": "unjs/unenv",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/unenv",
       "noticeFile": "/licenses/unenv.txt"
     },
@@ -1183,6 +1339,7 @@
       "version": "8.3.8",
       "license": "MIT",
       "repository": "https://github.com/vitejs/vite",
+      "repositoryNote": null,
       "url": "https://vite.dev",
       "noticeFile": "/licenses/vite.txt"
     },
@@ -1191,6 +1348,7 @@
       "version": "1.0.2",
       "license": "Apache-2.0",
       "repository": "https://github.com/GoogleChromeLabs/webdriver-bidi-protocol",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/webdriver-bidi-protocol",
       "noticeFile": "/licenses/webdriver-bidi-protocol.txt"
     },
@@ -1199,6 +1357,7 @@
       "version": "2.1.5",
       "license": "MIT",
       "repository": "github:fabiospampinato/when-exit",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/when-exit",
       "noticeFile": "/licenses/when-exit.txt"
     },
@@ -1207,6 +1366,7 @@
       "version": "1.20261113.1",
       "license": "Apache-2.0",
       "repository": "https://github.com/cloudflare/workerd",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/workerd",
       "noticeFile": null
     },
@@ -1215,6 +1375,7 @@
       "version": "4.162.0",
       "license": "MIT OR Apache-2.0",
       "repository": "https://github.com/cloudflare/workers-sdk",
+      "repositoryNote": null,
       "url": "https://github.com/cloudflare/workers-sdk#readme",
       "noticeFile": null
     },
@@ -1223,6 +1384,7 @@
       "version": "9.0.2",
       "license": "MIT",
       "repository": "chalk/wrap-ansi",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/wrap-ansi",
       "noticeFile": "/licenses/wrap-ansi.txt"
     },
@@ -1231,6 +1393,7 @@
       "version": "8.23.0",
       "license": "MIT",
       "repository": "https://github.com/websockets/ws",
+      "repositoryNote": null,
       "url": "https://github.com/websockets/ws",
       "noticeFile": "/licenses/ws.txt"
     },
@@ -1239,6 +1402,7 @@
       "version": "1.0.1",
       "license": "MIT",
       "repository": "sindresorhus/wsl-utils",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/wsl-utils",
       "noticeFile": "/licenses/wsl-utils.txt"
     },
@@ -1247,6 +1411,7 @@
       "version": "5.1.0",
       "license": "MIT",
       "repository": "sindresorhus/xdg-basedir",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/xdg-basedir",
       "noticeFile": "/licenses/xdg-basedir.txt"
     },
@@ -1255,6 +1420,7 @@
       "version": "5.0.8",
       "license": "ISC",
       "repository": "yargs/y18n",
+      "repositoryNote": null,
       "url": "https://github.com/yargs/y18n",
       "noticeFile": "/licenses/y18n.txt"
     },
@@ -1263,6 +1429,7 @@
       "version": "18.2.0",
       "license": "MIT",
       "repository": "https://github.com/yargs/yargs",
+      "repositoryNote": null,
       "url": "https://yargs.js.org/",
       "noticeFile": "/licenses/yargs.txt"
     },
@@ -1271,6 +1438,7 @@
       "version": "22.0.0",
       "license": "ISC",
       "repository": "https://github.com/yargs/yargs-parser",
+      "repositoryNote": null,
       "url": "https://www.npmjs.com/package/yargs-parser",
       "noticeFile": "/licenses/yargs-parser.txt"
     },
@@ -1279,6 +1447,7 @@
       "version": "4.1.0-beta.10",
       "license": "MIT",
       "repository": "https://github.com/poppinss/youch",
+      "repositoryNote": null,
       "url": "https://github.com/poppinss/youch#readme",
       "noticeFile": "/licenses/youch.txt"
     },
@@ -1287,6 +1456,7 @@
       "version": "0.3.3",
       "license": "MIT",
       "repository": "https://github.com/poppinss/youch-core",
+      "repositoryNote": null,
       "url": "https://github.com/poppinss/youch-core#readme",
       "noticeFile": "/licenses/youch-core.txt"
     },
@@ -1295,6 +1465,7 @@
       "version": "4.6.7",
       "license": "MIT",
       "repository": "https://github.com/colinhacks/zod",
+      "repositoryNote": null,
       "url": "https://zod.dev",
       "noticeFile": "/licenses/zod.txt"
     }

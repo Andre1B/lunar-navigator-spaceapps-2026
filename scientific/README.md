@@ -10,6 +10,7 @@ pip install -r requirements.txt
 ./fetch_data.sh                                   # ~520 MB into cache/ (not versioned)
 PYTHONPATH=. python -P build_scenes.py            # writes public/data/{manifest,sky}.json and sites/*.json
 PYTHONPATH=. python -P validate.py --horizons     # writes public/data/validation.json
+PYTHONPATH=. python -P build_planets.py           # optional visual context: public/data/planets.json
 ```
 
 `--horizons` sends 8 serial requests to the JPL Horizons API (one at a time, identifying User-Agent, responses cached in `cache/horizons/`). Omit it to keep V1 pending.

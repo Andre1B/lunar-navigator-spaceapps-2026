@@ -43,3 +43,5 @@ PYTHONPATH=. python -P validate.py --horizons
 - Read-only review of the frontend (`src/lib/analysis.mjs`, `src/components/SpaceScene.jsx`, `Horizon.jsx`) sent to the coordinator. No frontend files edited.
 - Pinned requirements.txt to numpy 2.5.3, spiceypy 8.4.0 (CSPICE N0067) and tifffile 2026.9.20. pyshp is optional and not imported. Pillow is NOT used.
 - Reviewed the second SpaceScene revision and eventSummary (read-only) and sent the exact credits list to the coordinator.
+- Added build_planets.py, which writes public/data/planets.json (375 KB). It has 7 planets over the same period: Moon-centred J2000 positions with LT+S, PCK mean radii, and system barycentres labelled as proxies for Mars through Neptune. Visual only and not validated against Horizons.
+- Added public/demo/ (index.html, demo.css, demo.js): six slides in English. External JS because the CSP is script-src self. Checked in the headless preview: slide 1 and slide 4 at 1280x720, slide 5 at 390x844, no console errors. No screenshots of the app were embedded.

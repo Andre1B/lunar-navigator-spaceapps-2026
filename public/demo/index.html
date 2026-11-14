@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lunar Navigator · Demo</title>
+<meta name="description" content="Six-slide demo of Lunar Navigator, Team An0r4k's NASA Space Apps Challenge 2026 project for the Lunar Landing Site Navigator challenge.">
+<link rel="icon" href="/icon.svg">
+<link rel="stylesheet" href="demo.css">
+</head>
+<body>
+<main class="deck" id="deck" aria-roledescription="slide deck" aria-label="Lunar Navigator demo">
+
+<section class="slide" aria-roledescription="slide" aria-label="1 of 6">
+  <p class="kicker">Team An0r4k · NASA Space Apps Challenge 2026 · Lunar Landing Site Navigator</p>
+  <h1>When the landing date slips,<br>does the site still work?</h1>
+  <p class="lead">Lunar Navigator compares lunar south-pole sites and dates by showing where the Sun and Earth sit against the <em>real terrain horizon</em>. It is built for planners, educators and the public.</p>
+  <p class="links"><a href="https://lunar-navigator-2026.pages.dev/">Open the app</a><a href="https://lunar-navigator-2026.pages.dev/#/evidence">Evidence</a><a href="https://github.com/Andre1B/lunar-navigator-spaceapps-2026">Source code</a></p>
+</section>
+
+<section class="slide" aria-roledescription="slide" aria-label="2 of 6">
+  <p class="kicker">The problem</p>
+  <h2>At the pole, one degree of terrain decides</h2>
+  <div class="cols">
+    <div>
+      <p>Near the south pole the Sun skims the horizon. A ridge 10–20 km away can block it, and a ridge you stand on can let you see it below your own horizontal plane.</p>
+      <p>Existing tools such as QuickMap, Moon Trek and JPL Horizons are built for detailed analysis. Comparing many site-and-date options quickly is still slow.</p>
+    </div>
+    <div class="stat">
+      <span class="num">−2.00° to −0.09°</span>
+      <span>Sun elevation relative to the local horizontal at Connecting ridge, March–April 2027. It never rises above that plane.</span>
+      <span class="num">48% → 67%</span>
+      <span>Mean visible fraction of the solar disk there anyway, at 1 m and 5 m above the ground. The ridge looks down over lower terrain.</span>
+    </div>
+  </div>
+</section>
+
+<section class="slide" aria-roledescription="slide" aria-label="3 of 6">
+  <p class="kicker">What we built</p>
+  <h2>Guided Mission and Open Workspace</h2>
+  <ul class="grid">
+    <li><strong>Guided Mission</strong>: about 10 minutes from the question to the evidence.</li>
+    <li><strong>Open Workspace</strong>: every step is open at once, for judges and planners.</li>
+    <li><strong>Delay comparison</strong>: move the arrival date and compare sunlight, the longest period without direct Sun and Earth line of sight.</li>
+    <li><strong>Surface sky</strong>: Sun and Earth at true angular size and direction above a 720-point terrain horizon.</li>
+    <li><strong>Faithful Mode</strong>: one shared physical clock for every body.</li>
+    <li><strong>Free Mode</strong>: freeze bodies one at a time to explore. Every freeze is labelled artificial and gives no recommendations.</li>
+  </ul>
+</section>
+
+<section class="slide" aria-roledescription="slide" aria-label="4 of 6">
+  <p class="kicker">The science</p>
+  <h2>Published NASA data, computed offline</h2>
+  <div class="cols">
+    <ul class="plain">
+      <li><strong>Terrain</strong>: nested LOLA elevation models. PGDA 5 m within 5 km, PDS 80 m from 5 to 100 km, PDS 240 m beyond.</li>
+      <li><strong>Horizon</strong>: 720 great-circle sight lines with exact spherical geometry, following Mazarico et al. 2011 and Barker et al. 2021.</li>
+      <li><strong>Ephemerides</strong>: NAIF SPICE (DE440), observer fixed in the Moon's mean-Earth frame, light time and aberration included.</li>
+      <li><strong>Sites</strong>: four points from published LOLA studies. They are not selected landing sites.</li>
+    </ul>
+    <table>
+      <caption>Longest period without direct Sun, March–April 2027</caption>
+      <thead><tr><th>Point</th><th>1 m</th><th>5 m</th></tr></thead>
+      <tbody>
+        <tr><td>Connecting ridge</td><td>132 h</td><td>85 h</td></tr>
+        <tr><td>Shackleton rim</td><td>231 h</td><td>118 h</td></tr>
+        <tr><td>Nobile rim 1</td><td>217 h</td><td>107 h</td></tr>
+        <tr><td>Malapert massif</td><td>289 h</td><td>144 h</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="slide" aria-roledescription="slide" aria-label="5 of 6">
+  <p class="kicker">Show your work</p>
+  <h2>How we know the numbers hold</h2>
+  <table class="wide">
+    <thead><tr><th>Check</th><th>Target</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Sun and Earth vs JPL Horizons, 40 instants</td><td>p95 &lt; 0.01°</td><td>Agree to Horizons' printed 1e-6°</td></tr>
+      <tr><td>5 m vs 80 m elevation datum and registration</td><td>|median| &lt; 2 m, no shift</td><td>0.20–0.27 m, best shift (0, 0)*</td></tr>
+      <tr><td>Horizon range convergence (300 km vs full)</td><td>&lt; 0.01°</td><td>0.000°</td></tr>
+      <tr><td>Reproduce Barker et al. 2021 (2024–2026, 1 m)</td><td>&gt; 0.70</td><td>0.783 and 0.708</td></tr>
+      <tr><td>Permanently shadowed pixel in Shackleton</td><td>0 direct Sun</td><td>0 over 2024–2026</td></tr>
+    </tbody>
+  </table>
+  <p class="note">* This target was written after an exploratory run. The full record is in the app's Evidence page and in <code>data/validation.json</code>.</p>
+</section>
+
+<section class="slide" aria-roledescription="slide" aria-label="6 of 6">
+  <p class="kicker">Limits and links</p>
+  <h2>Geometry, honestly labelled</h2>
+  <div class="cols">
+    <ul class="plain">
+      <li>Earth line of sight does not mean a guaranteed radio link. DSN coverage is not modelled.</li>
+      <li>Sunlight is not power, and darkness alone does not size a battery.</li>
+      <li>Results cover the stated period only. Windows shorter than 5 minutes may be missed.</li>
+      <li>AI coding assistants helped write the code. Every number is computed from NASA data, not produced by a language model.</li>
+    </ul>
+    <p class="links stack">
+      <a href="https://lunar-navigator-2026.pages.dev/">App</a>
+      <a href="https://lunar-navigator-2026.pages.dev/#/evidence">Evidence and validation</a>
+      <a href="https://lunar-navigator-2026.pages.dev/#/credits">Credits and licenses</a>
+      <a href="https://github.com/Andre1B/lunar-navigator-spaceapps-2026">GitHub (Apache-2.0)</a>
+    </p>
+  </div>
+</section>
+
+</main>
+<nav class="controls" aria-label="Slide navigation">
+  <button id="prev" type="button" aria-label="Previous slide">←</button>
+  <span id="count" aria-live="polite">1 / 6</span>
+  <button id="next" type="button" aria-label="Next slide">→</button>
+</nav>
+<script src="demo.js"></script>
+</body>
+</html>
