@@ -1,13 +1,21 @@
 {
-  "recordedAtUtc": "2026-11-15T05:11:10.379731+00:00",
+  "recordedAtUtc": "2026-11-15T05:30:00Z",
   "site": "https://lunar-navigator-2026.pages.dev/",
-  "status": "published-focused-qa-and-hardware-lighthouse-passed-daily-delivery-pending",
-  "currentSourceCommit": "2b910fc712e6ac4f076a318e15cf20db0c076d69",
+  "status": "release-candidate-daily-delivery-proved",
+  "currentSourceCommit": "dd0d3e9c0a06625f8058b5fda20edf330b4d0502",
   "currentProduction": {
-    "sourceCommit": "2b910fc712e6ac4f076a318e15cf20db0c076d69",
-    "deployment": "ea180be8-9edf-4e96-96a2-d4107636809c",
+    "sourceCommit": "dd0d3e9c0a06625f8058b5fda20edf330b4d0502",
+    "deployment": "b7e8780b-6db8-4941-84bc-70c24d815d44",
     "buildDirty": false,
     "trigger": "github:push",
+    "appSourceUnchangedSince": "2b910fc712e6ac4f076a318e15cf20db0c076d69",
+    "publicDataHashes": {
+      "pass": 10,
+      "fail": 0,
+      "integrityJsonIdentical": true,
+      "manifestGeneratedAtUtc": "2026-11-15T05:04:58Z",
+      "sampleCount": 17521
+    },
     "knownFailure": null
   },
   "checks": {
@@ -226,15 +234,33 @@
       "run": "https://github.com/Andre1B/lunar-navigator-spaceapps-2026/actions/runs/43678852498",
       "conclusion": "success",
       "generatedCommit": "9de89804132b8f060dd1d685d9f5801ccbddf2cf",
-      "steps": "Fresh Linux locked-input fetch, full regeneration/validation, integrity,168tests,credits191packages,build,botcommit,cleanbuild passed",
-      "publicDelivery": "Pending: bot commit pushed05:05:43UTC, Cloudflare canonical still2b910fc at last read. Do not claim automatic Pages delivery."
+      "steps": "Fresh Linux locked-input fetch, full regeneration and validation, integrity, 168 tests, credits 191 packages, build, bot commit, clean build passed",
+      "publicDelivery": {
+        "proved": true,
+        "deployment": "7624424a-2372-4a85-964c-83edf290a5db",
+        "trigger": "github:push",
+        "commit": "9de89804132b8f060dd1d685d9f5801ccbddf2cf",
+        "buildDirty": false,
+        "createdUtc": "2026-11-15T05:05:46Z",
+        "deployEndedUtc": "2026-11-15T05:06:47Z",
+        "note": "Bot push with the workflow token triggered the Pages Git integration; no deploy hook or extra credential. The first read of history was too early."
+      },
+      "scheduledTrigger": "03:37 UTC daily, same publish step; first scheduled execution not yet observed at this record"
+    },
+    "demoNumbersRecomputed": {
+      "pass": true,
+      "method": "eventSummary on regenerated data, 2027-03-01 + 58 days",
+      "examples": {
+        "malapert-massif": "289 h -> 144 h, mean Sun 32% -> 68%",
+        "connecting-ridge": "132 h -> 85 h, Sun elevation -2.00 to -0.09 deg"
+      }
     }
   },
   "pending": [
-    "Demonstrate Pages deployment of a daily bot refresh without human push",
-    "Final current-data release identity/smoke after Linux regeneration",
-    "Any binding submission/eligibility confirmation; AI ideation interpretation unresolved",
-    "29-second video rendering/upload, if choosing video instead of prepared six-slide demo"
+    "First scheduled (cron) daily run and its deployment",
+    "Team/event confirmation, binding Terms and original-work assent (human)",
+    "Interpretation of AI-assisted ideation remains unresolved; no eligibility certification",
+    "Choice of six-slide demo or a recorded 29-second video"
   ],
   "limitations": [
     "Software-GPU performance failed in the recorded comparison.",
@@ -498,6 +524,19 @@
           }
         }
       }
+    },
+    "beforeDailyDeliveryProof": {
+      "recordedAtUtc": "2026-11-15T05:11:10.379731+00:00",
+      "status": "published-focused-qa-and-hardware-lighthouse-passed-daily-delivery-pending",
+      "currentSourceCommit": "2b910fc712e6ac4f076a318e15cf20db0c076d69",
+      "currentProduction": {
+        "sourceCommit": "2b910fc712e6ac4f076a318e15cf20db0c076d69",
+        "deployment": "ea180be8-9edf-4e96-96a2-d4107636809c",
+        "buildDirty": false,
+        "trigger": "github:push",
+        "knownFailure": null
+      }
     }
-  }
+  },
+  "releaseCandidate": "release-candidate-2026-11-15-1"
 }
