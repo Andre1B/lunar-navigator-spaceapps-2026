@@ -9,12 +9,16 @@ import {dirname,join,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {Quaternion} from 'three';
 import {interpolateBodyQuaternion} from '../src/lib/sceneGeometry.mjs';
+import {comparisonRows} from '../src/lib/comparisonReport.mjs';
+import {percent,windowBounds} from '../src/lib/analysis.mjs';
 
 const ROOT=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const BASE=(process.env.QA_URL||'http://localhost:5173').replace(/\/$/,'');
 const OUT=process.env.QA_OUT?resolve(process.env.QA_OUT):resolve(ROOT,'..','tmp','lunar-new-ui');
 const manifest=JSON.parse(readFileSync(join(ROOT,'public/data/manifest.json'),'utf8'));
 const skyData=JSON.parse(readFileSync(join(ROOT,'public/data/sky.json'),'utf8'));
+const siteData=Object.fromEntries(manifest.sites.map(s=>[s.id,JSON.parse(readFileSync(join(ROOT,'public/data',s.file),'utf8'))]));
+const dataset={manifest,sites:siteData};
 const results=[],issues={console:[],page:[],http:[],requestfailed:[]},contexts=[];
 mkdirSync(OUT,{recursive:true});
 const fail=(m)=>{throw new Error(m);};
@@ -300,6 +304,9 @@ await check('Home delay briefing recomputes two real rows and its CTA applies th
   const briefing=page.locator('.delay-briefing');await briefing.waitFor();
   const rows=briefing.locator('.briefing-results article');await rows.first().waitFor({timeout:30000});
   if(await rows.count()!==2)fail(`delay briefing should show two comparison rows, got ${await rows.count()}`);
+  const featuredDate='2027-02-09',date=[3,7,14].every(delay=>windowBounds(manifest.period,featuredDate,7,delay))?featuredDate:manifest.coveragePolicy.asOfUtcDate;
+  const heading=await briefing.locator('.hl-kicker').innerText();
+  if(!heading.includes('Shackleton rim')||!heading.includes('1 m above the ground')||!heading.includes('7-day stay'))fail(`featured home example does not describe Shackleton rim / 1 m / 7 days: ${heading}`);
   const signatures=[];
   for(const delay of [3,7,14]){
     const b=briefing.getByRole('button',{name:`+${delay} days`,exact:true});await b.click();
@@ -307,14 +314,95 @@ await check('Home delay briefing recomputes two real rows and its CTA applies th
     await page.waitForFunction(d=>document.querySelector('.delay-briefing .briefing-results')?.textContent.includes(`Arrive ${d} days later`),delay,{timeout:5000});
     if(await rows.count()!==2)fail(`+${delay} days produced ${await rows.count()} rows`);
     const values=await rows.allTextContents();if(values.some(t=>/Not calculated|Loading the real/i.test(t)))fail(`+${delay} days did not produce calculated data`);
+    const expected=comparisonRows(dataset,{siteId:'shackleton-rim',alternative:'connecting-ridge',height:1,date,days:7,delay});
+    const rendered=await rows.evaluateAll(nodes=>nodes.map(n=>({heading:n.querySelector('h3')?.textContent.trim(),number:n.querySelector('.hl-num')?.textContent.trim(),metrics:n.querySelector('p:not(.hl-num)')?.textContent.replace(/\s+/g,' ').trim()})));
+    const fmtDay=(value)=>new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(`${value}T00:00:00Z`));
+    for(const [i,r] of expected.slice(0,2).entries()){
+      const wantNumber=r.summary.dark.hours.toFixed(1)+' h';
+      if(rendered[i].heading!==`Arrive ${fmtDay(i===0?date:new Date(Date.parse(`${date}T00:00:00Z`)+delay*86400000).toISOString().slice(0,10))}`&&i===0)fail(`base briefing row date differs from comparisonRows: ${JSON.stringify(rendered[i])}`);
+      if(i===1&&rendered[i].heading!==`Arrive ${delay} days later`)fail(`delayed briefing row heading is wrong: ${JSON.stringify(rendered[i])}`);
+      if(!rendered[i].number?.includes(wantNumber))fail(`briefing row ${i} longest-dark value differs from comparisonRows: expected ${wantNumber}, got ${rendered[i].number}`);
+      const wantMetrics=`Sun visible ${percent(r.summary.sunlitFraction)} of the stay · Earth ${percent(r.summary.earthFraction)}`;
+      if(!rendered[i].metrics?.includes(wantMetrics))fail(`briefing row ${i} percentages differ from comparisonRows: expected ${wantMetrics}, got ${rendered[i].metrics}`);
+    }
     signatures.push(values.join('|'));
     if(delay===14){await briefing.getByRole('button',{name:/Change the place, date or height/}).click();await page.waitForFunction(()=>location.hash==='#/compare',null,{timeout:10000});}
   }
   if(new Set(signatures).size<2)fail('delay choices did not change the comparison rows');
   const applied={site:await page.locator('#site').inputValue(),alternative:await page.locator('#alternative').inputValue(),height:await page.locator('#height').inputValue(),date:await page.locator('#arrival').inputValue(),days:await page.locator('#days').inputValue(),delay:await page.locator('#delay').inputValue()};
-  const expected={site:'connecting-ridge',alternative:'shackleton-rim',height:'1',date:manifest.coveragePolicy.asOfUtcDate,days:'7',delay:'14'};
+  const expected={site:'shackleton-rim',alternative:'connecting-ridge',height:'1',date,days:'7',delay:'14'};
   if(JSON.stringify(applied)!==JSON.stringify(expected))fail(`Home briefing CTA did not apply its settings: expected ${JSON.stringify(expected)}, got ${JSON.stringify(applied)}`);
-  await ctx.close();return `three delays update two rows; Compare receives ${JSON.stringify(applied)}`;
+  const figures=page.locator('.hl-compare');await figures.waitFor({timeout:10000});
+  const compareRows=comparisonRows(dataset,{siteId:expected.site,alternative:expected.alternative,height:1,date:expected.date,days:7,delay:14});
+  const ledger=await figures.locator('.hl-ledger svg[role="img"]').getAttribute('aria-label');
+  for(const r of compareRows){
+    for(const text of [`${r.summary.dark.hours.toFixed(1)} h`,`Sun visible ${percent(r.summary.sunlitFraction)}`,`Earth visible ${percent(r.summary.earthFraction)}`])
+      if(!ledger.includes(text))fail(`Compare ledger is missing ${text} from comparisonRows: ${ledger}`);
+  }
+  await ctx.close();return `featured ${heading}; each Home row and all three Compare ledger rows match comparisonRows; Compare receives ${JSON.stringify(applied)}`;
+});
+
+await check('comparison link copies six settings and restores the same computed cards in a fresh context',async()=>{
+  const settings={site:'nobile-rim-1',h:'2',arr:'2026-11-16',days:'14',delay:'3',alt:'connecting-neighbor'};
+  const {ctx,page}=await context(browser,'share-link-copy',{webglBlocked:true});
+  await ctx.grantPermissions(['clipboard-read','clipboard-write'],{origin:new URL(BASE).origin});
+  await go(page,'compare');
+  await page.locator('#site').selectOption(settings.site);await page.locator('#alternative').selectOption(settings.alt);
+  await page.locator('#height').selectOption(settings.h);await page.locator('#arrival').fill(settings.arr);
+  await page.locator('#days').selectOption(settings.days);await page.locator('#delay').selectOption(settings.delay);
+  const copy=page.getByRole('button',{name:'Copy comparison link',exact:true});await copy.click();
+  await page.getByRole('status').filter({hasText:'Link copied.'}).waitFor({timeout:3000});
+  const link=await page.locator('.share-url input[readonly]').inputValue();
+  const clipboard=await page.evaluate(()=>navigator.clipboard.readText());
+  if(link!==clipboard)fail(`copied link differs from read-only URL: ${JSON.stringify({link,clipboard})}`);
+  const params=new URL(link).hash.split('?')[1];const actual=Object.fromEntries(new URLSearchParams(params));
+  if(JSON.stringify(actual)!==JSON.stringify(settings))fail(`share URL does not contain the six current settings: ${JSON.stringify({settings,actual})}`);
+  const original=await page.locator('.answer-scenario').allTextContents();
+  const {ctx:restoredCtx,page:restored}=await context(browser,'share-link-restore',{webglBlocked:true});
+  await restored.goto(link,{waitUntil:'networkidle',timeout:60000});
+  await restored.locator('#site').waitFor();await restored.getByRole('status').filter({hasText:'Settings restored from a link'}).waitFor({timeout:5000});
+  const restoredSettings={site:await restored.locator('#site').inputValue(),alt:await restored.locator('#alternative').inputValue(),h:await restored.locator('#height').inputValue(),arr:await restored.locator('#arrival').inputValue(),days:await restored.locator('#days').inputValue(),delay:await restored.locator('#delay').inputValue()};
+  const expected={site:settings.site,alt:settings.alt,h:settings.h,arr:settings.arr,days:settings.days,delay:settings.delay};
+  if(JSON.stringify(restoredSettings)!==JSON.stringify(expected))fail(`new document did not restore all six fields: ${JSON.stringify({expected,restoredSettings})}`);
+  const restoredCards=await restored.locator('.answer-scenario').allTextContents();
+  if(original.join('\n')!==restoredCards.join('\n'))fail('fresh-context restored cards differ from the original computed comparison');
+  const expectedRows=comparisonRows(dataset,{siteId:settings.siteId??settings.site,alternative:settings.alternative??settings.alt,height:Number(settings.h),date:settings.date??settings.arr,days:Number(settings.days),delay:Number(settings.delay)});
+  const rendered=await restored.locator('.answer-scenario').evaluateAll(nodes=>nodes.map(n=>({sun:n.querySelector('.answer-sun-percent')?.textContent.trim(),earth:n.querySelector('.answer-earth-percent')?.textContent.trim(),dark:n.querySelector('dl div dd')?.textContent.trim()})));
+  for(const [i,row] of expectedRows.entries()){
+    if(rendered[i].sun!==percent(row.summary.sunlitFraction)||rendered[i].earth!==percent(row.summary.earthFraction)||!rendered[i].dark.includes(row.summary.dark.hours.toFixed(1)))fail(`restored scenario ${i} differs from comparisonRows: ${JSON.stringify({actual:rendered[i],expected:{sun:percent(row.summary.sunlitFraction),earth:percent(row.summary.earthFraction),dark:row.summary.dark.hours}})}`);
+  }
+  const invalidCtx=await context(browser,'share-link-invalid',{webglBlocked:true});
+  await invalidCtx.page.goto(`${BASE}/?qa=1#/compare?site=unknown&h=999&arr=2027-02-31&days=9&delay=30&alt=unknown`,{waitUntil:'networkidle',timeout:60000});
+  await invalidCtx.page.getByRole('status').filter({hasText:'Settings restored from a link'}).waitFor({timeout:5000});
+  const notice=await invalidCtx.page.locator('.share-restored').innerText();
+  if(!/ignored invalid site, alt, h, days, delay, arr/.test(notice))fail(`invalid fields are not identified in the restored-link status: ${notice}`);
+  if(await invalidCtx.page.locator('.answer-scenario').count()!==3)fail('invalid shared fields crashed or removed the comparison scenarios');
+  for(const c of [ctx,restoredCtx,invalidCtx.ctx])await c.close();
+  return `copy/read-only link roundtrip restored six settings and matching scientific values; invalid fields were ignored and announced`;
+});
+
+await check('Horizon Ledger Home and Compare stay within mobile widths and mono captions remain readable',async()=>{
+  const reports=[];
+  for(const [width,height] of [[390,844],[844,390]]){
+    const {ctx,page}=await context(browser,`horizon-responsive-${width}`,{viewport:{width,height},touch:true,webglBlocked:true});
+    await go(page,'home');await page.locator('.delay-briefing .hl-ledger svg').waitFor({timeout:15000});
+    await page.evaluate(()=>document.fonts.ready);
+    const read=()=>page.evaluate(()=>{
+      const root=document.documentElement,caption=document.querySelector('.hl-legend'),style=getComputedStyle(caption),axis=document.querySelector('.hl-axis'),axisStyle=axis&&getComputedStyle(axis),rgb=s=>s.match(/[\d.]+/g)?.slice(0,3).map(Number)??[0,0,0];
+      const luminance=values=>values.map(v=>v/255).map(v=>v<=0.04045?v/12.92:((v+0.055)/1.055)**2.4).reduce((sum,v,i)=>sum+v*[0.2126,0.7152,0.0722][i],0);
+      const fg=luminance(rgb(style.color)),bg=luminance(rgb(getComputedStyle(root).backgroundColor)),contrast=(Math.max(fg,bg)+0.05)/(Math.min(fg,bg)+0.05);
+      const axisFg=axisStyle?luminance(rgb(axisStyle.fill)):0,axisContrast=axisStyle?(Math.max(axisFg,bg)+0.05)/(Math.min(axisFg,bg)+0.05):0;
+      return{viewport:innerWidth,scrollWidth:root.scrollWidth,fontSize:parseFloat(style.fontSize),fontFamily:style.fontFamily,plexLoaded:document.fonts.check('12px "IBM Plex Mono"'),contrast:+contrast.toFixed(2),captionVisible:caption.getBoundingClientRect().width>0,axisFontSize:axisStyle?parseFloat(axisStyle.fontSize):null,axisContrast:+axisContrast.toFixed(2),axisVisible:!!axis&&axis.getBBox().width>0};
+    });
+    let home=await read();if(home.scrollWidth>width+1)fail(`${width}x${height}: Home overflows horizontally: ${JSON.stringify(home)}`);
+    if(home.fontSize<11||home.fontSize>13||!home.fontFamily.includes('IBM Plex Mono')||!home.plexLoaded||home.contrast<4.5||!home.captionVisible||home.axisFontSize<10.5||home.axisFontSize>13||home.axisContrast<4.5||!home.axisVisible)fail(`${width}x${height}: Home ledger caption/axis labels are too small, low contrast or missing: ${JSON.stringify(home)}`);
+    await page.getByRole('link',{name:'Compare a landing delay'}).click();await page.waitForFunction(()=>location.hash==='#/compare',null,{timeout:10000});
+    await page.locator('.hl-compare .hl-ledger svg').waitFor({timeout:15000});await page.evaluate(()=>document.fonts.ready);
+    const compare=await read();if(compare.scrollWidth>width+1)fail(`${width}x${height}: Compare overflows horizontally: ${JSON.stringify(compare)}`);
+    if(compare.fontSize<11||compare.fontSize>13||compare.contrast<4.5||!compare.plexLoaded||!compare.captionVisible||compare.axisFontSize<10.5||compare.axisFontSize>13||compare.axisContrast<4.5||!compare.axisVisible)fail(`${width}x${height}: Compare ledger caption/axis labels are too small, low contrast or missing: ${JSON.stringify(compare)}`);
+    reports.push(`${width}x${height}: no horizontal overflow; legends ${home.fontSize}/${compare.fontSize} px (contrast ${home.contrast}/${compare.contrast}:1), SVG axes ${home.axisFontSize}/${compare.axisFontSize} px (contrast ${home.axisContrast}/${compare.axisContrast}:1)`);await ctx.close();
+  }
+  return reports.join('; ');
 });
 
 await check('Arrival calendar keyboard, bounds, invalid ISO text and export remain honest at desktop and mobile',async()=>{

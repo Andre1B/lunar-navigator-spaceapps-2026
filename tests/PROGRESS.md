@@ -1,5 +1,18 @@
 # Test agent progress (tests/ only)
 
+## Local Horizon Ledger redesign QA checkpoint — build 2bc70e9 (2026-11-15)
+
+This evidence is tied to the local preview at `http://localhost:4173` built at `2bc70e9`, before the next human-requested color/logo/intro/layout revision. That revision invalidates these visual/UI results; do not reuse them as final QA for a later build. The browser and hardware GPU were closed/released after this batch.
+
+- Unit: `npm test` passed 172/172 (0 failed/skipped/todo). Added `sharelink.test.mjs`: six-setting URL round-trip, comparison-row equality, rejected untrusted fields, allowed stay/delay choices and irrelevant routes.
+- Home/Compare: focused browser checks passed 4/4. Default feature resolves to Shackleton rim / Connecting ridge / 1 m / 2027-02-09 / 7 days; all three delay choices, each displayed Home row and all Compare ledger rows match `comparisonRows`; CTA applies its six settings. Copy/read-only link restored all six values in a fresh context with identical scientific cards; invalid inputs were named and ignored. Compare JSON export remained usable with WebGL blocked.
+- Responsive and type: 390x844 and 844x390 had no horizontal overflow. IBM Plex Mono loaded; new ledger captions measured 12 px with contrast 9.06:1. SVG axis labels measured 11 px portrait and 12 px landscape with contrast 5.67:1.
+- Entry/accessibility and exports: Home entry actions passed (Faithful to mission, Free to simulator in Free Mode, tour opens); intro normal/reduced-motion and keyboard/focus checks passed 3/3. Review time-share vs mean-disc values passed; PDF primary download and advanced JSON check passed.
+- Playback text stability: the six settled combinations (Surface sky and Local terrain x 1440x900, 390x844, 844x390) passed with no removed/blank stable text, placeholders, unready-frame excess, layout drift or base/presented clock backslide.
+- Hardware renderer: Chrome 157, RTX 3060 Laptop GPU / Direct3D11, no SwiftShader override. 1440x900: 119.8 average draws/s, 120 cap, `renderScale=1`, `terrainDetail=full`, 5 draw calls / 363,200 triangles. 844x390 touch: 60.0 average draws/s, 60 cap, `renderScale=1`, `terrainDetail=full`, 4 draw calls / 54,400 triangles. RAF sampling was 163.9 Hz and is recorded separately from draws. 0 console/page/HTTP errors.
+- Browser artifacts outside the repository: `../tmp/lunar-redesign-final-browser/results.json`, `../tmp/lunar-redesign-home-entry`, `../tmp/lunar-redesign-motion-focus/results.json`, `../tmp/lunar-redesign-review`, `../tmp/lunar-redesign-pdf`, `../tmp/lunar-redesign-renderer-hardware/results.json`, `../tmp/lunar-redesign-playback-six/results.json`.
+- Pending for the next stable build: repeat affected UI, brand/intro, layout, focus and reduced-motion checks. No final/published QA is claimed from this local snapshot.
+
 Last run: `npm test` -> 0 fail, 0 todo (now incl. 9 eventSummary tests + real-data agreement test). Browser QA vs dev (localhost:5173) after Codex fixes: 20/20 pass; with planets/focus checks 24/26 (the 2 failures are finding D) (incl. new mission-notes persistence check). Production QA pending: waiting for 'deploy final atualizado' (QA_URL=https://lunar-navigator-2026.pages.dev/). 3D projection test deferred (Sol review already covered 1393*4*2 max sep 0.000704 deg).
 
 ## Files
