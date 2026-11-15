@@ -6,6 +6,10 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { horizonAt, visibleDiskFraction } from "../lib/analysis.mjs";
 import { solarObservation } from "../lib/solarVisibility.mjs";
 import {
+  createPresentationAnchor,
+  samplePresentation,
+} from "../lib/presentationClock.mjs";
+import {
   surfaceMaterial,
   alignSurfaceAtObserver,
 } from "../lib/surfaceVisual.mjs";
@@ -40,13 +44,20 @@ export default function SpaceSceneV2({
   playing = false,
   speed = 6,
 }) {
-  const presentation = useRef({ index, playing, speed, at: performance.now() });
+  const presentation = useRef(null);
   if (
+    !presentation.current ||
     presentation.current.index !== index ||
     presentation.current.playing !== playing ||
     presentation.current.speed !== speed
   )
-    presentation.current = { index, playing, speed, at: performance.now() };
+    presentation.current = createPresentationAnchor(
+      presentation.current,
+      index,
+      playing,
+      speed,
+      performance.now(),
+    );
   const host = useRef(null),
     engine = useRef(null),
     latest = useRef({
@@ -684,12 +695,11 @@ export default function SpaceSceneV2({
         // GPU presentation follows the display refresh. React text/data updates
         // remain slower and explicitly identify the frame their values describe.
         // At most 100 ms is presented between received clock anchors.
-        const presented = p.playing
-          ? index +
-            (Math.min(100, Math.max(0, now - presentation.current.at)) / 1000) *
-              p.speed
-          : index;
-        const i = THREE.MathUtils.clamp(presented, 0, sky.sunPosKm.length - 1),
+        const i = samplePresentation(
+            presentation.current,
+            now,
+            sky.sunPosKm.length - 1,
+          ),
           q = interpolateBodyQuaternion(
             sky.moonOrientationQuat,
             freeze.moonRotation ?? i,
