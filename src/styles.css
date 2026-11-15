@@ -1,12 +1,12 @@
 :root {
   font-family: Overpass, "Segoe UI", sans-serif;
-  color: #f5f7fa;
-  background: #070c18;
+  color: #f9f8f6;
+  background: #10100f;
   font-synthesis: none;
-  --surface: #101a2b;
-  --line: #2c3b53;
-  --muted: #b2bfd2;
-  --blue: #2e96f5;
+  --surface: #1f1e1c;
+  --line: #43413c;
+  --muted: #ccc5b8;
+  --blue: #a39780;
   --red: #ef5258;
 }
 * {
@@ -34,7 +34,7 @@ a {
   -webkit-tap-highlight-color: transparent;
 }
 a {
-  color: #77bdff;
+  color: #c6bfb0;
   text-underline-offset: 4px;
 }
 button {
@@ -52,17 +52,17 @@ select:focus-visible {
   outline-offset: 4px;
 }
 button {
-  color: #f5f7fa;
-  background: #152138;
-  border: 1px solid #41516a;
+  color: #f9f8f6;
+  background: #292724;
+  border: 1px solid #5b5750;
   border-radius: 3px;
   padding: 9px 14px;
 }
 input,
 select {
-  color: #f5f7fa;
-  background: #0b1322;
-  border: 1px solid #64748b;
+  color: #f9f8f6;
+  background: #181715;
+  border: 1px solid #7f7a70;
   border-radius: 3px;
   min-height: 42px;
   padding: 9px 12px;
@@ -87,7 +87,7 @@ input[type="checkbox"] {
   gap: 28px;
   padding: 18px 4vw;
   border-bottom: 1px solid var(--line);
-  background: #070c18;
+  background: #10100f;
 }
 .brand {
   display: flex;
@@ -96,7 +96,7 @@ input[type="checkbox"] {
   font-size: 21px;
   letter-spacing: 0.8px;
   font-weight: 700;
-  color: #f5f7fa;
+  color: #f9f8f6;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -107,7 +107,7 @@ input[type="checkbox"] {
   align-items: center;
 }
 .header nav a {
-  color: #bac7d8;
+  color: #d2ccc0;
   text-decoration: none;
   font-weight: 600;
   font-size: 15px;
@@ -115,11 +115,11 @@ input[type="checkbox"] {
   border-bottom: 2px solid transparent;
 }
 .header nav a[aria-current="page"] {
-  color: #70bbff;
-  border-bottom-color: #2e96f5;
+  color: #c3bbac;
+  border-bottom-color: #a39780;
 }
 .header-mode {
-  color: #bac7d8;
+  color: #d2ccc0;
   font-size: 12px;
   border-left: 1px solid var(--line);
   padding-left: 20px;
@@ -152,14 +152,14 @@ h3 {
 p {
   font-size: 16px;
   line-height: 1.65;
-  color: #c0ccdc;
+  color: #d6d1c6;
   margin: 0 0 18px;
 }
 .lead {
   font-size: 21px;
   line-height: 1.55;
   max-width: 820px;
-  color: #cbd5e3;
+  color: #ddd9d1;
 }
 .red {
   color: var(--red);
@@ -178,8 +178,8 @@ small {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #166fc0;
-  border: 1px solid #4fa9fb;
+  background: #716d65;
+  border: 1px solid #b3aa97;
   border-radius: 3px;
   padding: 13px 21px;
   color: #fff;
@@ -189,14 +189,14 @@ small {
   min-height: 48px;
 }
 .button:hover {
-  background: #2181d4;
+  background: #827d73;
 }
 .button.secondary {
   background: transparent;
-  border-color: #61718a;
+  border-color: #7d786e;
 }
 .button.secondary:hover {
-  background: #17243a;
+  background: #2b2926;
 }
 .page-heading {
   margin-bottom: 38px;
@@ -205,7 +205,7 @@ small {
 .section-label {
   text-transform: uppercase;
   letter-spacing: 1.8px;
-  color: #79bdff;
+  color: #c7c0b1;
   font:
     12px "Fira Code",
     monospace;
@@ -310,14 +310,14 @@ small {
   background-image: url("/assets/moon-lroc-2k.jpg");
   background-size: auto 100%;
   background-position: 50% center;
-  box-shadow: inset -110px -22px 95px 10px #03060edc;
+  box-shadow: inset -110px -22px 95px 10px #090908dc;
   transform: rotate(-12deg);
 }
 .home-moon > span {
   position: absolute;
   bottom: 0;
   left: 0;
-  color: #9daec4;
+  color: #bdb5a4;
   font:
     12px "Fira Code",
     monospace;
@@ -342,7 +342,7 @@ small {
   font:
     12px "Fira Code",
     monospace;
-  color: #78bfff;
+  color: #c6bfb1;
   display: block;
   margin-bottom: 12px;
 }
@@ -371,7 +371,7 @@ small {
   padding: 19px 12px;
 }
 .chapter-list button[aria-current="step"] {
-  background: #11233c;
+  background: #292724;
   border-left: 3px solid var(--blue);
 }
 .chapter-list small {
@@ -393,12 +393,12 @@ small {
   flex-wrap: wrap;
 }
 .data-status {
-  border: 1px solid #546479;
+  border: 1px solid #6d6960;
   padding: 20px;
   margin-bottom: 22px;
-  color: #d2dbe7;
+  color: #e2ded7;
   font-size: 14px;
-  background: #101a2b;
+  background: #1f1e1c;
 }
 .data-status details {
   margin-top: 10px;
@@ -414,7 +414,7 @@ small {
 }
 .setup label {
   font-size: 13px;
-  color: #c4cede;
+  color: #d8d3ca;
   display: block;
   margin: 22px 0 7px;
 }
@@ -447,7 +447,7 @@ td {
 }
 thead th {
   font-weight: 400;
-  color: #bdc9db;
+  color: #d4cfc4;
   font-size: 12px;
 }
 tbody th {
@@ -483,12 +483,12 @@ td {
 }
 .decision ul {
   padding-left: 20px;
-  color: #c2cfe0;
+  color: #d8d3ca;
   line-height: 1.8;
   font-size: 14px;
 }
 .chart-section {
-  background: #0c1423;
+  background: #191816;
   padding: 24px 18px;
 }
 .horizon-chart svg {
@@ -499,7 +499,7 @@ td {
   font:
     12px Overpass,
     sans-serif;
-  fill: #c1cde0;
+  fill: #d8d3c9;
 }
 .horizon-chart .caption {
   margin-bottom: 4px;
@@ -536,7 +536,7 @@ td {
 }
 .prose p,
 .prose li {
-  color: #c0ccdc;
+  color: #d6d1c6;
   line-height: 1.8;
 }
 .prose li {
@@ -552,7 +552,7 @@ td {
     12px/1.8 "Fira Code",
     monospace;
   padding: 20px;
-  background: #101a2b;
+  background: #1f1e1c;
 }
 .source {
   padding: 17px 0;
@@ -586,7 +586,7 @@ td {
     11px "Fira Code",
     monospace;
   padding: 5px 9px;
-  border: 1px solid #7c8ea5;
+  border: 1px solid #a2967f;
   margin-bottom: 12px;
 }
 .test-status.pass {
@@ -636,12 +636,12 @@ td {
   gap: 4px;
 }
 .segmented button[aria-pressed="true"] {
-  background: #1267ad;
-  border-color: #59b3ff;
+  background: #65615a;
+  border-color: #b9b09f;
 }
 .sim-toolbar label {
   font-size: 13px;
-  color: #bac7d8;
+  color: #d2ccc0;
 }
 .freeze-controls {
   display: flex;
@@ -664,7 +664,7 @@ td {
 .scene-frame {
   height: 540px;
   position: relative;
-  background: #050911;
+  background: #0c0b0a;
   border: 1px solid var(--line);
   overflow: hidden;
 }
@@ -681,7 +681,7 @@ td {
   position: absolute;
   bottom: 18px;
   left: 20px;
-  color: #c2cddd;
+  color: #d7d2c8;
   font-size: 11px;
   line-height: 1.7;
   max-width: 70%;
@@ -697,7 +697,7 @@ td {
 .camera-controls button {
   font-size: 11px;
   padding: 9px 11px;
-  background: #0a1425e8;
+  background: #191816e8;
 }
 .scene-pending,
 .scene-error,
@@ -707,7 +707,7 @@ td {
   top: 20px;
   font-size: 14px;
   max-width: 80%;
-  background: #101a2be6;
+  background: #1f1e1ce6;
   padding: 15px;
 }
 .sim-bottom {
@@ -728,8 +728,8 @@ td {
   z-index: 110;
   right: 25px;
   top: 25px;
-  background: #1267ad;
-  border-color: #7ec3ff;
+  background: #65615a;
+  border-color: #c9c2b4;
   font-size: 16px;
   font-weight: 600;
   min-height: 48px;
@@ -1035,9 +1035,9 @@ body.immersive-active > .header {
 .mission-journal textarea {
   font: inherit;
   line-height: 1.6;
-  background: #0b1322;
-  color: #f5f7fa;
-  border: 1px solid #64748b;
+  background: #181715;
+  color: #f9f8f6;
+  border: 1px solid #7f7a70;
   border-radius: 3px;
   padding: 12px;
   width: 100%;
@@ -1082,8 +1082,8 @@ body.immersive-active > .header {
   position: absolute;
   top: 16px;
   left: 18px;
-  color: #e0e7f0;
-  background: #0a1425df;
+  color: #ece9e4;
+  background: #191816df;
   padding: 9px 12px;
   font:
     11px/1.7 "Fira Code",

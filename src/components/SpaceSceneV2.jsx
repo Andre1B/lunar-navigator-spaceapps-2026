@@ -157,6 +157,7 @@ export default function SpaceSceneV2({
     // fewer pixels. Only sharpness changes; geometry, data, occlusion and the
     // shared clock are untouched. Measured between consecutive drawn frames.
     let renderScale = 1,
+      continuousLoop = false,
       prevDrawAt = null,
       slowFrames = 0,
       fastFrames = 0,
@@ -165,6 +166,13 @@ export default function SpaceSceneV2({
     function adaptResolution(now) {
       const dt = prevDrawAt === null ? null : now - prevDrawAt;
       prevDrawAt = now;
+      // Only frames of a continuous loop (Play or a camera transition) measure
+      // rendering cost; on-demand draws follow input cadence, not the GPU.
+      if (!continuousLoop) {
+        slowFrames = 0;
+        fastFrames = 0;
+        return;
+      }
       // Gaps longer than 400 ms are idle time, not rendering cost.
       if (dt === null || dt > 400) return;
       if (dt > 26) {
@@ -1437,6 +1445,7 @@ export default function SpaceSceneV2({
           };
       }
       settingCamera = false;
+      continuousLoop = !!(p.playing || transition);
       if (p.playing) schedule();
     }
     const change = () => {

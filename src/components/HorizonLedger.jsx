@@ -44,7 +44,7 @@ const day = (utc) =>
 // for every offered delay, otherwise the dataset's reference date.
 export function exampleSettings(manifest) {
   const period = manifest.period;
-  const fits = DELAYS.every((d) =>
+  const fits = [0, ...DELAYS].every((d) =>
     windowBounds(period, FEATURED.date, FEATURED.days, d),
   );
   if (fits) return { ...FEATURED, featured: true };
@@ -237,6 +237,8 @@ function Ledger({ dataset, rows, height, names }) {
       } else cur = null;
     });
     const dark = r.summary?.dark;
+    const matches =
+      !!best && !!dark && Math.abs(best[1] - best[0] - dark.hours) <= 1.5;
     const block = (
       <g key={r.label}>
         <text className="hl-row" x={0} y={compact ? y + 12 : top + rowH * 0.7}>
@@ -276,17 +278,22 @@ function Ledger({ dataset, rows, height, names }) {
             y2={top + rowH + earthH + 5}
           />
         ))}
-        {dark && dark.hours > 0 && best ? (
+        {dark && dark.hours > 0 ? (
           <g>
-            <path
-              className="hl-bracket"
-              d={`M${labelW + best[0] * cw},${top + rowH + 12}v6H${labelW + best[1] * cw}v-6`}
-            />
+            {/* The bracket marks the hourly dark run only when it is the same
+                stretch as the refined event duration; otherwise the refined
+                value is shown without pointing at a possibly different run. */}
+            {matches ? (
+              <path
+                className="hl-bracket"
+                d={`M${labelW + best[0] * cw},${top + rowH + 12}v6H${labelW + best[1] * cw}v-6`}
+              />
+            ) : null}
             <text
               className="hl-bracket-label"
-              x={labelW + ((best[0] + best[1]) / 2) * cw}
+              x={matches ? labelW + ((best[0] + best[1]) / 2) * cw : W}
               y={top + rowH + 34}
-              textAnchor="middle"
+              textAnchor={matches ? "middle" : "end"}
             >
               {dark.censored ? "at least " : ""}
               {dark.hours.toFixed(1)} h without direct sunlight
@@ -308,7 +315,7 @@ function Ledger({ dataset, rows, height, names }) {
         aria-label={rows
           .map(
             (r, n) =>
-              `${names[n]}: longest stretch without direct sunlight ${r.summary ? r.summary.dark.hours.toFixed(1) + " h" : "not calculated"}, Sun visible ${percent(r.summary?.sunlitFraction)} of the stay, Earth visible ${percent(r.summary?.earthFraction)}.`,
+              `${names[n]}: longest stretch without direct sunlight ${r.summary ? (r.summary.dark.censored ? "at least " : "") + r.summary.dark.hours.toFixed(1) + " h" : "not calculated"}, Sun visible ${percent(r.summary?.sunlitFraction)} of the stay, Earth visible ${percent(r.summary?.earthFraction)}.`,
           )
           .join(" ")}
       >

@@ -595,3 +595,9 @@ input[type="range"] {
   color: var(--sun);
   margin: 0;
 }
+/* Earth keeps its cyan wherever a value describes Earth */
+.next-events-earthrise .next-events-name,
+.next-events-earthset .next-events-name,
+.arrival-series-earth {
+  color: var(--earth);
+}
