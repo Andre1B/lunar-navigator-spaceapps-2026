@@ -12,6 +12,7 @@ import {
   steps,
   toc,
 } from "../content/learning.js";
+import { RAISE_FRAME, raiseGeometry } from "../lib/learnGeometry.mjs";
 
 const reduced = () =>
   typeof window !== "undefined" &&
@@ -53,24 +54,17 @@ function Details({ summary, children }) {
   );
 }
 
-/* 1. Raise the observer: a cartoon with made-up distances. */
-const W = 400;
-const GROUND = 130;
-const UNIT = 8; // px per schematic unit
-const OBS_X = 40;
+/* 1. Raise the observer: a cartoon with made-up distances. Verdict and
+   drawing both come from raiseGeometry, in one frame. */
+const W = RAISE_FRAME.width;
+const GROUND = RAISE_FRAME.ground;
 
 function RaiseObserver() {
   const [h, setH] = useState(raise.start);
   const id = useId();
-  const { distance, height: ridgeH } = raise.ridge;
-  const tan = Math.tan((raise.sunElevation * Math.PI) / 180);
-  const visible = h + distance * tan > ridgeH;
-  const ridgeX = OBS_X + distance * 4;
-  const eyeY = GROUND - h * UNIT;
-  const rayEndX = 372;
-  const rayEndY = eyeY - (rayEndX - OBS_X) * tan;
-  const hitY = eyeY - (ridgeX - OBS_X) * tan;
-  const ridgeTop = GROUND - ridgeH * UNIT;
+  const g = raiseGeometry(h, raise.ridge, raise.sunElevation);
+  const { visible, eye, crest, sun, hit } = g;
+  const flank = RAISE_FRAME.flankPx;
   return (
     <div className="learn-card learn-sim">
       <svg
@@ -86,42 +80,42 @@ function RaiseObserver() {
         <rect className="learn-sky" width={W} height={GROUND} />
         <polygon
           className="learn-ground"
-          points={`0,${GROUND} ${ridgeX - 50},${GROUND} ${ridgeX},${ridgeTop} ${ridgeX + 50},${GROUND} ${W},${GROUND} ${W},160 0,160`}
+          points={`0,${GROUND} ${crest.x - flank},${GROUND} ${crest.x},${crest.y} ${crest.x + flank},${GROUND} ${W},${GROUND} ${W},160 0,160`}
         />
         <line
           className={visible ? "learn-ray ok" : "learn-ray blocked"}
-          x1={OBS_X}
-          y1={eyeY}
-          x2={visible ? rayEndX : ridgeX}
-          y2={visible ? rayEndY : Math.max(hitY, ridgeTop)}
+          x1={eye.x}
+          y1={eye.y}
+          x2={visible ? sun.x : hit.x}
+          y2={visible ? sun.y : hit.y}
         />
         {!visible ? (
           <line
             className="learn-ray ghost"
-            x1={ridgeX}
-            y1={Math.max(hitY, ridgeTop)}
-            x2={rayEndX}
-            y2={rayEndY}
+            x1={hit.x}
+            y1={hit.y}
+            x2={sun.x}
+            y2={sun.y}
           />
         ) : null}
         <circle
           className={visible ? "learn-sun on" : "learn-sun off"}
-          cx={rayEndX}
-          cy={Math.max(rayEndY, 14)}
+          cx={sun.x}
+          cy={sun.y}
           r="10"
         />
         <line
           className="learn-pole"
-          x1={OBS_X}
+          x1={eye.x}
           y1={GROUND}
-          x2={OBS_X}
-          y2={eyeY}
+          x2={eye.x}
+          y2={eye.y}
         />
-        <circle className="learn-eye" cx={OBS_X} cy={eyeY} r="4" />
+        <circle className="learn-eye" cx={eye.x} cy={eye.y} r="4" />
         <text
           className="learn-label"
-          x={ridgeX}
-          y={ridgeTop - 6}
+          x={crest.x}
+          y={crest.y - 6}
           textAnchor="middle"
         >
           ridge
@@ -148,8 +142,9 @@ function RaiseObserver() {
         {visible ? raise.visible : raise.hidden}
       </p>
       <p className="caption">
-        Illustrative cartoon with made-up distances and units. Not a real lunar
-        site and not NASA data.
+        Illustrative cartoon with made-up distances and units; heights are
+        drawn 2x taller than distances. The Sun becomes visible above{" "}
+        {g.threshold.toFixed(2)} units. Not a real lunar site and not NASA data.
       </p>
     </div>
   );

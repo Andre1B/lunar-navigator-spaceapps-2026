@@ -1118,3 +1118,31 @@ input[type="range"] {
   stroke-width: 1;
   stroke-dasharray: 3 3;
 }
+
+/* Learn: even, dense card grids instead of stacked boxes of uneven width. */
+.learn-page .learn-facts,
+.learn-page .learn-limits,
+.learn-page .learn-quiz {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+.learn-page .learn-facts > li,
+.learn-page .learn-limits > li,
+.learn-page .learn-quiz > fieldset {
+  margin: 0;
+  width: auto;
+  max-width: none;
+  padding: 18px 20px;
+}
+.learn-page .learn-facts > li h3,
+.learn-page .learn-limits > li h3 {
+  margin-top: 0;
+}
+.learn-page .learn-dots {
+  list-style: none;
+  padding: 0;
+}

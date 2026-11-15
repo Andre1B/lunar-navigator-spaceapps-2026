@@ -8,7 +8,7 @@ export const intro = {
   facts: [
     {
       q: "What is it?",
-      a: "A lunar sky simulator using calculated Sun and Earth positions and published terrain. It replays the real Sun, Earth and Moon geometry over six points on published terrain near the lunar south pole.",
+      a: "A comparison tool for landing delays near the lunar south pole. Pick a study point, an observer height, an arrival date and a delay: it calculates how long the Sun and Earth stay in view for each arrival, from published terrain and NASA/NAIF positions. The 3D view is an optional way to see the same sky.",
     },
     {
       q: "Who is it for?",
@@ -117,7 +117,7 @@ export const modes = {
     "Faithful Mode is the real sky: every body sits where it truly is at one shared moment. Free Mode is a toy: you may freeze something while the rest moves on.",
   faithful: {
     name: "Faithful Mode",
-    text: "One clock drives the Sun and Earth together. Only these results mean something for a mission question.",
+    text: "One clock drives the Sun and Earth together. Use these calculated results for the comparison.",
   },
   free: {
     name: "Free Mode",
@@ -171,7 +171,7 @@ export const metrics = {
     ],
   ],
   detail:
-    "In the app, the mean uses hourly samples, while start and end times of sunlit periods are found on a 5-minute grid and refined to about 30 seconds. An event shorter than 5 minutes can be missed. A period that touches the edge of the study window is shown as a lower bound (≥), because it may continue beyond it.",
+    "In the app, the mean uses hourly samples, while start and end times of sunlit periods are found on a 5-minute grid and refined to about 1 minute. An event shorter than 5 minutes can be missed. A period that touches the edge of the study window is shown as a lower bound (≥), because it may continue beyond it.",
 };
 
 export const steps = [
@@ -184,12 +184,12 @@ export const steps = [
   },
   {
     title: "Choose an observer height",
-    body: "Set 1 m or 5 m above the ground. A taller observer can see over small bumps.",
+    body: "Choose 0.5, 1, 2, 5 or 10 m above the ground. A taller observer can see over small bumps.",
     more: "This is the same idea as the Raise the observer demo above.",
   },
   {
     title: "Set the arrival and the window",
-    body: "Pick an arrival date and how long you plan to operate. The data covers 1 March to 28 April 2027.",
+    body: "Pick an arrival date and how long you plan to operate. The data covers a rolling period of about one year before and after the latest refresh; Compare shows the exact first and last dates.",
     more: "Dates are in UTC. The operating window stays the same length when you delay the arrival, so comparisons are fair.",
   },
   {
@@ -262,7 +262,7 @@ export const sources = {
     },
     {
       title: "Open source",
-      text: "Original code is Apache-2.0. Other software keeps its own license. The Credits screen links every reused project on GitHub and says whether it is a tool, data, a reference or inspiration.",
+      text: "Original code is Apache-2.0. Other software keeps its own license. The Credits screen links the upstream source and license of every reused project and says whether it is a tool, data, a reference or inspiration.",
     },
     {
       title: "AI assistance",
