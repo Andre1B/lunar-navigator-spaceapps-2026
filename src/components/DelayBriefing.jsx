@@ -5,16 +5,20 @@ import { percent } from "../lib/analysis.mjs";
 // An immediate, real experiment: exactly the same calculation path as Compare/export.
 export default function DelayBriefing({ dataset, onOpen }) {
   const [delay, setDelay] = useState(7);
+  const initialDate =
+    dataset?.manifest?.coveragePolicy?.asOfUtcDate ??
+    dataset?.manifest?.period.startUtc.slice(0, 10) ??
+    "2027-03-01";
   const settings = useMemo(
     () => ({
       siteId: "connecting-ridge",
       alternative: "shackleton-rim",
       height: 1,
-      date: "2027-03-01",
+      date: initialDate,
       days: 7,
       delay,
     }),
-    [delay],
+    [delay, initialDate],
   );
   const rows = useMemo(
     () =>
@@ -57,7 +61,11 @@ export default function DelayBriefing({ dataset, onOpen }) {
         {rows.length ? (
           rows.map((row, i) => (
             <article key={row.label}>
-              <h3>{i ? `Arrive ${delay} days later` : "Arrive on 1 March"}</h3>
+              <h3>
+                {i
+                  ? `Arrive ${delay} days later`
+                  : `Arrive ${new Date(initialDate + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" })}`}
+              </h3>
               <dl>
                 <div>
                   <dt>Longest time without sunlight</dt>

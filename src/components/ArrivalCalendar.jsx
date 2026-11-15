@@ -148,6 +148,7 @@ export default function ArrivalCalendar({
           inputMode="numeric"
           placeholder="YYYY-MM-DD"
           autoComplete="off"
+          maxLength={32}
           spellCheck={false}
           value={value}
           aria-invalid={invalid || undefined}
@@ -219,6 +220,67 @@ export default function ArrivalCalendar({
             >
               →
             </button>
+          </div>
+          <div className="calendar-jump">
+            <label>
+              Month
+              <select
+                aria-label="Calendar month"
+                value={new Date(month).getUTCMonth()}
+                onChange={(e) =>
+                  shiftMonth(
+                    Number(e.target.value) - new Date(month).getUTCMonth(),
+                  )
+                }
+              >
+                {Array.from({ length: 12 }, (_, m) => {
+                  const year = new Date(month).getUTCFullYear();
+                  return (
+                    <option
+                      key={m}
+                      value={m}
+                      disabled={
+                        Date.UTC(year, m + 1, 0) < lower ||
+                        Date.UTC(year, m, 1) > upper
+                      }
+                    >
+                      {new Date(Date.UTC(2027, m, 1)).toLocaleDateString(
+                        "en-GB",
+                        { month: "long", timeZone: "UTC" },
+                      )}
+                    </option>
+                  );
+                })}
+              </select>
+            </label>
+            <label>
+              Year
+              <select
+                aria-label="Calendar year"
+                value={new Date(month).getUTCFullYear()}
+                onChange={(e) =>
+                  shiftMonth(
+                    (Number(e.target.value) -
+                      new Date(month).getUTCFullYear()) *
+                      12,
+                  )
+                }
+              >
+                {Array.from(
+                  {
+                    length:
+                      new Date(upper).getUTCFullYear() -
+                      new Date(lower).getUTCFullYear() +
+                      1,
+                  },
+                  (_, i) => new Date(lower).getUTCFullYear() + i,
+                ).map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
           <p className="calendar-coverage">
             Computed dates · {min} to {max}

@@ -1,6 +1,6 @@
 {
  "schemaVersion": "1.0.0",
- "generatedAtUtc": "2026-11-15T00:42:37Z",
+ "generatedAtUtc": "2026-11-15T02:41:57Z",
  "tests": [
   {
    "id": "V1",
@@ -74,10 +74,10 @@
       "maxSepDeg": 0.0
      }
     ],
-    "newHorizonsRequests": 4
+    "newHorizonsRequests": 0
    },
    "status": "pass",
-   "evidence": "Horizons responses cached in scientific/cache/horizons/ (not versioned); serial requests with identifying User-Agent.",
+   "evidence": "Historical Horizons responses pinned in scientific/reference/horizons/ (or original cache); six sites/two bodies/five original-window instants. Automated rebuild makes no new requests.",
    "notes": "Agreement holds only for the sampled instants and site/body pairs listed in this result, limited by the 1e-6 deg precision printed by Horizons. It is not a general proof of equality for every site, time or body."
   },
   {
@@ -243,7 +243,7 @@
   {
    "id": "V5",
    "title": "Sanity: height monotonicity and a permanently shadowed pixel",
-   "method": "For every adjacent pair of observer heights (0.5, 1, 2, 5, 10 m), the higher horizon must not exceed the lower and generated hourly Sun/Earth visible fractions must not decrease; a pixel flagged permanently shadowed in PDS LPSR_85S_060M (Shackleton floor, 80 m DEM near field) must receive no direct sunlight hourly over 2024-2026.",
+   "method": "For every adjacent pair of observer heights (0.5, 1, 2, 5, 10 m), the higher horizon must not exceed the lower and generated hourly terrain-only Sun/Earth visible fractions must not decrease (eclipse parallax is excluded from this monotonicity claim); a pixel flagged permanently shadowed in PDS LPSR_85S_060M (Shackleton floor, 80 m DEM near field) must receive no direct sunlight hourly over 2024-2026.",
    "metric": "booleans; max solar-disk fraction at PSR pixel",
    "target": "all true; PSR max fraction = 0",
    "result": [
@@ -505,6 +505,118 @@
    "status": "pass",
    "evidence": "scientific/validate.py v5_sanity",
    "notes": "PSR test uses the 80 m DEM as near field (no 5 m PGDA tile covers this pixel)."
+  },
+  {
+   "id": "V6",
+   "title": "Joint terrain and spherical-Earth solar disk integration",
+   "method": "Exact circle containment/no-overlap cases; 128-vs-256 quadrature convergence; independent 100000-chord midpoint integration, fixed random seed.",
+   "metric": "maximum solar disk area fraction error",
+   "target": "analytic<1e-8, convergence<2e-5, independent<1e-4",
+   "result": {
+    "analyticMaxError": 0.0,
+    "quadrature128vs256MaxError": 3.358509215178884e-08,
+    "independent100000ChordMaxError": 4.636160941262624e-08,
+    "cases": 86,
+    "targets": {
+     "analytic": 1e-08,
+     "convergence": 2e-05,
+     "independent": 0.0001
+    },
+    "pass": true
+   },
+   "status": "pass",
+   "evidence": "scientific/verify_coverage.py",
+   "notes": "Numerical validation of angular-circle approximation only; not atmosphere, energy, or independent astronomical ephemeris validation."
+  },
+  {
+   "id": "V7",
+   "title": "Coverage and joint solar fraction consistency",
+   "method": "All six sites/heights: array lengths, finite bounded fractions, joint area <= terrain and unocculted areas, event/contact bounds; sky/planets share manifest period; duration <= actual interval. Counterfactual terrain bracket cause checks; actual numerical refinement brackets <=30 seconds.",
+   "metric": "errors",
+   "target": "no errors",
+   "result": {
+    "pass": true,
+    "errors": [],
+    "sites": [
+     {
+      "site": "connecting-ridge",
+      "samples": 17521,
+      "eclipseIntervalsAllHeights": 15
+     },
+     {
+      "site": "shackleton-rim",
+      "samples": 17521,
+      "eclipseIntervalsAllHeights": 15
+     },
+     {
+      "site": "nobile-rim-1",
+      "samples": 17521,
+      "eclipseIntervalsAllHeights": 15
+     },
+     {
+      "site": "malapert-massif",
+      "samples": 17521,
+      "eclipseIntervalsAllHeights": 15
+     },
+     {
+      "site": "connecting-neighbor",
+      "samples": 17521,
+      "eclipseIntervalsAllHeights": 15
+     },
+     {
+      "site": "shackleton-neighbor",
+      "samples": 17521,
+      "eclipseIntervalsAllHeights": 15
+     }
+    ],
+    "intervalHours": 17520.0,
+    "solarTransitionCauseChecks": {
+     "pass": true,
+     "cases": 22,
+     "method": "20 terrain-cap transitions during overlapping disks plus two actual Earth-only counterfactual transitions"
+    },
+    "numericalContactBracketTargetSec": 30,
+    "accuracyNote": "Numerical bracket target only; not a claim of physical eclipse contact-time accuracy."
+   },
+   "status": "pass",
+   "evidence": "scientific/verify_coverage.py dataset_checks",
+   "notes": ""
   }
- ]
+ ],
+ "eventMetadataCorrection": {
+  "checkedAtUtc": "2026-11-15T02:50:24Z",
+  "nearEclipseSolarBracketsReproduced": 82,
+  "changedCauseLabels": [
+   {
+    "site": "connecting-ridge",
+    "heightM": 0.5,
+    "utc": "2026-03-03T09:59:32Z",
+    "before": {
+     "type": "eclipseDarknessEnd",
+     "cause": "earth-occultation"
+    },
+    "after": {
+     "type": "sunrise",
+     "cause": "terrain"
+    }
+   },
+   {
+    "site": "shackleton-rim",
+    "heightM": 10,
+    "utc": "2026-03-03T13:04:51Z",
+    "before": {
+     "type": "eclipseDarknessStart",
+     "cause": "earth-occultation"
+    },
+    "after": {
+     "type": "sunset",
+     "cause": "terrain"
+    }
+   }
+  ],
+  "changedCount": 2,
+  "numericalFieldsUnchanged": true,
+  "refinementBracketSec": 18.75,
+  "generator": "scientific/refine_event_metadata.py"
+ }
 }

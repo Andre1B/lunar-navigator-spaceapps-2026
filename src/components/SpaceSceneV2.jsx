@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { horizonAt, visibleDiskFraction } from "../lib/analysis.mjs";
+import { solarObservation } from "../lib/solarVisibility.mjs";
 import {
   surfaceMaterial,
   alignSurfaceAtObserver,
@@ -794,10 +795,18 @@ export default function SpaceSceneV2({
               elevationDeg: elevation,
               azimuthDeg: (azimuth + 360) % 360,
               horizonDeg: horizon,
+              angularRadiusDeg: angularRadius,
             };
           };
           const sunDetail = disc(sun, sun.scale.x),
             earthDetail = disc(earth, earth.scale.x);
+          const solar = solarObservation(sunDetail, earthDetail);
+          sunDetail.terrainFraction = sunDetail.fraction;
+          if (solar) {
+            sunDetail.fraction = solar.fraction;
+            sunDetail.eclipse = solar.eclipse;
+            sunDetail.unobscuredFraction = solar.unobscuredFraction;
+          }
           currentObservation = {
             siteId: site.id,
             index: i,

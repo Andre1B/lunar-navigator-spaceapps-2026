@@ -21,6 +21,8 @@ import {
 import { percent, hours, timeAt } from "./lib/analysis.mjs";
 import ArrivalComparison from "./components/ArrivalComparison.jsx";
 import ComparisonAnswer from "./components/ComparisonAnswer.jsx";
+import ExportComparison from "./components/ExportComparison.jsx";
+import CoverageNotice from "./components/CoverageNotice.jsx";
 import ArrivalSeries from "./components/ArrivalSeries.jsx";
 import HomeV2 from "./pages/HomeV2.jsx";
 import Review from "./pages/Review.jsx";
@@ -342,6 +344,7 @@ function Compare({
         </p>
       </div>
       <DataStatus dataset={dataset} />
+      <CoverageNotice manifest={manifest} />
       {manifest ? (
         <div className="compare-layout">
           <Setup manifest={manifest} {...settings} {...setters} />
@@ -351,6 +354,11 @@ function Compare({
               manifest={manifest}
               settings={settings}
               onInspect={onInspect}
+            />
+            <ExportComparison
+              dataset={dataset}
+              settings={settings}
+              limit={limit}
             />
             {mode === "free" ? (
               <aside className="warning">
@@ -367,7 +375,8 @@ function Compare({
               <p>
                 Optional detail. The three results above already answer the
                 basic comparison. Open this section to check all four
-                measurements, save a JSON record or test your own limit.
+                measurements, save the advanced JSON record or test your own
+                limit.
               </p>
               <section>
                 <div className="section-heading">
@@ -952,6 +961,7 @@ function Credits() {
 }
 export default function App() {
   const dataset = useDataset();
+  const initializedDates = useRef(false);
   // Every new document visit gets the opening. Storage/cookies never suppress it.
   // In-app route changes do not replay it; reduced-motion visitors opt out.
   const [opening, setOpening] = useState(
@@ -1006,12 +1016,23 @@ export default function App() {
     return () => window.removeEventListener("hashchange", change);
   }, []);
   useEffect(() => {
-    if (dataset.manifest) {
+    if (dataset.manifest && !initializedDates.current) {
+      initializedDates.current = true;
       setSiteId(dataset.manifest.sites[0].id);
       setAlternative(
         dataset.manifest.sites[1]?.id ?? dataset.manifest.sites[0].id,
       );
-      setDate(dataset.manifest.period.startUtc.slice(0, 10));
+      const initialDate =
+        dataset.manifest.coveragePolicy?.asOfUtcDate ??
+        dataset.manifest.period.startUtc.slice(0, 10);
+      setDate(initialDate);
+      if (dataset.manifest.coveragePolicy?.asOfUtcDate) {
+        setIndex(
+          (Date.parse(initialDate + "T00:00:00Z") -
+            Date.parse(dataset.manifest.period.startUtc)) /
+            (dataset.manifest.period.stepMinutes * 60000),
+        );
+      }
     }
   }, [dataset.manifest]);
   const settings = { siteId, alternative, height, date, days, delay },

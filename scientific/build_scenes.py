@@ -15,17 +15,21 @@ import numpy as np
 import lunar_ephem as E
 import lunar_horizon as hz
 import lunar_geo as g
+import lunar_eclipse as eclipse
+import coverage as coverage_config
 
 SCHEMA_VERSION = "1.0.0"
 HERE = os.path.dirname(os.path.abspath(__file__))
 CACHE = os.path.join(HERE, "cache")
 OUT = os.path.join(HERE, "..", "public", "data")
 
-PERIOD = {"startUtc": "2027-03-01T00:00:00Z", "endUtc": "2027-04-28T00:00:00Z"}
+PERIOD = {}
+COVERAGE_POLICY = {}
 OUTPUT_STEP_MIN = 60
 INTERNAL_STEP_MIN = 5
 OBSERVER_HEIGHTS_M = (0.5, 1, 2, 5, 10)
 GEOMETRY_REFERENCE_HEIGHT_M = 1
+BASELINE_METRIC_RESULTS = []
 PGDA = "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp"
 IMBRIUM = "https://imbrium.mit.edu"
 
@@ -125,20 +129,28 @@ class SiteModel:
     def obs(self, hobs):
         return E.observer_pos_km(self.lat, self.lon, self.h_terrain + hobs)
 
-    def series(self, ets, hobs):
+    def series(self, ets, hobs, apply_eclipse=True):
         out = {}
         for body, radius in (("SUN", E.SUN_RADIUS_KM), ("EARTH", E.EARTH_RADIUS_KM)):
             rng, az, el = E.azel(body, ets, self.obs(hobs))
             ang = np.degrees(np.arcsin(radius / rng))
             frac = E.disk_fraction(el, hz.interp_horizon(self.horizon[hobs], az), ang)
             out[body] = {"range": rng, "az": az, "el": el, "ang": ang, "frac": frac}
+        if apply_eclipse:
+            eclipse.apply(out, hz.interp_horizon(self.horizon[hobs], out["SUN"]["az"]))
         return out
 
     def visible_at(self, body, et, hobs):
-        radius = E.SUN_RADIUS_KM if body == "SUN" else E.EARTH_RADIUS_KM
-        rng, az, el = E.azel(body, [et], self.obs(hobs))
-        ang = np.degrees(np.arcsin(radius / rng))
-        return float(E.disk_fraction(el, hz.interp_horizon(self.horizon[hobs], az), ang)[0]) > 0.0
+        return self.series([et], hobs)[body]["frac"][0] > 0.0
+
+
+def solar_transition_type(visible_before, terrain_before, terrain_after):
+    """Counterfactual cause: does removing Earth remove this transition?"""
+    if terrain_before != terrain_after:
+        return ("sunset" if visible_before else "sunrise"), "terrain"
+    if terrain_before and terrain_after:
+        return ("eclipseDarknessStart" if visible_before else "eclipseDarknessEnd"), "earth-occultation"
+    raise ValueError("Joint solar visibility cannot change while terrain is invisible at both bracket ends")
 
 
 def refine_events(model, body, ets, frac, hobs):
@@ -154,17 +166,84 @@ def refine_events(model, body, ets, frac, hobs):
                 a = m
             else:
                 b = m
+        typ = names[0] if not va else names[1]
+        cause = "terrain"
+        if body == "SUN":
+            at = model.series([a, b], hobs)["SUN"]
+            typ, cause = solar_transition_type(bool(va), bool(at["terrainFrac"][0] > 0),
+                                               bool(at["terrainFrac"][1] > 0))
         events.append({
-            "type": names[0] if not va else names[1],
+            "type": typ,
+            "cause": cause,
             "heightM": hobs,
             "utc": E.et_to_iso(0.5 * (a + b)),
             "resolutionMin": 1,
             "refined": True,
+            "refinementBracketSec": round(float(b-a), 6),
         })
     return events
 
 
+def metrics_from_series(series, interval_only=False):
+    # A finite stay has N-1 grid cells. Original published metrics averaged N
+    # endpoints; retain that definition only to reproduce the saved baseline.
+    sf = series["SUN"]["frac"][:-1] if interval_only else series["SUN"]["frac"]
+    ef = series["EARTH"]["frac"][:-1] if interval_only else series["EARTH"]["frac"]
+    sun_vis, earth_vis = sf > 0, ef > 0
+    step_h = INTERNAL_STEP_MIN/60.0
+    lit, lit_c = longest(sun_vis, step_h)
+    dark, dark_c = longest(~sun_vis, step_h)
+    noe, noe_c = longest(~earth_vis, step_h)
+    return {
+        "meanSunVisibleFraction": round(float(sf.mean()), 4),
+        "sunlitTimeFraction": round(float(sun_vis.mean()), 4),
+        "longestSunlitH": lit, "longestSunlitCensored": lit_c,
+        "longestNoDirectSunH": dark, "longestNoDirectSunCensored": dark_c,
+        "earthVisibleTimeFraction": round(float(earth_vis.mean()), 4),
+        "longestNoEarthH": noe, "longestNoEarthCensored": noe_c,
+        "durationResolutionMin": INTERNAL_STEP_MIN,
+    }
+
+
+def eclipse_intervals(model, ets, series, hobs):
+    """Site/height-specific angular limb contacts, refined to <=30 seconds."""
+    active = series["SUN"]["eclipseMargin"] < 0
+    intervals, boundaries = [], []
+    for s, e in runs(active):
+        contacts = []
+        for index, entering in ((s, True), (e, False)):
+            clipped = index == 0 or index == len(ets)
+            if clipped:
+                et = ets[0] if index == 0 else ets[-1]
+            else:
+                a, b = ets[index-1], ets[index]
+                while b-a > 30:
+                    m = (a+b)*0.5
+                    state = model.series([m], hobs)["SUN"]["eclipseMargin"][0] < 0
+                    if state == entering:
+                        b = m
+                    else:
+                        a = m
+                et = (a+b)*0.5
+            contacts.append(E.et_to_iso(et))
+            if not clipped:
+                boundaries.append({"type": "solarEclipseStart" if entering else "solarEclipseEnd",
+                                   "heightM": hobs, "utc": contacts[-1],
+                                   "resolutionMin": 1, "refined": True,
+                                   "refinementBracketSec": round(float(b-a), 6),
+                                   "cause": "earth-occultation"})
+        intervals.append({"startUtc": contacts[0], "endUtc": contacts[1], "heightM": hobs,
+                          "type": "earth-occults-sun-geometric-spherical",
+                          "minimumUnobscuredFraction": round(float(series["SUN"]["unobscured"][s:e].min()), 6),
+                          "minimumSamplingMin": INTERNAL_STEP_MIN,
+                          "startCensored": bool(s == 0), "endCensored": bool(e == len(ets)),
+                          "resolutionMin": 1, "refined": True})
+    return intervals, boundaries
+
+
 def main():
+    if not PERIOD:
+        raise RuntimeError("Configure coverage before generation")
     os.makedirs(os.path.join(OUT, "sites"), exist_ok=True)
     E.load_kernels()
     out_times = E.utc_grid(PERIOD["startUtc"], PERIOD["endUtc"], OUTPUT_STEP_MIN)
@@ -172,12 +251,6 @@ def main():
     out_ets = np.array([E.to_et(t) for t in out_times])
     in_ets = np.array([E.to_et(t) for t in in_times])
     step_h = INTERNAL_STEP_MIN / 60.0
-
-    # Eclipse screening (Earth occulting the Sun as seen from the Moon centre).
-    occ = np.array([E.earth_occults_sun_from_moon(et) for et in in_ets])
-    eclipses = [{"startUtc": E.et_to_iso(in_ets[s]), "endUtc": E.et_to_iso(in_ets[e - 1]),
-                 "type": "earth-occults-sun (screened from Moon centre, 5-min grid)"}
-                for s, e in runs(occ != 0)]
 
     mid = g.load_pds_polar_img(os.path.join(CACHE, "dem", "LDEM_80S_80M.IMG"))
     far = g.load_pds_polar_img(os.path.join(CACHE, "dem", "LDEM_75S_240M.IMG"))
@@ -193,7 +266,8 @@ def main():
                 "minReachKm": round(float(model.reach_m.min()) / 1000.0, 1),
                 "elevationDeg": {str(h): r(model.horizon[h]) for h in OBSERVER_HEIGHTS_M},
             },
-            "sun": {}, "earth": {}, "events": [], "metrics": {}, "eclipses": eclipses,
+            "sun": {}, "earth": {}, "events": [], "metrics": {}, "eclipses": [],
+            "eclipseEvents": [],
         }
         reference = model.series(out_ets, GEOMETRY_REFERENCE_HEIGHT_M)
         for body, key in (("SUN", "sun"), ("EARTH", "earth")):
@@ -202,26 +276,36 @@ def main():
             doc[key]["angularRadiusDeg"] = r(reference[body]["ang"], 4)
             doc[key]["rangeKm"] = r(reference[body]["range"], 0)
             doc[key]["visibleFraction"] = {}
+        doc["sun"]["terrainVisibleFraction"] = {}
+        doc["sun"]["eclipseUnobscuredFraction"] = {}
         for hobs in OBSERVER_HEIGHTS_M:
             so = reference if hobs == GEOMETRY_REFERENCE_HEIGHT_M else model.series(out_ets, hobs)
             si = model.series(in_ets, hobs)
             for body, key in (("SUN", "sun"), ("EARTH", "earth")):
                 doc[key]["visibleFraction"][str(hobs)] = r(so[body]["frac"])
                 doc["events"] += refine_events(model, body, in_ets, si[body]["frac"], hobs)
-            sun_vis = si["SUN"]["frac"] > 0
-            earth_vis = si["EARTH"]["frac"] > 0
-            lit, lit_c = longest(sun_vis, step_h)
-            dark, dark_c = longest(~sun_vis, step_h)
-            noe, noe_c = longest(~earth_vis, step_h)
-            doc["metrics"][str(hobs)] = {
-                "meanSunVisibleFraction": round(float(si["SUN"]["frac"].mean()), 4),
-                "sunlitTimeFraction": round(float(sun_vis.mean()), 4),
-                "longestSunlitH": lit, "longestSunlitCensored": lit_c,
-                "longestNoDirectSunH": dark, "longestNoDirectSunCensored": dark_c,
-                "earthVisibleTimeFraction": round(float(earth_vis.mean()), 4),
-                "longestNoEarthH": noe, "longestNoEarthCensored": noe_c,
-                "durationResolutionMin": INTERNAL_STEP_MIN,
-            }
+            doc["sun"]["terrainVisibleFraction"][str(hobs)] = r(so["SUN"]["terrainFrac"])
+            doc["sun"]["eclipseUnobscuredFraction"][str(hobs)] = r(so["SUN"]["unobscured"])
+            intervals, boundaries = eclipse_intervals(model, in_ets, si, hobs)
+            doc["eclipses"] += intervals
+            doc["eclipseEvents"] += boundaries
+            doc["metrics"][str(hobs)] = metrics_from_series(si, interval_only=True)
+            baseline_path = os.path.join(CACHE, "year-extension-baseline", "sites", site["id"]+".json")
+            if os.path.exists(baseline_path):
+                with open(os.path.join(CACHE, "year-extension-baseline", "manifest.json"), encoding="utf-8") as f:
+                    baseline_manifest = json.load(f)
+                oldperiod = baseline_manifest["period"]
+                old_a = E.to_et(datetime.fromisoformat(oldperiod["startUtc"].replace("Z", "+00:00")))
+                old_b = E.to_et(datetime.fromisoformat(oldperiod["endUtc"].replace("Z", "+00:00")))
+                pick = (in_ets >= old_a) & (in_ets <= old_b)
+                if pick.sum() == round((old_b-old_a)/(INTERNAL_STEP_MIN*60))+1:
+                    with open(baseline_path, encoding="utf-8") as f:
+                        previous_metrics = json.load(f)["metrics"][str(hobs)]
+                    subset = {body: {"frac": values["frac"][pick]} for body, values in si.items()}
+                    equal = metrics_from_series(subset, interval_only=False) == previous_metrics
+                    BASELINE_METRIC_RESULTS.append({"site": site["id"], "heightM": hobs, "pass": equal})
+                    if not equal:
+                        raise ValueError(f"Original-window metric regression: {site['id']} {hobs}m")
         doc["events"].sort(key=lambda ev: (ev["heightM"], ev["utc"]))
         with open(os.path.join(OUT, "sites", f"{site['id']}.json"), "w", encoding="utf-8", newline="\n") as f:
             json.dump(doc, f, separators=(",", ":"))
@@ -261,15 +345,17 @@ def main():
         "generatedAtUtc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "period": {**PERIOD, "stepMinutes": OUTPUT_STEP_MIN, "sampleCount": len(out_ets)},
         "observerHeightsM": list(OBSERVER_HEIGHTS_M),
+        "coveragePolicy": COVERAGE_POLICY,
         "conventions": {
             "azimuth": "deg clockwise from local north, 0-360",
             "elevation": "deg above the local horizontal plane (sphere normal, R = 1737.4 km)",
             "longitude": "east-positive deg",
             "frame": "MOON_ME (NAIF moon_de440_250416.tf: DE440 PA rotated to DE421 mean-Earth, same frame as LOLA/PGDA DEMs)",
-            "time": "UTC; sample i at startUtc + i*stepMinutes",
+            "time": "UTC; sample i at startUtc + i*stepMinutes; both endpoint samples stored. Metrics use the N-1 left-endpoint 5-minute intervals, excluding the terminal sample from durations/averages.",
             "geometryReferenceHeightM": GEOMETRY_REFERENCE_HEIGHT_M,
+            "solarEclipse": "Opaque spherical Earth and uniform solar disk in an angular tangent plane; integrate the disk jointly above the local horizontal terrain cut and outside Earth. No atmosphere, refraction, limb darkening, irradiance or energy model.",
             "heightCalculation": "Shared azDeg, elDeg, angularRadiusDeg and rangeKm refer to the 1 m observer. Each height has separately computed observer position, horizon, visible fractions, events and metrics; no interpolation between heights.",
-            "visibleFraction": "fraction of the body's disk above the terrain horizon; disk cut horizontally at the horizon elevation at the disk-centre azimuth (Barker et al. 2021), uniform disk (no limb darkening)",
+            "visibleFraction": "fraction of the body's disk above the terrain horizon; solar fractions additionally exclude Earth-occulted area. Horizontal terrain cut at disk-centre azimuth; uniform disks. Solar terrain-only and eclipse-only fractions are separately published and are not multiplied.",
             "censored": "true when the longest period touches the start or end of the simulated window: show as >= value",
         },
         "sites": site_entries,
@@ -292,6 +378,8 @@ def main():
             "Bare-terrain horizon from LOLA DEMs: 5 m PGDA (<5 km), 80 m PDS (5-100 km), 240 m PDS (>100 km), 720 azimuths, great-circle sight lines, exact spherical geometry.",
             "Observer heights 0.5, 1, 2, 5 and 10 m above the local terrain surface; heights describe the model observer, not DEM vertical accuracy.",
             "Sun and Earth treated as uniform disks; Earth visibility is geometric line of sight only.",
+            "Solar eclipses use an opaque spherical Earth (6378.137 km) and angular-circle approximation; fractional solar area jointly excludes terrain and Earth. No atmospheric transmission, refraction, limb darkening, penumbral photometry or energy calculation.",
+            "eclipseUnobscuredFraction is the Sun area not covered by Earth before terrain; terrainVisibleFraction ignores Earth; visibleFraction applies the union of both occluders. Eclipse contact events are separate from terrain events.",
             f"Durations and metrics from a {INTERNAL_STEP_MIN}-min grid; rise/set times refined by bisection to <= 30 s and reported with 1-min resolution.",
         ],
         "limitations": [
@@ -304,8 +392,10 @@ def main():
     }
     with open(os.path.join(OUT, "manifest.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(manifest, f, indent=1)
-    print("eclipses", eclipses)
+    print("coverage", PERIOD, "samples", len(out_ets))
 
 
 if __name__ == "__main__":
+    import sys
+    coverage_config.configure(sys.modules[__name__])
     main()

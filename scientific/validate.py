@@ -23,6 +23,8 @@ import lunar_ephem as E
 import lunar_geo as g
 import lunar_horizon as hz
 
+CACHED_HORIZONS_ONLY = False
+
 HORIZONS_CACHE = os.path.join(B.CACHE, "horizons")
 USER_AGENT = "LunarLandingSiteNavigator/0.1 (NASA Space Apps 2026 hackathon project; offline validation, serial requests)"
 
@@ -43,9 +45,15 @@ def horizons_query(body_id, lon, lat, alt_km, tlist):
     os.makedirs(HORIZONS_CACHE, exist_ok=True)
     key = f"{body_id}_{lon:.5f}_{lat:.5f}_{alt_km:.5f}_{hashlib.sha1("|".join(tlist).encode()).hexdigest()[:10]}.txt"
     path = os.path.join(HORIZONS_CACHE, key)
+    reference = os.path.join(os.path.dirname(__file__), "reference", "horizons", key)
+    if os.path.isfile(reference):
+        with open(reference, encoding="utf-8") as f:
+            return f.read(), True
     if os.path.exists(path):
         with open(path, encoding="utf-8") as f:
             return f.read(), True
+    if CACHED_HORIZONS_ONLY:
+        raise FileNotFoundError(f"Horizons cache/reference missing; network disabled: {key}")
     params = {
         "format": "text", "COMMAND": f"'{body_id}'", "MAKE_EPHEM": "'YES'", "EPHEM_TYPE": "'OBSERVER'",
         "CENTER": "'coord@301'", "COORD_TYPE": "'GEODETIC'",
@@ -97,7 +105,7 @@ def v1_horizons(models):
         {"p95Deg": round(p95, 5), "maxDeg": round(float(seps.max()), 5), "n": int(seps.size), "perSiteBody": rows,
          "newHorizonsRequests": calls},
         "pass" if p95 < 0.01 else "fail",
-        "Horizons responses cached in scientific/cache/horizons/ (not versioned); serial requests with identifying User-Agent.",
+        "Historical Horizons responses pinned in scientific/reference/horizons/ (or original cache); six sites/two bodies/five original-window instants. Automated rebuild makes no new requests.",
         "Agreement holds only for the sampled instants and site/body pairs listed in this result, limited by the 1e-6 deg precision printed by Horizons. It is not a general proof of equality for every site, time or body.",
     )
 
@@ -170,7 +178,7 @@ def v4_barker(models, mid, far):
     for m in models:
         if m.site["id"] not in ("connecting-ridge", "shackleton-rim"):
             continue
-        frac = m.series(ets, 1)["SUN"]["frac"]
+        frac = m.series(ets, 1, apply_eclipse=False)["SUN"]["frac"]
         mean = float(frac.mean())
         ok &= mean > 0.70
         rows.append({"site": m.site["id"], "meanVisibleFraction2024to2026At1m": round(mean, 4)})
@@ -191,7 +199,7 @@ def v4b_pgda(models):
     for m in models:
         x, y = m.site["xy"]
         pg = float(av.sample(np.array([x]), np.array([y]))[0])
-        ours = float(m.series(ets, 1)["SUN"]["frac"].mean())
+        ours = float(m.series(ets, 1, apply_eclipse=False)["SUN"]["frac"].mean())
         rows.append({"site": m.site["id"], "pgda18yrAvgVisibility60m": round(pg, 3),
                      "ours2024to2026At1m": round(ours, 3)})
     return test(
@@ -214,8 +222,8 @@ def v5_sanity(models, mid, far):
             mono_h = bool(np.all(m.horizon[upper] <= m.horizon[lower] + 1e-9))
             fractions = {}
             for body in ("sun", "earth"):
-                lo = np.asarray(generated[body]["visibleFraction"][str(lower)])
-                hi = np.asarray(generated[body]["visibleFraction"][str(upper)])
+                lo = np.asarray(generated[body]["terrainVisibleFraction" if body == "sun" and "terrainVisibleFraction" in generated[body] else "visibleFraction"][str(lower)])
+                hi = np.asarray(generated[body]["terrainVisibleFraction" if body == "sun" and "terrainVisibleFraction" in generated[body] else "visibleFraction"][str(upper)])
                 fractions[body] = bool(np.all(hi >= lo - 1e-12))
             ok &= mono_h and all(fractions.values())
             pairs.append({"lowerM": lower, "upperM": upper,
@@ -240,14 +248,17 @@ def v5_sanity(models, mid, far):
                               "maxSunFraction2024to2026": round(float(frac.max()), 4)}})
     return test(
         "V5", "Sanity: height monotonicity and a permanently shadowed pixel",
-        "For every adjacent pair of observer heights (0.5, 1, 2, 5, 10 m), the higher horizon must not exceed the lower and generated hourly Sun/Earth visible fractions must not decrease; a pixel flagged permanently shadowed in PDS LPSR_85S_060M (Shackleton floor, 80 m DEM near field) must receive no direct sunlight hourly over 2024-2026.",
+        "For every adjacent pair of observer heights (0.5, 1, 2, 5, 10 m), the higher horizon must not exceed the lower and generated hourly terrain-only Sun/Earth visible fractions must not decrease (eclipse parallax is excluded from this monotonicity claim); a pixel flagged permanently shadowed in PDS LPSR_85S_060M (Shackleton floor, 80 m DEM near field) must receive no direct sunlight hourly over 2024-2026.",
         "booleans; max solar-disk fraction at PSR pixel", "all true; PSR max fraction = 0",
         rows, "pass" if ok else "fail", "scientific/validate.py v5_sanity",
         "PSR test uses the 80 m DEM as near field (no 5 m PGDA tile covers this pixel).")
 
 
-def main():
-    use_horizons = "--horizons" in sys.argv
+def main(use_horizons=None, cached_only=False):
+    global CACHED_HORIZONS_ONLY
+    CACHED_HORIZONS_ONLY = cached_only
+    if use_horizons is None:
+        use_horizons = "--horizons" in sys.argv
     E.load_kernels()
     mid = g.load_pds_polar_img(os.path.join(B.CACHE, "dem", "LDEM_80S_80M.IMG"))
     far = g.load_pds_polar_img(os.path.join(B.CACHE, "dem", "LDEM_75S_240M.IMG"))
@@ -260,6 +271,18 @@ def main():
                           "p95 < 0.01 deg", None, "pending", "", "Not run in this invocation."))
     tests += [v2_datum(mid), v3_convergence(models), v4_barker(models, mid, far), v4b_pgda(models),
               v5_sanity(models, mid, far)]
+    from verify_coverage import eclipse_checks, dataset_checks
+    ec = eclipse_checks()
+    tests.append(test("V6", "Joint terrain and spherical-Earth solar disk integration",
+                      "Exact circle containment/no-overlap cases; 128-vs-256 quadrature convergence; independent 100000-chord midpoint integration, fixed random seed.",
+                      "maximum solar disk area fraction error", "analytic<1e-8, convergence<2e-5, independent<1e-4",
+                      ec, "pass" if ec["pass"] else "fail", "scientific/verify_coverage.py",
+                      "Numerical validation of angular-circle approximation only; not atmosphere, energy, or independent astronomical ephemeris validation."))
+    structure = dataset_checks(B.OUT)
+    tests.append(test("V7", "Coverage and joint solar fraction consistency",
+                      "All six sites/heights: array lengths, finite bounded fractions, joint area <= terrain and unocculted areas, event/contact bounds; sky/planets share manifest period; duration <= actual interval.",
+                      "errors", "no errors", structure, "pass" if structure["pass"] else "fail",
+                      "scientific/verify_coverage.py dataset_checks"))
     doc = {"schemaVersion": B.SCHEMA_VERSION,
            "generatedAtUtc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
            "tests": tests}
@@ -278,6 +301,8 @@ def main():
     man["validation"]["summary"] = {t["id"]: t["status"] for t in tests}
     with open(man_path, "w", encoding="utf-8", newline="\n") as f:
         json.dump(man, f, indent=1)
+    if "fail" in statuses:
+        raise RuntimeError("Scientific validation failed; dataset must not be promoted")
 
 
 if __name__ == "__main__":

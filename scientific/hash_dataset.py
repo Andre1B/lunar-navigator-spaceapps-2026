@@ -23,7 +23,10 @@ def sha256(path):
     return h.hexdigest()
 
 
-def main():
+def main(output_dir=None):
+    global OUT
+    if output_dir is not None:
+        OUT = str(output_dir)
     with open(os.path.join(OUT, "manifest.json"), encoding="utf-8") as f:
         manifest = json.load(f)
     files = CORE + [s["file"] for s in manifest["sites"]]

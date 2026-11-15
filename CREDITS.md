@@ -8,6 +8,8 @@ Lunar Navigator — Team An0r4k, NASA Space Apps 2026, Lunar Landing Site Naviga
 
 - [React](https://github.com/facebook/react): application components and state, MIT.
 - [Three.js](https://github.com/mrdoob/three.js): WebGL scene and OrbitControls, MIT.
+- [jsPDF](https://github.com/parallax/jsPDF), version 4.2.1: locally generated comparison PDF, MIT. Charts and report layouts are original vector drawing code.
+- [FontTools](https://github.com/fonttools/fonttools): optional build tool to convert the installed Overpass WOFF2 font into embedded report TTF, MIT. Outlines and copyright notices are preserved; parent/output checksums are in `public/assets/fonts/report-fonts.json`, with the OFL notice alongside the fonts.
 - [Vite](https://github.com/vitejs/vite) and its React plugin: development and production build, MIT.
 - [SpiceyPy](https://github.com/AndrewAnnex/SpiceyPy): Python interface to NAIF CSPICE, MIT; CSPICE retains NAIF terms.
 - [NumPy](https://github.com/numpy/numpy): scientific array calculations, BSD-3-Clause.

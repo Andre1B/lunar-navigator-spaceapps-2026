@@ -56,14 +56,30 @@ export default function ComparisonAnswer({
                   <dd>{duration(row.summary?.dark)}</dd>
                 </div>
                 <div>
-                  <dt>Time with some sunlight</dt>
-                  <dd>{percent(row.summary?.sunlitFraction)}</dd>
+                  <dt>Sun visible · % of your stay</dt>
+                  <dd className="answer-sun-percent">
+                    {percent(row.summary?.sunlitFraction)}
+                  </dd>
                 </div>
                 <div>
-                  <dt>Time with Earth in view</dt>
-                  <dd>{percent(row.summary?.earthFraction)}</dd>
+                  <dt>Earth visible · % of your stay</dt>
+                  <dd className="answer-earth-percent">
+                    {percent(row.summary?.earthFraction)}
+                  </dd>
                 </div>
               </dl>
+              <div className="answer-arrival">
+                <strong>At the arrival instant</strong>
+                <p>
+                  Unblocked disc:{" "}
+                  <span>
+                    Sun {percent(row.arrival?.sunVisibleDiscFraction)}
+                  </span>{" "}
+                  <span>
+                    Earth {percent(row.arrival?.earthVisibleDiscFraction)}
+                  </span>
+                </p>
+              </div>
               {row.summary ? (
                 <button
                   className="answer-inspect"
@@ -72,12 +88,23 @@ export default function ComparisonAnswer({
                   See {i === 2 ? "this place" : "this arrival"} in 3D
                 </button>
               ) : (
-                <p>Choose a date and stay that fit March–April 2027.</p>
+                <p>
+                  Choose a date and stay that fit{" "}
+                  {manifest.period.startUtc.slice(0, 10)} to{" "}
+                  {manifest.period.endUtc.slice(0, 10)}.
+                </p>
               )}
             </article>
           );
         })}
       </div>
+      <p className="answer-meaning">
+        <strong>Two different percentages:</strong> the stay percentage counts
+        time with any part visible. The arrival percentage measures how much of
+        each disc is visible at that one instant, including terrain and
+        geometric Earth eclipses for the Sun. Neither is an electrical-power
+        percentage.
+      </p>
       <p className="answer-meaning">
         Why it matters: long gaps without Sun affect the opportunity to collect
         solar energy. Seeing Earth creates an opportunity for a direct radio
@@ -90,8 +117,8 @@ export default function ComparisonAnswer({
           <div>
             <dt>Longest stretch without sunlight</dt>
             <dd>
-              One uninterrupted period when the terrain hides the entire Sun. A
-              longer gap may need more stored energy.
+              One uninterrupted period when terrain or Earth hides the entire
+              Sun. A longer gap may need more stored energy.
             </dd>
           </div>
           <div>

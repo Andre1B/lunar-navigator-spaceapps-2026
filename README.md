@@ -69,3 +69,9 @@ Sunlight does not establish electrical generation or battery survival. Direct Ea
 
 ## First interaction
 The opening ends on Home, with the question and ready-to-use comparison. Normal-motion entries play automatically; reduced-motion, tours and exact comparison inspections start paused. On Home, try +3/+7/+14 days to see a real two-arrival comparison immediately, then open those same settings in Compare. A nearby-point shortcut changes only the alternative location. Sun/Earth aiming follows the current direction continuously; manual dragging releases following.
+
+## Rolling dates and comparison PDF
+
+The active dataset covers one calendar year before and after its UTC reference day. See the manifest coveragePolicy and the visible Computed dates notice. The daily workflow regenerates in staging, verifies pinned sources and data hashes, runs tests and a production build, then commits validated data to main. Cloudflare Pages is connected to this repository and builds main into dist. No Cloudflare API credential is needed in the daily workflow. An end-to-end scheduled-refresh/deployment run remains pending until recorded in VERIFICATION. Old days leave the active dataset; version history remains auditable.
+
+Compare downloads a local, styled PDF: all three scenarios, time and arrival-disc percentages, horizon/timeline charts, the complete valid-arrival table, validation, source/version hashes and limitations. Advanced JSON remains available for reproducibility. The simulator can repeat the computed period with Loop; it does not extrapolate.

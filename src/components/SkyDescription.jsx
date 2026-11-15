@@ -1,7 +1,7 @@
 // AI-assisted component. A text alternative to the sky view, built from the SAME interpolated
 // observation that drives the on-screen Sun/Earth disc percentages. No speech, no network.
 import { useEffect, useState } from "react";
-import { timeAt } from "../lib/analysis.mjs";
+import { timeAt, percent } from "../lib/analysis.mjs";
 
 const SETTLE_MS = 700;
 
@@ -12,11 +12,13 @@ function body(name, d) {
   if (!d || !Number.isFinite(d.elevationDeg)) return `${name}: not available.`;
   const pct = Math.round(d.fraction * 100);
   const state =
-    d.fraction >= 1
-      ? "fully above the terrain horizon"
-      : d.fraction <= 0
-        ? "hidden below the terrain horizon"
-        : `${pct < 1 ? "less than 1" : pct > 99 ? "more than 99" : pct}% of the disc above the terrain horizon`;
+    name === "Sun" && d.eclipse
+      ? `${percent(d.fraction)} of the disc visible after terrain and geometric Earth occultation; atmosphere and irradiance not modeled`
+      : d.fraction >= 1
+        ? "fully above the terrain horizon"
+        : d.fraction <= 0
+          ? "hidden below the terrain horizon"
+          : `${pct < 1 ? "less than 1" : pct > 99 ? "more than 99" : pct}% of the disc above the terrain horizon`;
   return (
     `${name} at azimuth ${d.azimuthDeg.toFixed(0)}°, ${deg(d.elevationDeg)} relative to the local horizontal; ` +
     `terrain horizon in that direction ${deg(d.horizonDeg)}; ${state}.`
@@ -78,18 +80,31 @@ export default function SkyDescription({
       </h3>
       {matches ? (
         <p className="sky-description-plain">
-          <span>{observation.sun > 0
-            ? "The Sun is in view."
-            : "The Sun is hidden by the terrain."}</span>{" "}
-          <span>{observation.earth > 0
-            ? "Earth is in view."
-            : "Earth is hidden by the terrain."}</span>
+          <span>
+            {observation.sun > 0
+              ? "The Sun is in view."
+              : observation.sunDetail?.eclipse &&
+                  observation.sunDetail?.terrainFraction > 0
+                ? "Earth blocks the Sun during a geometric eclipse."
+                : "The Sun is hidden by the terrain."}
+          </span>{" "}
+          <span>
+            {observation.earth > 0
+              ? "Earth is in view."
+              : "Earth is hidden by the terrain."}
+          </span>
         </p>
       ) : null}
-      <p className="sky-description-context">This describes the selected location, not every part of the 3D scene.</p>
+      <p className="sky-description-context">
+        This describes the selected location, not every part of the 3D scene.
+      </p>
       <details className="sky-description-details">
         <summary>Angles and calculation details</summary>
-        <p>{playing ? "Pause to inspect the angles at a moment in time." : text || "Waiting for the sky geometry…"}</p>
+        <p>
+          {playing
+            ? "Pause to inspect the angles at a moment in time."
+            : text || "Waiting for the sky geometry…"}
+        </p>
       </details>
       <p className="sr-only" aria-live="polite" aria-atomic="true">
         {playing
@@ -98,7 +113,9 @@ export default function SkyDescription({
       </p>
       <p className="sky-description-note">
         Geometric visibility from the interpolated ephemeris and the terrain
-        horizon. Not a radio link, power or operational assessment.
+        horizon, with an opaque spherical Earth included for geometric eclipses.
+        Atmosphere and irradiance are not modeled. Not a radio link, power or
+        operational assessment.
       </p>
     </section>
   );

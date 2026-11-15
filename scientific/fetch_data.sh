@@ -26,4 +26,4 @@ curl -fL -o cache/sss/2k_earth_clouds.jpg https://extension.solarsystemscope.com
 curl -fL -o cache/sss/2k_earth_specular_map.tif https://extension.solarsystemscope.com/textures/download/2k_earth_specular_map.tif
 # Verify a real binary was received (some PGDA links return an HTML page with HTTP 200).
 for f in cache/dem/*/*.tif; do head -c 4 "$f" | grep -q "II" || { echo "Not a TIFF: $f"; exit 1; }; done
-echo "Inputs ready. Then run: PYTHONPATH=. python -P build_scenes.py && PYTHONPATH=. python -P validate.py --horizons"
+echo "Inputs downloaded. Verify pins: python fetch_sources.py --check-only; generate: python -u rebuild.py --as-of YYYY-MM-DD"

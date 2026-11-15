@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import Timeline from "../components/TimelineV2.jsx";
 import NextEvents from "../components/NextEvents.jsx";
 import SkyDescription from "../components/SkyDescription.jsx";
+import CoverageNotice from "../components/CoverageNotice.jsx";
 import { percent, timeAt } from "../lib/analysis.mjs";
 const Scene = lazy(() => import("../components/SpaceSceneV2.jsx"));
 const cameras = [
@@ -39,6 +40,7 @@ export default function SimulatorV2({
         !matchMedia("(prefers-reduced-motion:reduce)").matches,
     ),
     [speed, setSpeed] = useState(1),
+    [loop, setLoop] = useState(true),
     [surfaceStyle, setSurfaceStyle] = useState("terrain"),
     [lightPaths, setLightPaths] = useState(false),
     [opticalGlare, setOpticalGlare] = useState(true),
@@ -110,16 +112,16 @@ export default function SimulatorV2({
       const now = performance.now(),
         delta = Math.min(now - last, 200);
       last = now;
-      const next = Math.min(
-        clock.current + (delta / 1000) * speed,
-        manifest.period.sampleCount - 1,
-      );
+      const max = manifest.period.sampleCount - 1;
+      const advanced = clock.current + (delta / 1000) * speed;
+      const next =
+        loop && advanced >= max ? advanced % max : Math.min(advanced, max);
       clock.current = next;
       setIndex(next);
-      if (next >= manifest.period.sampleCount - 1) setPlaying(false);
+      if (!loop && next >= max) setPlaying(false);
     }, 50);
     return () => clearInterval(timer);
-  }, [playing, speed, manifest, setIndex]);
+  }, [playing, speed, loop, manifest, setIndex]);
   function changeMode(m) {
     setPlaying(false);
     setMode(m);
@@ -184,6 +186,7 @@ export default function SimulatorV2({
           </a>
         </div>
       ) : null}
+      <CoverageNotice manifest={manifest} />
       <div className="explorer-layout">
         {inspecting ? (
           <p className="inspection-note">
@@ -483,12 +486,20 @@ export default function SimulatorV2({
                   <option value="24">1 day / second</option>
                 </select>
               </label>
+              <label className="inline playback-loop">
+                <input
+                  type="checkbox"
+                  checked={loop}
+                  onChange={(e) => setLoop(e.target.checked)}
+                />
+                Loop computed period
+              </label>
             </div>
             <p className="playback-status" role="status">
               {playing
-                ? `Playing · ${speed} simulated hours per second. Press Pause to inspect a moment.`
+                ? `Playing · ${speed} simulated hours per second. ${loop ? "At the end, the clock returns to the first computed date." : "Playback stops at the last computed date."}`
                 : atEnd
-                  ? "End of the calculated period. Replay starts again on 1 March 2027."
+                  ? `End of the calculated period. Replay starts again on ${manifest.period.startUtc.slice(0, 10)}.`
                   : "Paused. Press Play, step one hour, or drag the time slider."}
             </p>
             <div data-tour="light-tracks">
@@ -599,9 +610,10 @@ export default function SimulatorV2({
           ) : null}
           {!immersive && mode === "faithful" ? (
             <p className="readout-guide">
-              Sun / Earth in view: the percentage of each disc above the hills{" "}
+              Sun / Earth in view: the unobstructed percentage of each disc{" "}
               <strong>at this instant</strong>. 100% means the whole disc; 0%
-              means hidden. These are not percentages of time or power.
+              means hidden. Terrain and geometric Earth eclipses are included.
+              These are not percentages of time or power.
             </p>
           ) : null}
           {view === "sky" ? (

@@ -1,19 +1,31 @@
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import { timeAt } from "../lib/analysis.mjs";
 const Track = memo(function Track({ label, values }) {
+  // A rolling two-year dataset must not create tens of thousands of SVG nodes.
+  // This is display-only binning; the scientific metrics use the full data.
+  const bins = useMemo(() => {
+    const count = Math.min(720, values.length);
+    return Array.from({ length: count }, (_, bin) => {
+      const start = Math.floor((bin * values.length) / count);
+      const end = Math.floor(((bin + 1) * values.length) / count);
+      let sum = 0;
+      for (let i = start; i < end; i++) sum += values[i];
+      return sum / (end - start);
+    });
+  }, [values]);
   return (
     <div className="track-row">
       <span>{label}</span>
       <svg
-        viewBox={`0 0 ${values.length} 28`}
+        viewBox={`0 0 ${bins.length} 28`}
         preserveAspectRatio="none"
         role="img"
         aria-label={
           label + " timeline; brighter means more of the disc visible"
         }
       >
-        <rect width={values.length} height="28" fill="#192335" />
-        {values.map((v, i) =>
+        <rect width={bins.length} height="28" fill="#192335" />
+        {bins.map((v, i) =>
           v > 0 ? (
             <rect
               key={i}
@@ -79,7 +91,8 @@ export default function TimelineV2({
       <div className="between caption">
         <span>{period.startUtc.slice(0, 10)}</span>
         <span>
-          Gold: visible Sun · Cyan: visible Earth · hourly source samples
+          Gold: visible Sun · Cyan: visible Earth · display bins average hourly
+          samples
         </span>
         <span>{period.endUtc.slice(0, 10)}</span>
       </div>

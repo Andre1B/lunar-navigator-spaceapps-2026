@@ -24,6 +24,19 @@ export function comparisonRows(dataset, settings) {
       id,
       offset,
       bounds,
+      arrival: bounds
+        ? {
+            utc: timeAt(dataset.manifest.period, bounds.start),
+            sunVisibleDiscFraction:
+              dataset.sites[id]?.sun.visibleFraction[String(settings.height)]?.[
+                bounds.start
+              ] ?? null,
+            earthVisibleDiscFraction:
+              dataset.sites[id]?.earth.visibleFraction[
+                String(settings.height)
+              ]?.[bounds.start] ?? null,
+          }
+        : null,
       summary: eventSummary(
         dataset.sites[id],
         Number(settings.height),
@@ -81,6 +94,7 @@ export function comparisonReport(dataset, settings, limitH) {
     },
     settings: { ...settings, exampleDarknessLimitH: limitH },
     coverage: manifest.period,
+    coveragePolicy: manifest.coveragePolicy ?? null,
     scenarios: comparisonRows(dataset, settings).map((r) => {
       const point = manifest.sites.find((s) => s.id === r.id);
       return {
@@ -91,6 +105,17 @@ export function comparisonReport(dataset, settings, limitH) {
         startUtc: r.bounds ? timeAt(manifest.period, r.bounds.start) : null,
         endUtc: r.bounds ? timeAt(manifest.period, r.bounds.end) : null,
         status: r.summary ? "calculated" : "not-calculated",
+        arrival: r.arrival,
+        eclipses: r.bounds
+          ? (dataset.sites[r.id]?.eclipses ?? []).filter(
+              (e) =>
+                e.heightM === Number(settings.height) &&
+                Date.parse(e.endUtc) >
+                  Date.parse(timeAt(manifest.period, r.bounds.start)) &&
+                Date.parse(e.startUtc) <
+                  Date.parse(timeAt(manifest.period, r.bounds.end)),
+            )
+          : [],
         summary: r.summary
           ? {
               meanVisibleSolarDiscFraction: r.summary.meanSun,
@@ -110,7 +135,7 @@ export function comparisonReport(dataset, settings, limitH) {
       censored:
         "An interval touching a window edge is a lower bound, not the full interval.",
       visibility:
-        "Any part of the disc visible above the terrain horizon; not a radio-link guarantee.",
+        "Any part of the disc visible above terrain; for the Sun, opaque spherical Earth occultation is also included. Uniform angular disks, no atmospheric transmission or irradiance model; not a radio-link guarantee.",
       unavailable:
         "Out-of-coverage or invalid windows are not calculated; no extrapolation.",
     },

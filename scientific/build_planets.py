@@ -62,6 +62,7 @@ def main():
             "generator": "scientific/build_planets.py",
         },
     }
+    os.makedirs(B.OUT, exist_ok=True)
     with open(os.path.join(B.OUT, "planets.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(doc, f, separators=(",", ":"))
     for p in planets:
@@ -70,4 +71,6 @@ def main():
 
 
 if __name__ == "__main__":
+    import coverage as coverage_config
+    coverage_config.configure(B)
     main()

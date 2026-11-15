@@ -2,7 +2,7 @@
 
 This record distinguishes executed checks from pending release gates. It does not certify scientific precision in every geometry or competition eligibility.
 
-## Motion and surface correction ? current gate in progress
+## Motion and surface correction - current gate in progress
 
 The public site still runs RC5 (`3826c92`, deployment `66055be1`). Independent 60 Hz sampling found a real playback-text/layout flicker on that release. Its earlier green interaction checks did not detect the defect. RC5 is not a complete release sign-off.
 
@@ -118,3 +118,11 @@ Machine-readable results and raw-report hashes: [release-evidence.json](release-
 ## Competition submission
 
 Six-slide HTML demo prepared; not submitted to NASA. Registration/eligibility and legal confirmations have not been completed by this agent. Interpretation of the earlier AI-assisted ideation history remains unresolved. Source, assistance disclosure and truthful caveats must not be removed to claim eligibility.
+
+## Rolling/PDF resume - 2026-11-15 (local integration pending)
+
+The new dataset covers 2025-11-15 to 2027-11-15 UTC, 17521 hourly samples. Science-owner checks passed V1-V7, V4b informational; limited cached V1 epochs are not independent validation of the entire two-year range. All ten public data hashes passed again after exact recovery of three missing generator sources. No numerical data changed during source recovery.
+
+Root ran check:data10/10, credits186 packages/0 missing repository URLs and a production build. Local PDF download completed without browser runtime/network errors; the 60-page report includes the final valid arrival2027-11-08 and had no out-of-page text boxes or NaN values. First, measurements and last pages were visually checked. Independent rolling/eclipses/PDF tests, current browser/flicker checks, fresh Linux generation and current production Lighthouse remain pending.
+
+The user connected Lunar Pages to the original GitHub main branch. Read-only configuration inspection confirmed the destination; the previously empty build configuration was corrected only for Lunar. The daily workflow now commits validated data for the connected Pages build, without a Cloudflare token. A successful scheduled refresh and its resulting deployment have not yet been demonstrated.

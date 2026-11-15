@@ -3836,3 +3836,113 @@ button.tracking-state {
     animation: none !important;
   }
 }
+.answer-sun-percent {
+  color: #f6c36f;
+}
+.answer-earth-percent {
+  color: #72c7eb;
+}
+.answer-arrival {
+  border-top: 1px solid #3b4f66;
+  margin: 18px 0 16px;
+  padding-top: 13px;
+  font-size: 12px;
+  color: #c1d3e3;
+}
+.answer-arrival strong {
+  font-size: 12px;
+  font-weight: 600;
+}
+.answer-arrival p {
+  margin: 6px 0 0;
+  line-height: 1.7;
+}
+.answer-arrival span {
+  display: inline-block;
+  white-space: nowrap;
+  margin-right: 12px;
+  color: #f5f7fa;
+}
+.comparison-export {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px 24px;
+  padding: 24px;
+  background: #101e30;
+  border: 1px solid #3d5873;
+  border-radius: 5px;
+}
+.comparison-export h2 {
+  font-size: 22px;
+  margin: 0 0 8px;
+}
+.comparison-export p {
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 0;
+  max-width: 76ch;
+  color: #c0d0e1;
+}
+.comparison-export > .caption {
+  grid-column: 1/-1;
+  min-height: 1.7em;
+}
+.comparison-export .button {
+  white-space: nowrap;
+  min-height: 44px;
+}
+@media (max-width: 720px) {
+  .comparison-export {
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
+  .comparison-export .button {
+    width: 100%;
+    white-space: normal;
+  }
+}
+.coverage-notice {
+  border: 1px solid #31475f;
+  background: #0b1727;
+  padding: 12px 16px;
+  margin: 12px 0 24px;
+  font-size: 12px;
+  color: #bdd0e1;
+  line-height: 1.6;
+}
+.coverage-notice p {
+  margin: 0 0 3px;
+}
+.coverage-notice strong {
+  color: #e9f3ff;
+  margin-right: 8px;
+}
+.coverage-notice small {
+  font-size: 11px;
+  color: #b0c3d6;
+}
+.coverage-notice.refresh-pending {
+  border-color: #987541;
+}
+.playback-loop {
+  font-size: 12px;
+}
+.calendar-jump {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+.setup .calendar-jump label {
+  margin: 0;
+  font-size: 11px;
+}
+.calendar-jump select {
+  display: block;
+  width: 100%;
+  font-size: 13px;
+  padding: 6px;
+  min-height: 36px;
+  margin-top: 4px;
+}

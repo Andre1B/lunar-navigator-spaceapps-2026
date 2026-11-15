@@ -1,11 +1,11 @@
 {
  "schemaVersion": "1.0.0",
- "generatedAtUtc": "2026-11-15T00:41:33Z",
+ "generatedAtUtc": "2026-11-15T02:38:45Z",
  "period": {
-  "startUtc": "2027-03-01T00:00:00Z",
-  "endUtc": "2027-04-28T00:00:00Z",
+  "startUtc": "2025-11-15T00:00:00Z",
+  "endUtc": "2027-11-15T00:00:00Z",
   "stepMinutes": 60,
-  "sampleCount": 1393
+  "sampleCount": 17521
  },
  "observerHeightsM": [
   0.5,
@@ -14,15 +14,25 @@
   5,
   10
  ],
+ "coveragePolicy": {
+  "mode": "rolling-calendar-years",
+  "asOfUtcDate": "2026-11-15",
+  "calendarYearsBefore": 1,
+  "calendarYearsAfter": 1,
+  "boundaryConvention": "Both UTC midnight endpoints included in sample arrays; interval durations exclude the final endpoint.",
+  "leapDayPolicy": "February 29 anniversaries clamp to February 28 in non-leap years.",
+  "refreshPolicy": "Regenerate for the current UTC date once daily; advancing the date drops the oldest coverage and adds the new end. Deployment scheduling is external to this generator."
+ },
  "conventions": {
   "azimuth": "deg clockwise from local north, 0-360",
   "elevation": "deg above the local horizontal plane (sphere normal, R = 1737.4 km)",
   "longitude": "east-positive deg",
   "frame": "MOON_ME (NAIF moon_de440_250416.tf: DE440 PA rotated to DE421 mean-Earth, same frame as LOLA/PGDA DEMs)",
-  "time": "UTC; sample i at startUtc + i*stepMinutes",
+  "time": "UTC; sample i at startUtc + i*stepMinutes; both endpoint samples stored. Metrics use the N-1 left-endpoint 5-minute intervals, excluding the terminal sample from durations/averages.",
   "geometryReferenceHeightM": 1,
+  "solarEclipse": "Opaque spherical Earth and uniform solar disk in an angular tangent plane; integrate the disk jointly above the local horizontal terrain cut and outside Earth. No atmosphere, refraction, limb darkening, irradiance or energy model.",
   "heightCalculation": "Shared azDeg, elDeg, angularRadiusDeg and rangeKm refer to the 1 m observer. Each height has separately computed observer position, horizon, visible fractions, events and metrics; no interpolation between heights.",
-  "visibleFraction": "fraction of the body's disk above the terrain horizon; disk cut horizontally at the horizon elevation at the disk-centre azimuth (Barker et al. 2021), uniform disk (no limb darkening)",
+  "visibleFraction": "fraction of the body's disk above the terrain horizon; solar fractions additionally exclude Earth-occulted area. Horizontal terrain cut at disk-centre azimuth; uniform disks. Solar terrain-only and eclipse-only fractions are separately published and are not multiplied.",
   "censored": "true when the longest period touches the start or end of the simulated window: show as >= value"
  },
  "sites": [
@@ -206,7 +216,71 @@
    }
   ],
   "code": "scientific/",
-  "generator": "scientific/build_scenes.py"
+  "generator": "scientific/build_scenes.py",
+  "generationEnvironment": {
+   "python": "3.12.10",
+   "numpy": "2.5.3",
+   "spiceypy": "8.4.0",
+   "sourceLockFile": "scientific/source-lock.json",
+   "sourceLockSha256": "953e89f5b779fcda34820790665a7d94aa1659a4e969eaf27ef1aacc526f78f7",
+   "generatorCodeSha256": {
+    "build_earth_layers.py": "fbd86c90aefc4923f1efa7ab8098616271e1b041e270b87bcada2b70ac0b8c97",
+    "build_globe.py": "3186d39ac5aa8b03131e45ce67b1fe383f2e16d6dba0578b22b00eebcd5363c0",
+    "build_mobile_textures.py": "df2d116dbcf40bb3a49ac66836c9041b7e4e952a995aeb20c10aec1600534ffa",
+    "build_planets.py": "37b63f01880027a48a7583c0f8490df6223055f1c743a1ae586ac505d1dc88c8",
+    "build_scenes.py": "8dc4071d9a85125569c065b819909d0d9de2d778353414b79f54716dcc060f4e",
+    "build_starmap.py": "017fac48bd74cf16bab5fbc97d1d303a0bc6d8ee44273eab0ea35ffcaa264cf0",
+    "build_terrain_tiles.py": "2eae289db152320beff3bec791df2a01685fba327607cdb9f8ea0905b55a82bb",
+    "build_visual_assets.py": "1ca37d45d06b90af1859c768cba1f6ec0cd66499f136eee2ef7ec2284db7edc9",
+    "coverage.py": "fe4f7f5d5405c8bf41d1d899e6210518b6e1e3aaaaa01fc5e0424f9faf71423b",
+    "fetch_sources.py": "d75a66e9e797134f47327c62b60ed1c7eadfc4428061c72471674928fc5eeb48",
+    "hash_dataset.py": "40f401dc57e7e729cc7f9a109db181221930e9fc674c9bd4a578551546b1675a",
+    "lunar_eclipse.py": "1e93af44de899795ea3a7a208d5d945173cba827736f76cbcb60928deed5e353",
+    "lunar_ephem.py": "d9ff465106ed31911f6fd79e83d355eddceca1e82408e9d5988f0918ca446bde",
+    "lunar_geo.py": "d354b56001baffc71dbfbd54de6def2dab2aebd7a091bbf142fbd149130d927d",
+    "lunar_horizon.py": "582d31869a13fa72d5ac14feb394a087fcf3800d5e17709a139c0e346a4c9453",
+    "rebuild.py": "c06d912f8d7a3f4a7b768778850a0c722c9c72328ad19568f7aaffdb7f51c574",
+    "refine_event_metadata.py": "70c8034eb3882862f6fb1d0ec6a3eb64d0620f1e1054495a6cfddb887bd81314",
+    "validate.py": "1be1b01dfbcb151792285bfa9cd45ca75e1e5fd8a6b1de5580d499dcdaaaa55c",
+    "verify_coverage.py": "77506e71547f9770c28fdef38afe511c695060028376ab27181a9c268e9de3c3"
+   }
+  },
+  "eventMetadataCorrection": {
+   "checkedAtUtc": "2026-11-15T02:50:24Z",
+   "nearEclipseSolarBracketsReproduced": 82,
+   "changedCauseLabels": [
+    {
+     "site": "connecting-ridge",
+     "heightM": 0.5,
+     "utc": "2026-03-03T09:59:32Z",
+     "before": {
+      "type": "eclipseDarknessEnd",
+      "cause": "earth-occultation"
+     },
+     "after": {
+      "type": "sunrise",
+      "cause": "terrain"
+     }
+    },
+    {
+     "site": "shackleton-rim",
+     "heightM": 10,
+     "utc": "2026-03-03T13:04:51Z",
+     "before": {
+      "type": "eclipseDarknessStart",
+      "cause": "earth-occultation"
+     },
+     "after": {
+      "type": "sunset",
+      "cause": "terrain"
+     }
+    }
+   ],
+   "changedCount": 2,
+   "numericalFieldsUnchanged": true,
+   "refinementBracketSec": 18.75,
+   "generator": "scientific/refine_event_metadata.py"
+  }
  },
  "validation": {
   "file": "validation.json",
@@ -217,14 +291,19 @@
    "V3": "pass",
    "V4": "pass",
    "V4b": "info",
-   "V5": "pass"
-  }
+   "V5": "pass",
+   "V6": "pass",
+   "V7": "pass"
+  },
+  "externalEphemerisCoverageNote": "V1 compares only five cached instants in March-April 2027 for Sun/Earth at six sites. No external ephemeris check of every other date or planet is claimed."
  },
  "aiDisclosure": "The pipeline code in scientific/ was written with AI coding assistants (Claude Opus 5.5; reviewed with Codex). Every number in public/data/ is computed deterministically by that code from NASA PDS/PGDA LOLA data and NAIF SPICE kernels; no value was produced or edited by a language model.",
  "assumptions": [
   "Bare-terrain horizon from LOLA DEMs: 5 m PGDA (<5 km), 80 m PDS (5-100 km), 240 m PDS (>100 km), 720 azimuths, great-circle sight lines, exact spherical geometry.",
   "Observer heights 0.5, 1, 2, 5 and 10 m above the local terrain surface; heights describe the model observer, not DEM vertical accuracy.",
   "Sun and Earth treated as uniform disks; Earth visibility is geometric line of sight only.",
+  "Solar eclipses use an opaque spherical Earth (6378.137 km) and angular-circle approximation; fractional solar area jointly excludes terrain and Earth. No atmospheric transmission, refraction, limb darkening, penumbral photometry or energy calculation.",
+  "eclipseUnobscuredFraction is the Sun area not covered by Earth before terrain; terrainVisibleFraction ignores Earth; visibleFraction applies the union of both occluders. Eclipse contact events are separate from terrain events.",
   "Durations and metrics from a 5-min grid; rise/set times refined by bisection to <= 30 s and reported with 1-min resolution."
  ],
  "limitations": [

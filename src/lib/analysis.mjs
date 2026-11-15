@@ -118,15 +118,23 @@ export function eventSummary(data, height, bounds, period) {
   const begin = Date.parse(timeAt(period, bounds.start)),
     end = Date.parse(timeAt(period, bounds.end));
   function intervals(body, rise, set) {
+    const rises = new Set([
+      rise,
+      ...(body === "sun" ? ["eclipseDarknessEnd"] : []),
+    ]);
+    const sets = new Set([
+      set,
+      ...(body === "sun" ? ["eclipseDarknessStart"] : []),
+    ]);
     let visible = data[body].visibleFraction[String(height)][0] > 0;
     const events = data.events
       .filter(
-        (e) => e.heightM === height && (e.type === rise || e.type === set),
+        (e) => e.heightM === height && (rises.has(e.type) || sets.has(e.type)),
       )
       .map((e) => ({ ...e, ms: Date.parse(e.utc) }))
       .sort((a, b) => a.ms - b.ms);
     for (const e of events) {
-      if (e.ms <= begin) visible = e.type === rise;
+      if (e.ms <= begin) visible = rises.has(e.type);
     }
     let cursor = begin;
     const spans = [];
@@ -134,7 +142,7 @@ export function eventSummary(data, height, bounds, period) {
       if (e.ms <= begin || e.ms >= end) continue;
       spans.push({ start: cursor, end: e.ms, visible });
       cursor = e.ms;
-      visible = e.type === rise;
+      visible = rises.has(e.type);
     }
     spans.push({ start: cursor, end, visible });
     const hidden = spans

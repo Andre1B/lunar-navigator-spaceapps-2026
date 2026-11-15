@@ -4,7 +4,7 @@
 export const EVENT_TYPES = ["sunrise", "sunset", "earthrise", "earthset"];
 export const EVENT_METHOD =
   "Events from a 5-minute search, boundaries refined to at most 1 minute, at the selected observer height. " +
-  "A rise or set is when any part of the disc crosses the terrain horizon.";
+  "Sun transitions include terrain crossings and geometric Earth occultation. Earth transitions refer to the terrain horizon.";
 
 const NO_TRANSITION = "No transition in the computed period";
 
@@ -84,7 +84,18 @@ export function nextEvents(siteData, period, index, height) {
 
   // A modelled height with no events in the period yields "No transition" for every type.
   const candidates = siteData.events
-    .filter((e) => e && e.heightM === h && EVENT_TYPES.includes(e.type))
+    .filter((e) => e && e.heightM === h)
+    .map((e) => ({
+      ...e,
+      sourceType: e.type,
+      type:
+        e.type === "eclipseDarknessEnd"
+          ? "sunrise"
+          : e.type === "eclipseDarknessStart"
+            ? "sunset"
+            : e.type,
+    }))
+    .filter((e) => EVENT_TYPES.includes(e.type))
     .map((e) => ({ ...e, ms: Date.parse(e.utc) }))
     .filter((e) => Number.isFinite(e.ms) && e.ms > now && e.ms <= end)
     .sort((a, b) => a.ms - b.ms);
@@ -102,6 +113,9 @@ export function nextEvents(siteData, period, index, height) {
     return {
       type,
       utc: new Date(next.ms).toISOString().replace(".000Z", "Z"),
+      ...(next.cause === "earth-occultation"
+        ? { cause: next.cause, sourceType: next.sourceType }
+        : {}),
       hoursUntil: (next.ms - now) / 3600000,
       resolutionMin: Number.isFinite(next.resolutionMin)
         ? next.resolutionMin

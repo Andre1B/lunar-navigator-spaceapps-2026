@@ -1,7 +1,16 @@
 {
-  "generatedAtUtc": "2026-11-15T01:53:53.803Z",
+  "generatedAtUtc": "2026-11-15T03:09:01.913Z",
   "scope": "Installed direct and transitive runtime, build and verification packages",
   "packages": [
+    {
+      "name": "@babel/runtime",
+      "version": "7.29.14",
+      "license": "MIT",
+      "repository": "https://github.com/babel/babel",
+      "repositoryNote": null,
+      "url": "https://babel.dev/docs/en/next/babel-runtime",
+      "noticeFile": "/licenses/@babel__runtime.txt"
+    },
     {
       "name": "@cloudflare/kv-asset-handler",
       "version": "0.5.0",
@@ -354,6 +363,33 @@
       "noticeFile": "/licenses/@types__node.txt"
     },
     {
+      "name": "@types/pako",
+      "version": "2.0.4",
+      "license": "MIT",
+      "repository": "https://github.com/DefinitelyTyped/DefinitelyTyped",
+      "repositoryNote": null,
+      "url": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/pako",
+      "noticeFile": "/licenses/@types__pako.txt"
+    },
+    {
+      "name": "@types/raf",
+      "version": "3.4.3",
+      "license": "MIT",
+      "repository": "https://github.com/DefinitelyTyped/DefinitelyTyped",
+      "repositoryNote": null,
+      "url": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/raf",
+      "noticeFile": "/licenses/@types__raf.txt"
+    },
+    {
+      "name": "@types/trusted-types",
+      "version": "2.0.7",
+      "license": "MIT",
+      "repository": "https://github.com/DefinitelyTyped/DefinitelyTyped",
+      "repositoryNote": null,
+      "url": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/trusted-types",
+      "noticeFile": "/licenses/@types__trusted-types.txt"
+    },
+    {
       "name": "@vitejs/plugin-react",
       "version": "6.3.0",
       "license": "MIT",
@@ -435,6 +471,15 @@
       "noticeFile": "/licenses/balanced-match.txt"
     },
     {
+      "name": "base64-arraybuffer",
+      "version": "1.0.2",
+      "license": "MIT",
+      "repository": "https://github.com/niklasvh/base64-arraybuffer",
+      "repositoryNote": null,
+      "url": "https://github.com/niklasvh/base64-arraybuffer",
+      "noticeFile": "/licenses/base64-arraybuffer.txt"
+    },
+    {
       "name": "blake3-wasm",
       "version": "2.1.5",
       "license": "MIT",
@@ -460,6 +505,15 @@
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/bundle-name",
       "noticeFile": "/licenses/bundle-name.txt"
+    },
+    {
+      "name": "canvg",
+      "version": "3.0.11",
+      "license": "MIT",
+      "repository": "https://github.com/canvg/canvg",
+      "repositoryNote": null,
+      "url": "https://www.npmjs.com/package/canvg",
+      "noticeFile": "/licenses/canvg.txt"
     },
     {
       "name": "chrome-launcher",
@@ -507,6 +561,15 @@
       "noticeFile": "/licenses/cookie.txt"
     },
     {
+      "name": "core-js",
+      "version": "3.51.0",
+      "license": "MIT",
+      "repository": "https://github.com/zloirock/core-js",
+      "repositoryNote": null,
+      "url": "https://core-js.io",
+      "noticeFile": "/licenses/core-js.txt"
+    },
+    {
       "name": "csp_evaluator",
       "version": "1.1.8",
       "license": "Apache-2.0",
@@ -514,6 +577,15 @@
       "repositoryNote": null,
       "url": "https://csp-evaluator.withgoogle.com/",
       "noticeFile": "/licenses/csp_evaluator.txt"
+    },
+    {
+      "name": "css-line-break",
+      "version": "2.1.0",
+      "license": "MIT",
+      "repository": "https://github.com/niklasvh/css-line-break",
+      "repositoryNote": null,
+      "url": "https://github.com/niklasvh/css-line-break#readme",
+      "noticeFile": "/licenses/css-line-break.txt"
     },
     {
       "name": "debug",
@@ -577,6 +649,15 @@
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/devtools-protocol",
       "noticeFile": "/licenses/devtools-protocol.txt"
+    },
+    {
+      "name": "dompurify",
+      "version": "3.4.18",
+      "license": "(MPL-2.0 OR Apache-2.0)",
+      "repository": "https://github.com/cure53/DOMPurify",
+      "repositoryNote": null,
+      "url": "https://github.com/cure53/DOMPurify",
+      "noticeFile": "/licenses/dompurify.txt"
     },
     {
       "name": "dot-prop",
@@ -660,6 +741,15 @@
       "noticeFile": "/licenses/fast-deep-equal.txt"
     },
     {
+      "name": "fast-png",
+      "version": "6.4.0",
+      "license": "MIT",
+      "repository": "https://github.com/image-js/fast-png",
+      "repositoryNote": null,
+      "url": "https://github.com/image-js/fast-png#readme",
+      "noticeFile": "/licenses/fast-png.txt"
+    },
+    {
       "name": "fast-uri",
       "version": "3.1.9",
       "license": "BSD-3-Clause",
@@ -676,6 +766,15 @@
       "repositoryNote": null,
       "url": "https://github.com/thecodrr/fdir#readme",
       "noticeFile": "/licenses/fdir.txt"
+    },
+    {
+      "name": "fflate",
+      "version": "0.8.3",
+      "license": "MIT",
+      "repository": "https://github.com/101arrowz/fflate",
+      "repositoryNote": null,
+      "url": "https://101arrowz.github.io/fflate",
+      "noticeFile": "/licenses/fflate.txt"
     },
     {
       "name": "get-caller-file",
@@ -714,6 +813,15 @@
       "noticeFile": "/licenses/graceful-fs.txt"
     },
     {
+      "name": "html2canvas",
+      "version": "1.4.1",
+      "license": "MIT",
+      "repository": "https://github.com/niklasvh/html2canvas",
+      "repositoryNote": null,
+      "url": "https://html2canvas.hertzen.com",
+      "noticeFile": "/licenses/html2canvas.txt"
+    },
+    {
       "name": "http-link-header",
       "version": "1.1.4",
       "license": "MIT",
@@ -739,6 +847,15 @@
       "repositoryNote": null,
       "url": "https://github.com/formatjs/formatjs",
       "noticeFile": "/licenses/intl-messageformat.txt"
+    },
+    {
+      "name": "iobuffer",
+      "version": "5.4.0",
+      "license": "MIT",
+      "repository": "https://github.com/image-js/iobuffer",
+      "repositoryNote": null,
+      "url": "https://github.com/image-js/iobuffer#readme",
+      "noticeFile": "/licenses/iobuffer.txt"
     },
     {
       "name": "is-docker",
@@ -811,6 +928,15 @@
       "repositoryNote": null,
       "url": "https://github.com/epoberezkin/json-schema-traverse#readme",
       "noticeFile": "/licenses/json-schema-traverse.txt"
+    },
+    {
+      "name": "jspdf",
+      "version": "4.2.1",
+      "license": "MIT",
+      "repository": "https://github.com/parallax/jsPDF",
+      "repositoryNote": null,
+      "url": "https://github.com/parallax/jsPDF",
+      "noticeFile": "/licenses/jspdf.txt"
     },
     {
       "name": "kleur",
@@ -975,6 +1101,15 @@
       "noticeFile": "/licenses/oxc-parser.txt"
     },
     {
+      "name": "pako",
+      "version": "2.2.0",
+      "license": "(MIT AND Zlib)",
+      "repository": "https://github.com/nodeca/pako",
+      "repositoryNote": null,
+      "url": "https://www.npmjs.com/package/pako",
+      "noticeFile": "/licenses/pako.txt"
+    },
+    {
       "name": "path-scurry",
       "version": "3.0.0",
       "license": "BlueOak-1.0.0",
@@ -1000,6 +1135,15 @@
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/pathe",
       "noticeFile": "/licenses/pathe.txt"
+    },
+    {
+      "name": "performance-now",
+      "version": "2.1.0",
+      "license": "MIT",
+      "repository": "https://github.com/braveg1rl/performance-now",
+      "repositoryNote": null,
+      "url": "https://github.com/braveg1rl/performance-now",
+      "noticeFile": "/licenses/performance-now.txt"
     },
     {
       "name": "picocolors",
@@ -1074,6 +1218,15 @@
       "noticeFile": null
     },
     {
+      "name": "raf",
+      "version": "3.4.1",
+      "license": "MIT",
+      "repository": "https://github.com/chrisdickinson/raf",
+      "repositoryNote": null,
+      "url": "https://www.npmjs.com/package/raf",
+      "noticeFile": "/licenses/raf.txt"
+    },
+    {
       "name": "react",
       "version": "19.3.1",
       "license": "MIT",
@@ -1092,6 +1245,15 @@
       "noticeFile": "/licenses/react-dom.txt"
     },
     {
+      "name": "regenerator-runtime",
+      "version": "0.13.11",
+      "license": "MIT",
+      "repository": "https://github.com/facebook/regenerator/tree/main/packages/runtime",
+      "repositoryNote": null,
+      "url": "https://www.npmjs.com/package/regenerator-runtime",
+      "noticeFile": "/licenses/regenerator-runtime.txt"
+    },
+    {
       "name": "require-from-string",
       "version": "2.0.2",
       "license": "MIT",
@@ -1099,6 +1261,15 @@
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/require-from-string",
       "noticeFile": "/licenses/require-from-string.txt"
+    },
+    {
+      "name": "rgbcolor",
+      "version": "1.0.1",
+      "license": "MIT OR SEE LICENSE IN FEEL-FREE.md",
+      "repository": "https://github.com/yetzt/node-rgbcolor",
+      "repositoryNote": null,
+      "url": "https://www.npmjs.com/package/rgbcolor",
+      "noticeFile": "/licenses/rgbcolor.txt"
     },
     {
       "name": "robots-parser",
@@ -1182,6 +1353,15 @@
       "noticeFile": null
     },
     {
+      "name": "stackblur-canvas",
+      "version": "2.7.0",
+      "license": "MIT",
+      "repository": "https://github.com/flozz/StackBlur",
+      "repositoryNote": null,
+      "url": "http://www.quasimondo.com/StackBlurForCanvas/StackBlurDemo.html",
+      "noticeFile": null
+    },
+    {
       "name": "string-width",
       "version": "8.3.0",
       "license": "MIT",
@@ -1227,6 +1407,15 @@
       "noticeFile": "/licenses/supports-color.txt"
     },
     {
+      "name": "svg-pathdata",
+      "version": "6.0.3",
+      "license": "MIT",
+      "repository": "https://github.com/nfroidure/svg-pathdata",
+      "repositoryNote": null,
+      "url": "https://www.npmjs.com/package/svg-pathdata",
+      "noticeFile": "/licenses/svg-pathdata.txt"
+    },
+    {
       "name": "tagged-tag",
       "version": "1.0.0",
       "license": "MIT",
@@ -1234,6 +1423,15 @@
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/tagged-tag",
       "noticeFile": "/licenses/tagged-tag.txt"
+    },
+    {
+      "name": "text-segmentation",
+      "version": "1.0.3",
+      "license": "MIT",
+      "repository": "https://github.com/niklasvh/text-segmentation",
+      "repositoryNote": null,
+      "url": "https://github.com/niklasvh/text-segmentation",
+      "noticeFile": "/licenses/text-segmentation.txt"
     },
     {
       "name": "third-party-web",
@@ -1333,6 +1531,15 @@
       "repositoryNote": null,
       "url": "https://www.npmjs.com/package/unenv",
       "noticeFile": "/licenses/unenv.txt"
+    },
+    {
+      "name": "utrie",
+      "version": "1.0.2",
+      "license": "MIT",
+      "repository": "https://github.com/niklasvh/utrie",
+      "repositoryNote": null,
+      "url": "https://github.com/niklasvh/utrie",
+      "noticeFile": "/licenses/utrie.txt"
     },
     {
       "name": "vite",

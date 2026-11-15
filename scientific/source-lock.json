@@ -1,0 +1,152 @@
+{
+  "purpose": "Pinned inputs for reproducible rolling coverage; update only after review, not automatically on daily refresh.",
+  "files": [
+    {
+      "cachePath": "kernels/naif0012.tls",
+      "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0012.tls",
+      "sha256": "678e32bdb5a744117a467cd9601cd6b373f0e9bc9bbde1371d5eee39600a039b"
+    },
+    {
+      "cachePath": "kernels/pck00011.tpc",
+      "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/pck00011.tpc",
+      "sha256": "3dff7b1dbeceaa01f25467767d3fa25816051c85d162d1edf04acb310ee28bb1"
+    },
+    {
+      "cachePath": "kernels/de440s.bsp",
+      "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de440s.bsp",
+      "sha256": "c1c7feeab882263fc493a9d5a5b2ddd71b54826cdf65d8d17a76126b260a49f2"
+    },
+    {
+      "cachePath": "kernels/moon_pa_de440_200625.bpc",
+      "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/moon_pa_de440_200625.bpc",
+      "sha256": "60cd55aa401ea2ea97360636f567554bfe4e37bb829f901b4460a455dfaf783f"
+    },
+    {
+      "cachePath": "kernels/moon_de440_250416.tf",
+      "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/fk/satellites/moon_de440_250416.tf",
+      "sha256": "a47c71e9c9f33796bdafb2c9d69a7ee447b6016ecad80f71cd6f3e479f9cf768"
+    },
+    {
+      "cachePath": "dem/LDEM_80S_80M.IMG",
+      "url": "https://imbrium.mit.edu/DATA/LOLA_GDR/POLAR/IMG/LDEM_80S_80M.IMG",
+      "sha256": "e6591eeea35402ca5e124ca00f5bf0774381a2d4fa919144b455d82b8ff65fdc"
+    },
+    {
+      "cachePath": "dem/LDEM_75S_240M.IMG",
+      "url": "https://imbrium.mit.edu/DATA/LOLA_GDR/POLAR/IMG/LDEM_75S_240M.IMG",
+      "sha256": "d031efe2611b17dfbf3c158f5e15dc04cd5719349dcbf6384bb21fd97697c490"
+    },
+    {
+      "cachePath": "dem/Site01/Site01_final_adj_5mpp_surf.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site01/Site01_final_adj_5mpp_surf.tif",
+      "sha256": "3ba7b97cb00a2bcf21189c3aeb535f65afc21207154ab9f0d43c5bdc1f7e747e"
+    },
+    {
+      "cachePath": "dem/Site04/Site04_final_adj_5mpp_surf.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site04/Site04_final_adj_5mpp_surf.tif",
+      "sha256": "38ff70dbdf2f066c2cfa94a646c3a59d653ce7f6b4528b15fc1b43ee397ce758"
+    },
+    {
+      "cachePath": "dem/Site06/Site06_final_adj_5mpp_surf.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site06/Site06_final_adj_5mpp_surf.tif",
+      "sha256": "cca17e8067601dd659b583f889204db6bce685bc30c60a9e62427a8bce36b03d"
+    },
+    {
+      "cachePath": "dem/Site23/Site23_final_adj_5mpp_surf.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site23/Site23_final_adj_5mpp_surf.tif",
+      "sha256": "12d280a59cd7580415f6bada638d0abe025ce6727541fddf68d5dc371a6c94cf"
+    },
+    {
+      "cachePath": "dem/AVGVISIB_85S_060M_201608.IMG",
+      "url": "https://imbrium.mit.edu/EXTRAS/ILLUMINATION/IMG/AVGVISIB_85S_060M_201608.IMG",
+      "sha256": "82dadf321dee28f1947c1fed81858d4cf50fe8eb2aa405aae114e8ab21c1efe1"
+    },
+    {
+      "cachePath": "dem/LPSR_85S_060M_201608.IMG",
+      "url": "https://imbrium.mit.edu/EXTRAS/ILLUMINATION/IMG/LPSR_85S_060M_201608.IMG",
+      "sha256": "f8203cab342c817fc7851431e264def3cc64a3b8c30f032d61e0a44f1e4ef761"
+    },
+    {
+      "cachePath": "dem/LDEM_80S_80M.LBL",
+      "url": "https://imbrium.mit.edu/DATA/LOLA_GDR/POLAR/IMG/LDEM_80S_80M.LBL",
+      "sha256": "107c7558cbf8832e4119d3c8c2b1b272623344275c85378a9b0e03c22876eb33"
+    },
+    {
+      "cachePath": "dem/LDEM_75S_240M.LBL",
+      "url": "https://imbrium.mit.edu/DATA/LOLA_GDR/POLAR/IMG/LDEM_75S_240M.LBL",
+      "sha256": "ec07239f41d8abc1a3681495b5799b770c7206b5268b76721d69180df0422e02"
+    },
+    {
+      "cachePath": "dem/AVGVISIB_85S_060M_201608.LBL",
+      "url": "https://imbrium.mit.edu/EXTRAS/ILLUMINATION/IMG/AVGVISIB_85S_060M_201608.LBL",
+      "sha256": "33decce957d5d4d9608557d8d969d1e1b94056a159b2563624ade4b528a0c917"
+    },
+    {
+      "cachePath": "dem/LPSR_85S_060M_201608.LBL",
+      "url": "https://imbrium.mit.edu/EXTRAS/ILLUMINATION/IMG/LPSR_85S_060M_201608.LBL",
+      "sha256": "42ae7cb0ae64ff8df7a17106228921bd07eb9afba8fb833c4a8cfd2f53487c0f"
+    }
+  ],
+  "references": [
+    {
+      "relativePath": "reference/horizons/10_202.93280_-89.76197_1.73012_206f4ff862.txt",
+      "sha256": "366a4a48d6165114022320c26ae9aadb1e4293b91e7c7f4b1957b51ed5c292de",
+      "source": "JPL Horizons public API, historical cached response; query epoch March-April 2027, six sites, two bodies."
+    },
+    {
+      "relativePath": "reference/horizons/10_206.47367_-89.79194_1.69973_206f4ff862.txt",
+      "sha256": "fb45a413603fdcf4484a503b3b88606a4ae7cde12ffe6698f12732d169df4259",
+      "source": "JPL Horizons public API, historical cached response; query epoch March-April 2027, six sites, two bodies."
+    },
+    {
+      "relativePath": "reference/horizons/10_220.22883_-89.48415_1.90663_206f4ff862.txt",
+      "sha256": "0d8062756eb2cebfec5d6028f80c5e6018edc9db4888c30c00fc2f3a4f976f50",
+      "source": "JPL Horizons public API, historical cached response; query epoch March-April 2027, six sites, two bodies."
+    },
+    {
+      "relativePath": "reference/horizons/10_222.91247_-89.46226_1.95193_206f4ff862.txt",
+      "sha256": "bbe62adbb17a6d5ecf777b42648099255b4f8a986a72e4d461c1df23abc4c409",
+      "source": "JPL Horizons public API, historical cached response; query epoch March-April 2027, six sites, two bodies."
+    },
+    {
+      "relativePath": "reference/horizons/10_357.68527_-85.96973_4.98535_206f4ff862.txt",
+      "sha256": "a480b51559c04716e8483ff66334dffdf14084174285496639807a4ee1e93740",
+      "source": "JPL Horizons public API, historical cached response; query epoch March-April 2027, six sites, two bodies."
+    },
+    {
+      "relativePath": "reference/horizons/10_37.09346_-85.30013_6.76367_206f4ff862.txt",
+      "sha256": "e5a9fe8299e119c719db747d5d86480531ea9db2bf45d492bc6c7f3922dfc0c8",
+      "source": "JPL Horizons public API, historical cached response; query epoch March-April 2027, six sites, two bodies."
+    },
+    {
+      "relativePath": "reference/horizons/399_202.93280_-89.76197_1.73012_206f4ff862.txt",
+      "sha256": "81f465aae9ed240b3a8ae09292202dfb6d15a1f3fbf523344239d07730c9699d",
+      "source": "JPL Horizons public API, historical cached response; query epoch March-April 2027, six sites, two bodies."
+    },
+    {
+      "relativePath": "reference/horizons/399_206.47367_-89.79194_1.69973_206f4ff862.txt",
+      "sha256": "f53f1ae777c468a6b6b12e9a2060137557b5b7f0c8996fc0be833b4965a38039",
+      "source": "JPL Horizons public API, historical cached response; query epoch March-April 2027, six sites, two bodies."
+    },
+    {
+      "relativePath": "reference/horizons/399_220.22883_-89.48415_1.90663_206f4ff862.txt",
+      "sha256": "7939de44817f08c9014ccec70cefb1a15d9652bfbb0fd6f49ccc86a4c06e5565",
+      "source": "JPL Horizons public API, historical cached response; query epoch March-April 2027, six sites, two bodies."
+    },
+    {
+      "relativePath": "reference/horizons/399_222.91247_-89.46226_1.95193_206f4ff862.txt",
+      "sha256": "46d4f32cdead96409e55345231f6716289d79db8a3574f846c5df77ec69757a1",
+      "source": "JPL Horizons public API, historical cached response; query epoch March-April 2027, six sites, two bodies."
+    },
+    {
+      "relativePath": "reference/horizons/399_357.68527_-85.96973_4.98535_206f4ff862.txt",
+      "sha256": "cc659de082d83ef9435debd478965f2a765d44aac8cf264075f178d2574e75af",
+      "source": "JPL Horizons public API, historical cached response; query epoch March-April 2027, six sites, two bodies."
+    },
+    {
+      "relativePath": "reference/horizons/399_37.09346_-85.30013_6.76367_206f4ff862.txt",
+      "sha256": "e7b53da1ce752aa9749ecb6ad15edac527906795c05acfd474be81e61bbb03d2",
+      "source": "JPL Horizons public API, historical cached response; query epoch March-April 2027, six sites, two bodies."
+    }
+  ]
+}

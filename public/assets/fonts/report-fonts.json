@@ -1,0 +1,21 @@
+{
+  "font": "Overpass",
+  "source": "https://github.com/RedHatOfficial/Overpass",
+  "license": "SIL Open Font License 1.1",
+  "files": [
+    {
+      "file": "overpass-5.3.0-report-regular.ttf",
+      "source": "node_modules/@fontsource/overpass/files/overpass-latin-400-normal.woff2",
+      "sourceSha256": "f835f9c7e1266a33b93fe8865a1ddc8d40e7db6a80b494a4716cdebc72f973eb",
+      "sha256": "5f4e4719cfc40e7eb9ceadd8682f068c75dc652c575d12c864144557b8fa18b5",
+      "conversion": "WOFF2 decompressed to TTF with FontTools; outlines unchanged, original font timestamps preserved."
+    },
+    {
+      "file": "overpass-5.3.0-report-bold.ttf",
+      "source": "node_modules/@fontsource/overpass/files/overpass-latin-700-normal.woff2",
+      "sourceSha256": "6a855eb539e6f098452ffccb297fa3188969078ac4005af853b8872868e30170",
+      "sha256": "49ce9b7f5028499fb415219917a83db69f3e008142f9f721e59f2c16dff5bec5",
+      "conversion": "WOFF2 decompressed to TTF with FontTools; outlines unchanged, original font timestamps preserved."
+    }
+  ]
+}

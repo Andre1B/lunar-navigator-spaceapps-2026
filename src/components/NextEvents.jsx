@@ -46,7 +46,12 @@ export default function NextEvents({
                   (e.utc ? "" : " next-events-none")
                 }
               >
-                <dt className="next-events-name">{NAMES[e.type]}</dt>
+                <dt className="next-events-name">
+                  {NAMES[e.type]}
+                  {e.cause === "earth-occultation"
+                    ? " - Earth occultation"
+                    : ""}
+                </dt>
                 <dd className="next-events-value">
                   {e.utc ? (
                     <>
