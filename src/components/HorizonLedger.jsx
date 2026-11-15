@@ -267,6 +267,14 @@ function HorizonPanel({ site, height, rows, period, compact }) {
           <i className="hl-key late" /> B · stay arriving {d1}
         </span>
         <span>ring = start · bar = end · arrow = direction the Sun moves · times UTC</span>
+        {compact
+          ? rows.slice(0, 2).map((r, t) => (
+              <span key={"utc" + t}>
+                {t ? "B" : "A"} start {utcShort(r.bounds.start)} · end{" "}
+                {utcShort(r.bounds.end)} UTC
+              </span>
+            ))
+          : null}
         {crossings.length ? (
           <span>
             <i className="hl-key cross" /> both paths meet in this drawing
