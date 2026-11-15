@@ -441,26 +441,80 @@ function Ledger({ dataset, rows, height, names }) {
 // How far the Sun's centre is above (+) or below (-) the computed terrain
 // horizon in its direction, hour by hour, for each scenario on a common
 // elapsed-time axis. Same site files and horizon as every other figure.
+// Zoom and pan change only the visible time window, never the values.
 function ClearanceChart({ dataset, rows, height, names }) {
   const compact = useCompact();
   const key = String(height),
     W = compact ? 400 : 1360,
-    H = compact ? 200 : 240,
+    H = compact ? 220 : 260,
     pad = { l: compact ? 34 : 56, r: 10, t: 14, b: 30 };
-  const series = rows.map((r) => {
-    const site = dataset.sites[r.id];
-    const prof = site.horizon.elevationDeg[key];
-    const out = [];
-    for (let i = r.bounds.start; i <= r.bounds.end; i++)
-      out.push(site.sun.elDeg[i] - horizonAt(prof, site.sun.azDeg[i]));
-    return out;
-  });
+  const series = useMemo(
+    () =>
+      rows.map((r) => {
+        const site = dataset.sites[r.id];
+        const prof = site.horizon.elevationDeg[key];
+        const out = [];
+        for (let i = r.bounds.start; i <= r.bounds.end; i++)
+          out.push(site.sun.elDeg[i] - horizonAt(prof, site.sun.azDeg[i]));
+        return out;
+      }),
+    [dataset, rows, key],
+  );
+  const n = Math.max(1, ...series.map((s) => s.length - 1));
+  const [view, setView] = useState([0, n]),
+    [cursor, setCursor] = useState(null),
+    [drag, setDrag] = useState(null);
+  useEffect(() => {
+    setView([0, n]);
+    setCursor(null);
+  }, [n]);
+  const [k0, k1] = view,
+    span = k1 - k0;
   const all = series.flat(),
     lo = Math.floor(Math.min(...all, -0.5)),
-    hi = Math.ceil(Math.max(...all, 0.5)),
-    n = series[0].length - 1;
-  const X = (k) => pad.l + (k / n) * (W - pad.l - pad.r),
+    hi = Math.ceil(Math.max(...all, 0.5));
+  const X = (k) => pad.l + ((k - k0) / span) * (W - pad.l - pad.r),
     Y = (v) => pad.t + ((hi - v) / (hi - lo)) * (H - pad.t - pad.b);
+  const clamp = (a, b) => {
+    const w = Math.min(n, Math.max(6, b - a));
+    const s = Math.min(Math.max(0, a), n - w);
+    return [s, s + w];
+  };
+  const zoom = (factor, at = cursor ?? (k0 + k1) / 2) =>
+    setView(clamp(at - (at - k0) * factor, at + (k1 - at) * factor));
+  const pan = (dk) => setView(clamp(k0 + dk, k1 + dk));
+  const reset = () => {
+    setView([0, n]);
+    setCursor(null);
+  };
+  const toK = (evt) => {
+    const box = evt.currentTarget.getBoundingClientRect();
+    const x = ((evt.clientX - box.left) / box.width) * W;
+    return k0 + ((x - pad.l) / (W - pad.l - pad.r)) * span;
+  };
+  const moveCursor = (k) => {
+    const c = Math.round(Math.min(n, Math.max(0, k)));
+    setCursor(c);
+    if (c < k0) pan(c - k0);
+    else if (c > k1) pan(c - k1);
+  };
+  const onKey = (e) => {
+    const step = e.shiftKey ? 24 : 1;
+    const actions = {
+      ArrowLeft: () => moveCursor((cursor ?? Math.round(k0)) - step),
+      ArrowRight: () => moveCursor((cursor ?? Math.round(k0)) + step),
+      "+": () => zoom(0.5),
+      "=": () => zoom(0.5),
+      "-": () => zoom(2),
+      0: reset,
+      Home: () => moveCursor(0),
+      End: () => moveCursor(n),
+    };
+    if (actions[e.key]) {
+      e.preventDefault();
+      actions[e.key]();
+    }
+  };
   const cls = ["ontime", "late", "alt"];
   const summary = series.map((sr, j) => {
     const above = sr.filter((v) => v > 0).length;
@@ -468,13 +522,81 @@ function ClearanceChart({ dataset, rows, height, names }) {
   });
   const ticks = [];
   for (let e = lo; e <= hi; e++) ticks.push(e);
+  // Day ticks, thinned so labels never overlap at any zoom.
+  const every = Math.max(1, Math.ceil(span / 24 / (compact ? 6 : 12)));
+  const days = [];
+  for (let d = Math.ceil(k0 / 24); d * 24 <= k1; d += every) days.push(d);
+  const fmtV = (v) => `${v >= 0 ? "+" : "−"}${Math.abs(v).toFixed(2)}°`;
+  const utcAt = (j, k) =>
+    k < series[j].length
+      ? timeAt(dataset.manifest.period, rows[j].bounds.start + k)
+          .slice(0, 16)
+          .replace("T", " ") + " UTC"
+      : null;
+  const zoomed = span < n;
   return (
     <figure className="hl-clearance">
       <h3 className="hl-kicker">
         How high is the Sun above the ridge? Sun centre minus the terrain
         horizon in its direction, each hour (degrees)
       </h3>
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={summary.join(" ")}>
+      <div className="chart-tools" role="group" aria-label="Chart view">
+        <button type="button" onClick={() => zoom(0.5)} disabled={span <= 6}>
+          Zoom in
+        </button>
+        <button type="button" onClick={() => zoom(2)} disabled={!zoomed}>
+          Zoom out
+        </button>
+        <button type="button" onClick={reset} disabled={!zoomed && cursor === null}>
+          Reset
+        </button>
+        <span className="chart-window">
+          Showing hours {Math.round(k0)}–{Math.round(k1)} of {n} after each
+          arrival
+        </span>
+      </div>
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        role="img"
+        tabIndex={0}
+        aria-label={`${summary.join(" ")} Interactive: left and right arrows move the readout by one hour (Shift: one day), plus and minus zoom, 0 resets.`}
+        className={"chart-interactive" + (drag ? " dragging" : "")}
+        onKeyDown={onKey}
+        onWheel={(e) => {
+          if (!e.ctrlKey && !e.altKey && !zoomed && e.deltaY > 0) return;
+          e.preventDefault();
+          zoom(e.deltaY < 0 ? 0.8 : 1.25, toK(e));
+        }}
+        onPointerDown={(e) => {
+          e.currentTarget.setPointerCapture?.(e.pointerId);
+          setDrag({ x: e.clientX, k0, k1, moved: false });
+        }}
+        onPointerMove={(e) => {
+          if (drag) {
+            const box = e.currentTarget.getBoundingClientRect();
+            const dk =
+              ((drag.x - e.clientX) / box.width) *
+              (W / (W - pad.l - pad.r)) *
+              (drag.k1 - drag.k0);
+            if (Math.abs(e.clientX - drag.x) > 4) {
+              setView(clamp(drag.k0 + dk, drag.k1 + dk));
+              if (!drag.moved) setDrag({ ...drag, moved: true });
+              return;
+            }
+          }
+          if (e.pointerType === "mouse") moveCursor(toK(e));
+        }}
+        onPointerUp={(e) => {
+          if (drag && !drag.moved) moveCursor(toK(e));
+          setDrag(null);
+        }}
+        onPointerCancel={() => setDrag(null)}
+      >
+        <defs>
+          <clipPath id="clearance-plot">
+            <rect x={pad.l} y={0} width={W - pad.l - pad.r} height={H} />
+          </clipPath>
+        </defs>
         {ticks.map((e) => (
           <g key={e}>
             <line className={e === 0 ? "hl-zero" : "hl-grid"} x1={pad.l} x2={W - pad.r} y1={Y(e)} y2={Y(e)} />
@@ -484,30 +606,48 @@ function ClearanceChart({ dataset, rows, height, names }) {
             </text>
           </g>
         ))}
-        {Array.from({ length: Math.round(n / 24) + 1 }, (_, d) => (
-          <text key={d} className="hl-axis" x={X(d * 24)} y={H - 8} textAnchor={d === 0 ? "start" : d * 24 >= n ? "end" : "middle"}>
-            {compact ? d : `day ${d}`}
+        {days.map((d) => (
+          <text key={d} className="hl-axis" x={X(d * 24)} y={H - 8} textAnchor="middle">
+            {compact ? `d${d}` : `day ${d}`}
           </text>
         ))}
-        {series.map((sr, j) => (
-          <path
-            key={j}
-            className={`hl-curve ${cls[j]}`}
-            d={sr.map((v, k) => `${k ? "L" : "M"}${X(k).toFixed(1)},${Y(v).toFixed(1)}`).join("")}
-          />
-        ))}
+        <g clipPath="url(#clearance-plot)">
+          {series.map((sr, j) => {
+            const a = Math.max(0, Math.floor(k0) - 1),
+              b = Math.min(sr.length - 1, Math.ceil(k1) + 1);
+            let d = "";
+            for (let k = a; k <= b; k++)
+              d += `${k > a ? "L" : "M"}${X(k).toFixed(1)},${Y(sr[k]).toFixed(1)}`;
+            return <path key={j} className={`hl-curve ${cls[j]}`} d={d} />;
+          })}
+          {cursor !== null ? (
+            <line className="chart-cursor" x1={X(cursor)} x2={X(cursor)} y1={pad.t} y2={H - pad.b} />
+          ) : null}
+        </g>
         <text className="hl-axis" x={W - pad.r} y={Y(0) - 6} textAnchor="end">
           horizon (0°)
         </text>
       </svg>
+      <p className="chart-readout" aria-live="polite">
+        {cursor === null
+          ? "Point at, tap or focus the chart and use the arrow keys to read exact values."
+          : series
+              .map((sr, j) =>
+                cursor < sr.length
+                  ? `${"ABC"[j]}: ${fmtV(sr[cursor])} at ${utcAt(j, cursor)}`
+                  : `${"ABC"[j]}: outside this stay`,
+              )
+              .join(" · ") + ` (hour ${cursor} after arrival)`}
+      </p>
       <figcaption className="hl-legend">
         <span><i className="hl-key line ontime" /> A · {names[0]}</span>
         <span><i className="hl-key line late" /> B · {names[1]}</span>
         <span><i className="hl-key line alt" /> C · {names[2]}</span>
         <span>
-          Above 0° the Sun&apos;s centre clears the ridge; the Sun is a 0.53°
-          disc, so near 0° it can be partly visible. Elapsed time from each
-          arrival.
+          Vertical axis: degrees of the Sun&apos;s centre above (+) or below (−)
+          the ridge. Horizontal axis: hours after each arrival. Above 0° the
+          Sun&apos;s centre clears the ridge; the Sun is a 0.53° disc, so near 0°
+          it can be partly visible.
         </span>
       </figcaption>
       <ul className="sr-only">
