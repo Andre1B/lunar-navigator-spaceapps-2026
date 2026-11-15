@@ -1,4 +1,4 @@
-import { percent, timeAt } from "../lib/analysis.mjs";
+import { formatDelay, percent, timeAt } from "../lib/analysis.mjs";
 
 function duration(interval) {
   if (!interval) return "Not calculated";
@@ -25,8 +25,8 @@ export default function ComparisonAnswer({
       const difference = delayed.hours - original.hours;
       explanation =
         Math.abs(difference) < 0.05
-          ? `A ${settings.delay}-day delay leaves the longest stretch without sunlight unchanged in these windows.`
-          : `A ${settings.delay}-day delay makes the longest stretch without sunlight ${Math.abs(difference).toFixed(1)} hours ${difference > 0 ? "longer" : "shorter"} at the same place.`;
+          ? `A delay of ${formatDelay(settings.delay)} leaves the longest stretch without sunlight unchanged in these windows.`
+          : `A delay of ${formatDelay(settings.delay)} makes the longest stretch without sunlight ${Math.abs(difference).toFixed(1)} hours ${difference > 0 ? "longer" : "shorter"} at the same place.`;
     }
   }
   return (
@@ -50,7 +50,7 @@ export default function ComparisonAnswer({
                 {i ? (
                   <small>
                     {i === 1
-                      ? ` · same place, +${settings.delay} days`
+                      ? ` · same place, +${formatDelay(settings.delay)}`
                       : ` · another place, same delayed date`}
                   </small>
                 ) : (

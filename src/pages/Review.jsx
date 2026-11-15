@@ -1,3 +1,4 @@
+import { formatDelay } from "../lib/analysis.mjs";
 import { useMemo } from "react";
 import { comparisonRows } from "../lib/comparisonReport.mjs";
 import { percent, hours } from "../lib/analysis.mjs";
@@ -55,7 +56,7 @@ export default function Review({ dataset, settings }) {
           <h2>Same assumptions. Three consequences.</h2>
           <p>
             {settings.date} arrival · {settings.days}-day operation ·{" "}
-            {settings.height} m observer · +{settings.delay} days delay. These
+            {settings.height} m observer · +{formatDelay(settings.delay)} delay. These
             are your current comparison settings.
           </p>
           <div className="review-results">

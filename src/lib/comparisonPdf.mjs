@@ -2,7 +2,7 @@
 import { jsPDF } from "jspdf";
 import { comparisonReport, comparisonRows } from "./comparisonReport.mjs";
 import { arrivalSeries } from "./arrivalSeries.mjs";
-import { percent, timeAt } from "./analysis.mjs";
+import { formatDelay, percent, timeAt } from "./analysis.mjs";
 
 // Lunacline identity: warm black, orange accent, warm neutrals. Earth uses a
 // light neutral and is always named in its label, never told apart by hue.
@@ -225,12 +225,12 @@ export async function createComparisonPdf(
       answer =
         Math.abs(difference) < 0.05
           ? "The longest stretch without sunlight is unchanged in these two windows."
-          : `A ${settings.delay}-day delay makes the longest stretch without sunlight ${Math.abs(difference).toFixed(1)} hours ${difference > 0 ? "longer" : "shorter"} at the same place.`;
+          : `A delay of ${formatDelay(settings.delay)} makes the longest stretch without sunlight ${Math.abs(difference).toFixed(1)} hours ${difference > 0 ? "longer" : "shorter"} at the same place.`;
     }
   }
   paragraph(answer, { size: 13, color: C.gold, bold: true });
   paragraph(
-    `Arrival ${settings.date || "not set"} UTC  |  Stay ${settings.days} days  |  Delay +${settings.delay} days  |  Observer ${settings.height} m above terrain`,
+    `Arrival ${settings.date || "not set"} UTC  |  Stay ${settings.days} days  |  Delay +${formatDelay(settings.delay)}  |  Observer ${settings.height} m above terrain`,
     { size: 11 },
   );
   const cardY = y + 5,

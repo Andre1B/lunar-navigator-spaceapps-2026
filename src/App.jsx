@@ -18,7 +18,7 @@ import {
   scientificSoftware,
   researchProjects,
 } from "./lib/content.js";
-import { percent, hours, timeAt } from "./lib/analysis.mjs";
+import { percent, hours, timeAt, delayParts, formatDelay } from "./lib/analysis.mjs";
 import ArrivalComparison from "./components/ArrivalComparison.jsx";
 import ComparisonAnswer from "./components/ComparisonAnswer.jsx";
 import { LedgerFigures } from "./components/HorizonLedger.jsx";
@@ -279,15 +279,35 @@ function Setup({
       <select
         id="delay"
         data-tour="arrival-delay"
-        value={delay}
-        onChange={(e) => setDelay(Number(e.target.value))}
+        value={delayParts(delay).days}
+        onChange={(e) =>
+          setDelay(Number(e.target.value) + delayParts(delay).hours / 24)
+        }
       >
-        {[1, 3, 7, 14, 29].map((d) => (
+        {[0, 1, 3, 7, 14, 29].map((d) => (
           <option key={d} value={d}>
             +{d} {d === 1 ? "day" : "days"}
           </option>
         ))}
       </select>
+      <label htmlFor="delay-hours">Plus hours</label>
+      <select
+        id="delay-hours"
+        value={delayParts(delay).hours}
+        onChange={(e) =>
+          setDelay(delayParts(delay).days + Number(e.target.value) / 24)
+        }
+      >
+        {Array.from({ length: 24 }, (_, h) => (
+          <option key={h} value={h}>
+            +{h} h
+          </option>
+        ))}
+      </select>
+      <p className="height-explainer">
+        Total delay: {formatDelay(delay)} ({delayParts(delay).totalHours} h).
+        The dataset is hourly, so delays are whole hours.
+      </p>
       <label htmlFor="alternative">Alternative place · delayed date</label>
       <select
         id="alternative"

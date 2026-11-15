@@ -22,6 +22,18 @@ export function indexAt(period, utc) {
     (period.stepMinutes * 60000)
   );
 }
+// A delay is whole days plus whole hours, stored as fractional days
+// (days + hours / 24); the hourly dataset resolves it exactly.
+export function delayParts(delay) {
+  const total = Math.round(Number(delay) * 24);
+  return { days: Math.floor(total / 24), hours: total % 24, totalHours: total };
+}
+export function formatDelay(delay) {
+  const { days, hours } = delayParts(delay);
+  const d = days ? `${days} ${days === 1 ? "day" : "days"}` : "";
+  const h = hours ? `${hours} h` : "";
+  return [d, h].filter(Boolean).join(" ") || "0 h";
+}
 export function windowBounds(period, date, days, delayDays = 0) {
   const arrival = Date.parse(date) + delayDays * DAY_MS;
   if (!Number.isFinite(arrival) || !Number.isFinite(days)) return null;
