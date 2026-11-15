@@ -19,6 +19,8 @@ export function comparisonHash(settings) {
 
 // Returns null when the hash carries no comparison; otherwise the validated
 // settings and the reasons any field was rejected (rejected fields are omitted).
+// `covered` describes the link's own fields with 7-day defaults; the page reports
+// coverage from the settings actually applied.
 export function readComparisonHash(hash, manifest) {
   const [route, query] = String(hash).replace(/^#\/?/, "").split("?");
   if (route !== "compare" || !query) return null;

@@ -318,7 +318,7 @@ function Setup({
     </aside>
   );
 }
-function ShareComparison({ settings, manifest, sharedNotice }) {
+function ShareComparison({ settings, manifest, sharedNotice, covered }) {
   const [status, setStatus] = useState("");
   const url =
     location.origin + location.pathname + comparisonHash(settings);
@@ -339,7 +339,7 @@ function ShareComparison({ settings, manifest, sharedNotice }) {
           {sharedNotice.rejected.length
             ? `; ignored invalid ${sharedNotice.rejected.join(", ")}`
             : ""}
-          {sharedNotice.covered
+          {covered
             ? "."
             : ". Part of this comparison is outside the computed dates, so those results are not calculated."}
         </p>
@@ -414,6 +414,7 @@ function Compare({
               settings={settings}
               manifest={manifest}
               sharedNotice={sharedNotice}
+              covered={rows.every((r) => r.bounds)}
             />
             <ExportComparison
               dataset={dataset}
