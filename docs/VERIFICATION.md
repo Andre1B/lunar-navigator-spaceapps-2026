@@ -129,3 +129,6 @@ The user connected Lunar Pages to the original GitHub main branch. Read-only con
 
 ### Git connection artifact / production recovery
 At03:31UTC on2026-11-15, independent QA reported raw /src/main.jsx and a blank app from deployment8ac85602. Its02:53 creation preceded correction of the empty Pages build settings at03:05. Root restored the existing compiled RC5 deployment66055be1; HTTP200 then referenced /assets and not source JSX. This does not publish or validate the newer local rolling/PDF/music/story candidate. The correct build configuration remains npm run check:data && npm test && npm run build with output dist.
+
+## Current candidate local gate - 2026-11-15
+Integrated168/168 unit/data tests passed with no skips or todos;10/10 data checks,186-package credits and build passed. Independent current focused browser checks, six settled text/clock cases and13/13 Review/Compare passed on app13e4616. The legacy suite has an explicit22-case retirement/current-equivalent ledger in tests/PROGRESS.md. These are local candidate results; current-source public deployment, Lighthouse and fresh Linux rolling generation are still pending.

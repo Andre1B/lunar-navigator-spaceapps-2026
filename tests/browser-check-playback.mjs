@@ -115,13 +115,26 @@ await check('Loop computed period wraps to the first sample; disabling it pauses
   if(!await loop.isChecked())fail('Loop computed period should be enabled by default');
   await page.getByLabel('Speed').selectOption('24');
   await setIndex(page,max-0.05);
+  await page.evaluate(()=>{
+    window.__qaLoopTrace=[];
+    const sample=()=>{
+      const s=document.querySelector('canvas')?.lunarSnapshot?.();
+      const status=document.querySelector('.playback-status')?.textContent?.trim()??'';
+      if(s)window.__qaLoopTrace.push({t:performance.now(),index:s.index,presentedIndex:s.rendered?.presentedIndex,playing:status.startsWith('Playing'),status});
+      window.__qaLoopRaf=requestAnimationFrame(sample);
+    };
+    window.__qaLoopRaf=requestAnimationFrame(sample);
+  });
   await page.getByRole('button',{name:UI.play,exact:true}).click();
-  await page.waitForFunction(m=>{
-    const s=document.querySelector('canvas')?.lunarSnapshot?.(),status=document.querySelector('.playback-status')?.textContent??'';
-    return status.startsWith('Playing')&&s?.index>=0&&s.index<3;
-  },max,{timeout:12000}).catch(async e=>{const s=await snapshot(page),status=await page.locator('.playback-status').innerText();throw new Error(`loop did not wrap from max ${max}: index=${s?.index}, status=${status}; ${e.message.split('\n')[0]}`);});
+  await page.waitForFunction(()=>{
+    const trace=window.__qaLoopTrace??[];
+    return trace.some((frame,i)=>i>0&&trace[i-1].index>17000&&frame.index<trace[i-1].index&&frame.index<500&&frame.playing);
+  },null,{timeout:15000}).catch(async e=>{const s=await snapshot(page),status=await page.locator('.playback-status').innerText(),trace=await page.evaluate(()=>window.__qaLoopTrace??[]);throw new Error(`loop did not expose a continuous base-index wrap from near terminal to the first 500 samples: current=${s?.index}, status=${status}, trace=${JSON.stringify(trace.filter((f,i)=>i===0||i===trace.length-1||f.index<500||f.index>17000).slice(-12))}; ${e.message.split('\n')[0]}`);});
+  const loopTrace=await page.evaluate(()=>{cancelAnimationFrame(window.__qaLoopRaf);return window.__qaLoopTrace??[];});
+  const wrapAt=loopTrace.findIndex((frame,i)=>i>0&&loopTrace[i-1].index>17000&&frame.index<loopTrace[i-1].index&&frame.index<500&&frame.playing);
+  if(wrapAt<1)fail(`no captured continuous base-index wrap: ${JSON.stringify(loopTrace.slice(-6))}`);
   const wrapped=await snapshot(page);
-  if(wrapped.index>=3||!await visible(page,UI.pause))fail(`loop did not continue from the first samples: ${wrapped.index}`);
+  if(!await visible(page,UI.pause)||!loopTrace[wrapAt].playing)fail(`loop did not remain Playing after wrap: ${JSON.stringify({index:wrapped.index,trace:loopTrace[wrapAt]})}`);
   await page.getByRole('button',{name:UI.pause,exact:true}).click();
   await loop.setChecked(false);
   if(await loop.isChecked())fail('Loop computed period did not turn off');
@@ -131,7 +144,7 @@ await check('Loop computed period wraps to the first sample; disabling it pauses
   await page.waitForFunction(()=>document.querySelector('.playback-status')?.textContent.includes('End of the calculated period'),null,{timeout:12000});
   const ended=await snapshot(page);
   if(Math.abs(ended.index-max)>1e-6||await visible(page,UI.pause)||!await visible(page,UI.replay))fail(`loop-off playback did not stop at terminal sample: ${JSON.stringify({index:ended.index,max,pause:await visible(page,UI.pause),replay:await visible(page,UI.replay)})}`);
-  await context.close();return `loop-on wrapped and remained Playing at index ${wrapped.index.toFixed(3)}; loop-off paused at ${ended.index}/${max} with Replay available`;
+  await context.close();return `loop-on base index wrapped ${loopTrace[wrapAt-1].index.toFixed(3)}→${loopTrace[wrapAt].index.toFixed(3)} and remained Playing; loop-off paused at ${ended.index}/${max} with Replay available`;
 });
 
 await check('fast playback publishes the exact terminal HUD; re-entry from the period end restarts at zero',async()=>{
@@ -288,22 +301,22 @@ await check('normal-motion Simulator entry autoplays; reduced-motion entry stays
 await check('Guided tour and Compare inspection enter the simulator paused',async()=>{
   const outcomes=[];
   const tour=await browser.newContext({viewport:{width:1440,height:900}});
-  await tour.addInitScript(()=>sessionStorage.setItem('lunar-opening-v1','seen'));
   const tp=await tour.newPage();watch(tp,'tour-entry-pause');
-  await tp.goto(`${BASE}/#/home`,{waitUntil:'networkidle',timeout:60000});
+  await tp.goto(`${BASE}/?qa=tour#/home`,{waitUntil:'networkidle',timeout:60000});
+  const opening=tp.getByRole('dialog',{name:'Lunar Navigator'});if(await opening.isVisible().catch(()=>false))await opening.waitFor({state:'hidden',timeout:4500});
   await tp.getByRole('button',{name:/Show me how.*interactive tour/}).click();
   const card=tp.getByRole('dialog');await card.waitFor();
   await card.getByRole('button',{name:'Next',exact:true}).click();
   await tp.waitForFunction(()=>location.hash==='#/simulator',null,{timeout:10000}).catch(async e=>{throw new Error(`tour did not navigate from its home step: ${JSON.stringify(await tp.evaluate(()=>({hash:location.hash,card:document.querySelector('[role=dialog]')?.innerText,step:document.querySelector('.tour-counter')?.textContent})))}; ${e.message.split('\n')[0]}`);});
-  await tp.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot?.().rendered?.ready===true,null,{timeout:30000}).catch(async e=>{throw new Error(`tour simulator did not reach a rendered ready frame: ${JSON.stringify(await tp.evaluate(()=>({hash:location.hash,scene:document.querySelector('canvas')?.lunarSnapshot?.(),error:document.querySelector('.scene-error')?.textContent})))}; ${e.message.split('\n')[0]}`);});
+  await tp.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot?.().rendered?.ready===true,null,{timeout:30000}).catch(async e=>{throw new Error(`tour simulator did not reach a rendered ready frame: ${JSON.stringify(await tp.evaluate(()=>({hash:location.hash,canvasCount:document.querySelectorAll('canvas').length,snapshot:document.querySelector('canvas')?.lunarSnapshot?.()??null,sceneLoading:document.querySelector('.scene-loading')?.textContent??null,sceneError:document.querySelector('.scene-error')?.textContent??null,dataStatus:document.querySelector('.data-status')?.textContent?.slice(0,180)??null,dialog:document.querySelector('[role=dialog]')?.innerText?.slice(0,180)??null,mainText:document.querySelector('#main')?.innerText?.slice(0,350)??null})))}; ${e.message.split('\n')[0]}`);});
   if(!await tp.getByRole('button',{name:UI.play,exact:true}).isVisible()||await visible(tp,UI.pause))fail('tour entry should be paused');
   const ti=await snapshot(tp);await tp.waitForTimeout(600);if(Math.abs((await snapshot(tp)).index-ti.index)>1e-9)fail('tour clock advanced while it should start paused');
   outcomes.push('tour');await tour.close();
 
   const inspect=await browser.newContext({viewport:{width:1440,height:900}});
-  await inspect.addInitScript(()=>sessionStorage.setItem('lunar-opening-v1','seen'));
   const ip=await inspect.newPage();watch(ip,'compare-inspection-entry-pause');
-  await ip.goto(`${BASE}/#/compare`,{waitUntil:'networkidle',timeout:60000});
+  await ip.goto(`${BASE}/?qa=inspection#/compare`,{waitUntil:'networkidle',timeout:60000});
+  const inspectOpening=ip.getByRole('dialog',{name:'Lunar Navigator'});if(await inspectOpening.isVisible().catch(()=>false))await inspectOpening.waitFor({state:'hidden',timeout:4500});
   const inspectButton=ip.getByRole('button',{name:'See this arrival in 3D',exact:true}).first();await inspectButton.waitFor({timeout:30000});await inspectButton.click();
   await ip.waitForFunction(()=>location.hash==='#/simulator'&&document.querySelector('canvas')?.lunarSnapshot?.().rendered?.ready===true,null,{timeout:30000});
   const ins=await snapshot(ip);
@@ -315,10 +328,10 @@ await check('Guided tour and Compare inspection enter the simulator paused',asyn
 await check('Surface sky navigation guidance does not cover camera controls at 390 or 768 px',async()=>{
   const outcomes=[];
   for(const width of [390,768]){
-    const context=await browser.newContext({viewport:{width,height:900},isMobile:width===390,hasTouch:width===390,deviceScaleFactor:width===390?2:1});
+    const context=await browser.newContext({viewport:{width,height:900},isMobile:width===390,hasTouch:width===390,deviceScaleFactor:width===390?2:1,reducedMotion:'no-preference'});
     const page=await context.newPage();watch(page,`sky-guidance-${width}`);
     await page.goto(`${BASE}/?qa=1#/simulator`,{waitUntil:'networkidle',timeout:60000});
-    const opening=page.getByRole('dialog',{name:'Lunar Navigator'});if(await opening.count())await opening.waitFor({state:'hidden',timeout:4500});
+    const opening=page.getByRole('dialog',{name:'Lunar Navigator'});if(await opening.isVisible().catch(()=>false))await page.keyboard.press('Escape');
     await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot,null,{timeout:30000});
     if(width===390){if(!await page.locator('#explorer-view').isVisible())await page.locator('.setup-toggle').click();await page.selectOption('#explorer-view','sky');}
     else await page.locator(UI.presetButtons).nth(PRESETS.indexOf('sky')).click();

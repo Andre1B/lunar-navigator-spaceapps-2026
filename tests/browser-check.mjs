@@ -3,7 +3,7 @@
 //   production: QA_URL=https://<site> node tests/browser-check.mjs
 // Env: QA_OUT=<dir> overrides the output directory (use a separate one per base URL); QA_HEADED=1 shows the browser. Output: ../tmp/lunar-qa/{results.json,*.png} (outside git).
 import {chromium} from 'playwright';
-import {mkdirSync,writeFileSync,existsSync} from 'node:fs';
+import {mkdirSync,writeFileSync,existsSync,readFileSync} from 'node:fs';
 import {dirname,join,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
@@ -13,6 +13,7 @@ mkdirSync(OUT,{recursive:true});
 const CHROME_EXE='C:/Program Files/Google/Chrome/Application/chrome.exe';
 const results=[];
 const issues={console:[],pageerror:[],http:[],requestfailed:[]};
+const validation=JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)),'..','public','data','validation.json'),'utf8'));
 
 async function launch(){
   const args=['--use-gl=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist'];
@@ -30,6 +31,8 @@ function watch(page,tag){
   page.on('requestfailed',r=>issues.requestfailed.push({tag,url:r.url(),error:r.failure()?.errorText}));
 }
 async function check(name,fn){
+  const only=process.env.QA_ONLY?.toLowerCase().split('|').filter(Boolean)??[];
+  if(only.length&&!only.some(fragment=>name.toLowerCase().includes(fragment)))return;
   const t=Date.now();
   try{const detail=await fn();results.push({name,ok:true,detail:detail??'',ms:Date.now()-t});console.log('PASS',name);}
   catch(e){results.push({name,ok:false,detail:String(e.message||e).split('\n')[0],ms:Date.now()-t});console.log('FAIL',name,'-',String(e.message||e).split('\n')[0]);}
@@ -329,7 +332,7 @@ await check('keyboard: Tab reaches nav and native buttons; Enter/Space activate;
 await check('evidence: validation statuses rendered, caveats present, no garbled glyphs',async()=>{
   const page=await open(desktop,'evidence','evidence');
   await page.locator('.validation-list article').first().waitFor({timeout:15000});
-  expect(await page.locator('.validation-list article').count()===6,'6 validation tests');
+  expect(await page.locator('.validation-list article').count()===validation.tests.length,`${validation.tests.length} current validation tests`);
   const t=await page.locator('main').innerText();
   expect(/not antenna gain|link budget/.test(t),'comms caveat');
   expect(!/\?1 minute/.test(t),'garbled "?1 minute"');

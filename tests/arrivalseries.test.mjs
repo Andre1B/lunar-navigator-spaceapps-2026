@@ -16,19 +16,26 @@ const sites=Object.fromEntries(manifest.sites.map(s=>[s.id,json(s.file)]));
 const period=manifest.period;
 const dataset={manifest,sites};
 const coverageDays=(period.sampleCount-1)*period.stepMinutes/1440;
-const firstDate=period.startUtc.slice(0,10);
 const addDays=(d,n)=>new Date(Date.parse(d+'T00:00:00Z')+n*86400000).toISOString().slice(0,10);
+const validArrivalDates=(p,days)=>{
+  const first=Date.parse(p.startUtc),last=first+(p.sampleCount-1)*p.stepMinutes*60000,windowMs=days*86400000;
+  const dates=[];
+  for(let t=first;t+windowMs<=last;t+=86400000)dates.push(new Date(t).toISOString().slice(0,10));
+  return dates;
+};
 const close=(a,b,eps,m='')=>assert.ok(Math.abs(a-b)<=eps,`${m} got ${a} expected ${b}`);
 
 test('arrivalSeries: one entry per UTC start day while the full window fits',()=>{
   const d=sites['malapert-massif'];
   for(const days of [1,3,7,14,28,365,730]){
     const s=arrivalSeries(d,period,1,days);
-    const expected=coverageDays-days+1;
+    const dates=validArrivalDates(period,days);
+    const expected=dates.length;
     assert.equal(s.length,expected,`days=${days}`);
-    assert.equal(s[0].date,firstDate);
-    assert.equal(s.at(-1).date,addDays(firstDate,expected-1),`last date for ${days} d`);
-    s.forEach((e,k)=>assert.equal(e.date,addDays(firstDate,k),'consecutive daily dates'));
+    if(!expected){assert.deepEqual(s,[],`days=${days}: no full stay fits`);continue;}
+    assert.equal(s[0].date,dates[0]);
+    assert.equal(s.at(-1).date,dates.at(-1),`last date for ${days} d`);
+    s.forEach((e,k)=>assert.equal(e.date,dates[k],'consecutive daily dates'));
     assert.ok(s.every(e=>e.summary&&typeof e.summary.meanSun==='number'),'every entry calculated');
   }
   assert.deepEqual(arrivalSeries(d,period,1,coverageDays+1),[],'window longer than the coverage');
@@ -73,7 +80,7 @@ test('arrivalSeries: height 1 and "5" are accepted as numbers or strings and cha
   assert.equal(a.length,b.length);
   assert.ok(b.every((e,k)=>e.summary.meanSun>=a[k].summary.meanSun-1e-3),'5 m sees at least as much Sun');
   assert.ok(a.some((e,k)=>e.summary.meanSun!==b[k].summary.meanSun),'heights differ');
-  assert.equal(arrivalSeries(d,period,1,'7').length,coverageDays-7+1,'numeric string for days');
+  assert.equal(arrivalSeries(d,period,1,'7').length,validArrivalDates(period,7).length,'numeric string for days');
 });
 
 test('arrivalSeries: invalid input returns an empty series and never throws',()=>{
@@ -93,4 +100,13 @@ test('arrivalSeries: finer or coarser grids keep the same arithmetic (3-hourly t
   assert.equal(s.length,5,'6-day period, 2-day windows -> 5 start days');
   assert.equal(s.at(-1).date,'2027-03-05');
   assert.deepEqual(arrivalSeries(site,toy,1,7),[]);
+});
+
+test('arrivalSeries: UTC daily starts include leap day and stop at the last full stay without an extra day',()=>{
+  const toy={startUtc:'2024-02-28T00:00:00Z',stepMinutes:60,sampleCount:73};
+  const values=Array(toy.sampleCount).fill(0.5);
+  const site={events:[],sun:{visibleFraction:{'1':values}},earth:{visibleFraction:{'1':Array(toy.sampleCount).fill(1)}}};
+  const dates=arrivalSeries(site,toy,1,1).map(entry=>entry.date);
+  assert.deepEqual(dates,['2024-02-28','2024-02-29','2024-03-01'],'daily arrivals advance in UTC across February 29');
+  assert.deepEqual(arrivalSeries(site,toy,1,4),[],'a one-day stay beyond the three-day coverage cannot fit');
 });

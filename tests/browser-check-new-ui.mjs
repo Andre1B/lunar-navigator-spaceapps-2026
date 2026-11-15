@@ -144,6 +144,90 @@ await check('reduced-motion suppresses automatic intro and Replay opening stays 
   return 'no automatic opening; replay remains static and user-dismissible';
 });
 
+await check('current Guided analysis notes persist per chapter and across SPA routes without POSTs',async()=>{
+  const {ctx,page}=await context(browser,'mission-notes-current');await go(page,'mission');
+  const writes=[];page.on('request',request=>{if(!['GET','HEAD'].includes(request.method()))writes.push(`${request.method()} ${request.url()}`);});
+  const note=page.getByLabel('Analysis notes'),explored=page.getByLabel('I explored this question');
+  await note.fill('Prediction: a later arrival changes the exposed sky.');await explored.check();
+  await page.locator('.chapter-list button').nth(2).click();
+  if(await note.inputValue()!==''||await explored.isChecked())fail('chapter-specific notes leaked into another chapter');
+  await note.fill('Chapter three observation');
+  await page.locator('.chapter-list button').nth(0).click();
+  if(await note.inputValue()!=='Prediction: a later arrival changes the exposed sky.'||!await explored.isChecked())fail('first chapter journal was lost when switching chapters');
+  await page.getByRole('link',{name:'Compare',exact:true}).click();await page.waitForFunction(()=>location.hash==='#/compare',null,{timeout:5000});
+  await page.getByRole('link',{name:'Guided analysis',exact:true}).click();await page.waitForFunction(()=>location.hash==='#/mission',null,{timeout:5000});
+  if(await note.inputValue()!=='Prediction: a later arrival changes the exposed sky.'||!await explored.isChecked())fail('chapter journal was lost after an SPA route round-trip');
+  if(await note.getAttribute('maxlength')!=='1000')fail('journal does not retain its 1000-character limit');
+  if(writes.length)fail(`notes unexpectedly sent non-GET requests: ${writes.join(', ')}`);
+  await ctx.close();return 'notes stay isolated by chapter and survive Compare ↔ Guided analysis; no writes sent; 1000-character limit retained';
+});
+
+await check('keyboard can reach current navigation and immersive controls and Escape restores focus',async()=>{
+  const {ctx,page}=await context(browser,'keyboard-current');await go(page,'home');
+  const skip=page.getByRole('link',{name:'Skip to content',exact:true});await skip.focus();
+  if(!await skip.isVisible())fail('Skip to content is not visible when keyboard-focused');
+  await page.keyboard.press('Enter');await page.waitForFunction(()=>document.activeElement?.id==='main',null,{timeout:3000});
+  if(await page.evaluate(()=>location.hash)!=='#/home')fail('Skip to content changed the current route');
+  const compare=page.getByRole('link',{name:'Compare',exact:true});await compare.focus();
+  const focused=await compare.evaluate(e=>{const s=getComputedStyle(e);return {active:document.activeElement===e,outline:s.outlineStyle,outlineWidth:s.outlineWidth,shadow:s.boxShadow};});
+  if(!focused.active||((focused.outline==='none'||focused.outlineWidth==='0px')&&focused.shadow==='none'))fail(`focused navigation link has no visible focus indicator: ${JSON.stringify(focused)}`);
+  await page.keyboard.press('Enter');await page.waitForFunction(()=>location.hash==='#/compare',null,{timeout:5000});
+  await page.getByRole('link',{name:'Simulator',exact:true}).focus();await page.keyboard.press('Enter');await page.waitForFunction(()=>location.hash==='#/simulator',null,{timeout:5000});
+  await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot,null,{timeout:30000});
+  const enter=page.getByRole('button',{name:'Explore fullscreen',exact:true});await enter.focus();await page.keyboard.press('Enter');
+  const back=page.getByRole('button',{name:/Return to workspace/});await back.waitFor();
+  if(!await page.evaluate(()=>document.body.classList.contains('immersive-active'))||!await back.evaluate(e=>document.activeElement===e))fail('keyboard entry did not move focus into immersive controls');
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(()=>!document.body.classList.contains('immersive-active'),null,{timeout:5000});
+  if(!await enter.evaluate(e=>document.activeElement===e))fail('Escape did not restore focus to Explore fullscreen');
+  await ctx.close();return 'focused nav has a visible indicator; Enter routes; immersive entry/Exit use Enter/Escape with focus restoration';
+});
+
+await check('Free Mode motion freezes use current labels, persist while stepping, and clear on Faithful reset',async()=>{
+  const {ctx,page}=await context(browser,'free-mode-freezes-current');await go(page,'simulator');
+  await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot,null,{timeout:30000});
+  const pause=page.getByRole('button',{name:'Pause',exact:true});if(await pause.isVisible().catch(()=>false))await pause.click();
+  await page.getByRole('button',{name:/Free Mode/}).first().click();
+  const earth=page.getByLabel('Earth’s position', {exact:true});
+  const mercury=page.getByLabel('Mercury position',{exact:true});
+  if(!await earth.isVisible()||await earth.isChecked())fail('Earth position freeze should be visible and unchecked in Free Mode');
+  if(!await mercury.isVisible()||await mercury.isChecked())fail('optional Mercury position freeze should be visible and unchecked in Free Mode');
+  const timeBefore=await page.evaluate(()=>document.querySelector('canvas')?.lunarSnapshot?.().index);
+  await earth.check();await mercury.check();await page.getByRole('button',{name:/Step \+1 h/}).click();
+  const timeAfter=await page.evaluate(()=>document.querySelector('canvas')?.lunarSnapshot?.().index);
+  if(!(timeAfter>timeBefore)||!await earth.isChecked()||!await mercury.isChecked())fail(`Free Mode step did not advance time and preserve Earth/Mercury freezes: ${JSON.stringify({timeBefore,timeAfter,earth:await earth.isChecked(),mercury:await mercury.isChecked()})}`);
+  await page.getByRole('button',{name:'Reset to Faithful Mode',exact:true}).click();
+  if(await page.locator('.free-lab').count())fail('Free Mode freeze disclosure remains after Faithful reset');
+  await page.getByRole('button',{name:/Free Mode/}).first().click();
+  if(await page.getByLabel('Earth’s position',{exact:true}).isChecked()||await page.getByLabel('Mercury position',{exact:true}).isChecked())fail('Faithful reset did not clear Earth and optional Mercury position freezes');
+  await ctx.close();return 'Earth and Mercury position freezes are visible in Free Mode, survive stepping, and clear after Faithful reset';
+});
+
+await check('current simulator HUD and camera controls stay inside the desktop and mobile scene frame',async()=>{
+  const measured=[];
+  for(const [label,viewport,touch] of [['desktop-1440',{width:1440,height:900},false],['mobile-390',{width:390,height:844},true]]){
+    const {ctx,page}=await context(browser,`simulator-hud-${label}`,{viewport,touch});await go(page,'simulator');
+    await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot,null,{timeout:30000});
+    if(touch&&!await page.locator('#explorer-view').isVisible())await page.locator('.setup-toggle').click();
+    if(touch)await page.selectOption('#explorer-view','overview');
+    else await page.locator('.camera-presets button').first().click();
+    await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot?.().view==='overview',null,{timeout:10000});
+    await page.waitForTimeout(200);
+    const layout=await page.evaluate(()=>{
+      const names=['.explorer-world','.camera-controls','.world-reading','.world-meta','.scene-navigation-help'];
+      const rect=e=>{if(!e)return null;const r=e.getBoundingClientRect();return{x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height,visible:r.width>0&&r.height>0};};
+      return{viewport:{width:innerWidth,height:innerHeight},items:Object.fromEntries(names.map(s=>[s,rect(document.querySelector(s))]))};
+    });
+    const frame=layout.items['.explorer-world'],controls=layout.items['.camera-controls'],reading=layout.items['.world-reading'],meta=layout.items['.world-meta'];
+    if(!frame?.visible||frame.x<0||frame.right>layout.viewport.width+1||frame.y<0)fail(`${label}: scene frame is missing or horizontally outside viewport: ${JSON.stringify(layout)}`);
+    for(const [selector,r] of [['.camera-controls',controls],['.world-reading',reading],['.world-meta',meta]])if(!r?.visible||r.x<frame.x-1||r.right>frame.right+1||r.y<frame.y-1||r.bottom>frame.bottom+1)fail(`${label}: ${selector} is missing or outside the scene frame: ${JSON.stringify(layout)}`);
+    const overlapX=Math.max(0,Math.min(controls.right,reading.right)-Math.max(controls.x,reading.x)),overlapY=Math.max(0,Math.min(controls.bottom,reading.bottom)-Math.max(controls.y,reading.y));
+    if(overlapX>1&&overlapY>1)fail(`${label}: camera controls overlap the live Sun/Earth HUD by ${overlapX.toFixed(1)}×${overlapY.toFixed(1)} px: ${JSON.stringify(layout)}`);
+    measured.push(`${label}:HUD/camera in frame, overlap=${overlapX.toFixed(1)}×${overlapY.toFixed(1)}px`);await ctx.close();
+  }
+  return measured.join('; ');
+});
+
 await check('background music starts enabled, reports blocked autoplay as Ready, unlocks on gesture and persists Off',async()=>{
   const {ctx,page}=await context(browser,'background-music');
   await ctx.addInitScript(()=>{
@@ -163,14 +247,14 @@ await check('background music starts enabled, reports blocked autoplay as Ready,
   });
   await go(page,'home');
   const toggle=page.locator('.music-toggle');await toggle.waitFor();
-  let audio=await page.evaluate(()=>({contexts:window.__qaAudioContexts?.length??0,state:window.__qaAudioContexts?.[0]?.state,pressed:document.querySelector('.music-toggle')?.getAttribute('aria-pressed'),playing:document.querySelector('.music-toggle')?.getAttribute('data-playing'),label:document.querySelector('.music-toggle')?.innerText?.trim()}));
+  let audio=await page.evaluate(()=>({contexts:window.__qaAudioContexts?.length??0,state:window.__qaAudioContexts?.[0]?.state,pressed:document.querySelector('.music-toggle')?.getAttribute('aria-pressed'),playing:document.querySelector('.music-toggle')?.getAttribute('data-playing'),label:document.querySelector('.music-toggle')?.innerText?.trim().replace(/\s+/g,' ')}));
   if(audio.pressed!=='true')fail(`music should be enabled by default: ${JSON.stringify(audio)}`);
   if(audio.playing!=='false'||audio.state!=='suspended'||audio.label!=='Music Ready')fail(`blocked autoplay must show truthful Ready, not On: ${JSON.stringify(audio)}`);
   if(audio.contexts!==1)fail(`automatic attempt should keep at most one suspended AudioContext, got ${JSON.stringify(audio)}`);
   await page.getByRole('link',{name:'Compare',exact:true}).click();
   await page.waitForFunction(()=>location.hash==='#/compare',null,{timeout:5000});
   await page.waitForFunction(()=>{const b=document.querySelector('.music-toggle'),c=window.__qaAudioContexts?.[0];return b?.getAttribute('data-playing')==='true'&&c?.state==='running';},null,{timeout:5000});
-  audio=await page.evaluate(()=>({contexts:window.__qaAudioContexts?.length??0,state:window.__qaAudioContexts?.[0]?.state,pressed:document.querySelector('.music-toggle')?.getAttribute('aria-pressed'),playing:document.querySelector('.music-toggle')?.getAttribute('data-playing'),label:document.querySelector('.music-toggle')?.innerText?.trim()}));
+  audio=await page.evaluate(()=>({contexts:window.__qaAudioContexts?.length??0,state:window.__qaAudioContexts?.[0]?.state,pressed:document.querySelector('.music-toggle')?.getAttribute('aria-pressed'),playing:document.querySelector('.music-toggle')?.getAttribute('data-playing'),label:document.querySelector('.music-toggle')?.innerText?.trim().replace(/\s+/g,' ')}));
   if(audio.contexts!==1||audio.state!=='running'||audio.pressed!=='true'||audio.playing!=='true'||audio.label!=='Music On')fail(`first non-music gesture did not unlock truthful playback: ${JSON.stringify(audio)}`);
   const settings=page.locator('details.music-settings'),summary=page.getByLabel('Music volume and credits');
   await summary.click();if(!await settings.evaluate(e=>e.open))fail('volume and credits disclosure did not open');
@@ -190,7 +274,7 @@ await check('background music starts enabled, reports blocked autoplay as Ready,
   const preference=await page.evaluate(()=>localStorage.getItem('lunar-music-v1'));if(preference!=='off')fail(`Music Off was not persisted: ${preference}`);
   await page.reload({waitUntil:'networkidle',timeout:60000});
   await page.getByRole('button',{name:'Music Off',exact:true}).waitFor({timeout:5000});
-  const reload=await page.evaluate(()=>({contexts:window.__qaAudioContexts?.length??0,pressed:document.querySelector('.music-toggle')?.getAttribute('aria-pressed'),playing:document.querySelector('.music-toggle')?.getAttribute('data-playing'),label:document.querySelector('.music-toggle')?.innerText?.trim(),preference:localStorage.getItem('lunar-music-v1')}));
+  const reload=await page.evaluate(()=>({contexts:window.__qaAudioContexts?.length??0,pressed:document.querySelector('.music-toggle')?.getAttribute('aria-pressed'),playing:document.querySelector('.music-toggle')?.getAttribute('data-playing'),label:document.querySelector('.music-toggle')?.innerText?.trim().replace(/\s+/g,' '),preference:localStorage.getItem('lunar-music-v1')}));
   if(reload.contexts!==0||reload.pressed!=='false'||reload.playing!=='false'||reload.label!=='Music Off'||reload.preference!=='off')fail(`persisted Off did not survive a full reload without starting audio: ${JSON.stringify(reload)}`);
   await ctx.close();return 'enabled default; simulated autoplay block is truthful Ready on one suspended context; first non-music gesture unlocks one running context; volume reaches 0%; Escape restores focus; Off suspends and persists across reload without a new context';
 });
@@ -228,7 +312,8 @@ await check('Home delay briefing recomputes two real rows and its CTA applies th
   }
   if(new Set(signatures).size<2)fail('delay choices did not change the comparison rows');
   const applied={site:await page.locator('#site').inputValue(),alternative:await page.locator('#alternative').inputValue(),height:await page.locator('#height').inputValue(),date:await page.locator('#arrival').inputValue(),days:await page.locator('#days').inputValue(),delay:await page.locator('#delay').inputValue()};
-  if(JSON.stringify(applied)!==JSON.stringify({site:'connecting-ridge',alternative:'shackleton-rim',height:'1',date:'2027-03-01',days:'7',delay:'14'}))fail(`Home briefing CTA did not apply its settings: ${JSON.stringify(applied)}`);
+  const expected={site:'connecting-ridge',alternative:'shackleton-rim',height:'1',date:manifest.coveragePolicy.asOfUtcDate,days:'7',delay:'14'};
+  if(JSON.stringify(applied)!==JSON.stringify(expected))fail(`Home briefing CTA did not apply its settings: expected ${JSON.stringify(expected)}, got ${JSON.stringify(applied)}`);
   await ctx.close();return `three delays update two rows; Compare receives ${JSON.stringify(applied)}`;
 });
 

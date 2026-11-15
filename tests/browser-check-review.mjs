@@ -6,6 +6,7 @@ import {chromium} from 'playwright';
 import {mkdirSync,writeFileSync,readFileSync,existsSync} from 'node:fs';
 import {dirname,join,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {arrivalSeries} from '../src/lib/arrivalSeries.mjs';
 
 const ROOT=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const BASE=(process.env.QA_URL||'http://localhost:5173').replace(/\/$/,'');
@@ -15,6 +16,9 @@ const CHROME_EXE='C:/Program Files/Google/Chrome/Application/chrome.exe';
 const results=[],issues={console:[],pageerror:[],http:[],requestfailed:[]};
 const expect=(c,m)=>{if(!c)throw new Error(m);};
 const integrityFile=JSON.parse(readFileSync(join(ROOT,'public/data/integrity.json'),'utf8'));
+const manifestFile=JSON.parse(readFileSync(join(ROOT,'public/data/manifest.json'),'utf8'));
+const validationFile=JSON.parse(readFileSync(join(ROOT,'public/data/validation.json'),'utf8'));
+const siteFiles=Object.fromEntries(manifestFile.sites.map(site=>[site.id,JSON.parse(readFileSync(join(ROOT,'public/data',site.file),'utf8'))]));
 
 async function launch(){
   const args=['--use-gl=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist'];
@@ -71,7 +75,7 @@ await check('Compare presents a real PDF as its primary export and preserves the
   const page=await open(desktop,'compare','pdf-primary',500);
   const order=await page.evaluate(()=>{
     const pdf=document.querySelector('.comparison-export'),advanced=document.querySelector('.comparison-details');
-    return{pdf:!!pdf,advanced:!!advanced,primaryBeforeAdvanced:!!(pdf&&advanced&&(pdf.compareDocumentPosition(advanced)&Node.DOCUMENT_POSITION_FOLLOWING)),pdfLabel:pdf?.querySelector('button')?.innerText.trim(),jsonLabel:advanced?.querySelector('button')?.innerText.trim()};
+    return{pdf:!!pdf,advanced:!!advanced,primaryBeforeAdvanced:!!(pdf&&advanced&&(pdf.compareDocumentPosition(advanced)&Node.DOCUMENT_POSITION_FOLLOWING)),pdfLabel:pdf?.querySelector('button')?.innerText.trim(),jsonLabel:advanced?.querySelector('button')?.textContent.trim()};
   });
   expect(order.pdf&&order.advanced&&order.primaryBeforeAdvanced,'PDF must appear before the advanced JSON disclosure: '+JSON.stringify(order));
   expect(/Download comparison.*PDF/.test(order.pdfLabel)&&/Download comparison.*JSON/.test(order.jsonLabel),'both export labels must name their file format: '+JSON.stringify(order));
@@ -139,6 +143,7 @@ await check('Review and answer cards show time with some sunlight; the detailed 
   const report=(await download(cmp)).json;
   const rows=await detail.locator('table tbody tr').allInnerTexts();
   const answer=await cmp.locator('.answer-scenario').allInnerTexts();
+  const answerMeaning=(await cmp.locator('.answer-meaning').first().innerText()).replace(/\s+/g,' ');
   const rev=await open(desktop,'review','rev-numbers',900);
   const cards=rev.locator('.review-results article');
   expect(await answer.length===3&&await cards.count()===3&&report.scenarios.length===3,'expected three scenarios in answer, Review and export');
@@ -149,11 +154,13 @@ await check('Review and answer cards show time with some sunlight; the detailed 
     const answerText=answer[i],reviewText=await cards.nth(i).innerText();
     expect(answerText.includes(direct),`${scenario.label}: Compare answer card should show time fraction ${direct}`);
     expect(reviewText.includes(direct),`${scenario.label}: Review should show time fraction ${direct}`);
-    expect(/Time with some sunlight/.test(answerText)&&/Time with some sunlight/.test(reviewText),`${scenario.label}: short summary label missing`);
+    expect(/Sun visible\s*·\s*% of your stay/.test(answerText.replace(/\s+/g,' ')),`${scenario.label}: Compare must label Sun visibility as a percentage of the stay: ${JSON.stringify(answerText)}`);
+    expect(/Time with some sunlight/.test(reviewText.replace(/\s+/g,' ')),`${scenario.label}: Review must identify the time-with-sun metric: ${JSON.stringify(reviewText)}`);
     expect(!/Average Sun disc/.test(answerText+reviewText),`${scenario.label}: short summary conflates duration with mean disk area`);
     expect(rows[i].includes(mean),`${scenario.label}: detailed table should show mean visible disc ${mean}: ${rows[i]}`);
     if(Math.abs(scenario.summary.directSunTimeFraction-scenario.summary.meanVisibleSolarDiscFraction)>1e-6)distinct++;
   }
+  expect(/stay percentage counts time with any part visible/i.test(answerMeaning),`Compare must explain that its Sun-visible percentage is time share, not power: ${answerMeaning}`);
   expect(distinct>0,'test data must demonstrate that time-with-sun and mean visible disc are different measures');
   expect((await detail.locator('thead').innerText()).includes('Average Sun disc in view'),'detailed-table heading should retain the disc-area measure');
   await cmp.close();await rev.close();
@@ -170,7 +177,7 @@ await check('download: real file, JSON parses, reproduces the UI (settings, wind
   expect(j.reportType==='faithful-comparison'&&j.scenarios.length===3,'structure');
   expect(j.provenance&&j.provenance.kernels?.length>=5&&j.provenance.dems?.length>=6,'provenance present');
   expect(j.limitations.some(l=>/not NASA requirements/.test(l))&&j.limitations.some(l=>/landing-safety/.test(l)),'limitations present');
-  expect(j.conventions&&j.method&&j.validation?.length===6,'conventions/method/validation present');
+  expect(j.conventions&&j.method&&j.validation?.length===validationFile.tests.length&&j.validation.every((entry,i)=>entry.id===validationFile.tests[i].id&&entry.status===validationFile.tests[i].status),`conventions/method/current validation records present (${j.validation?.length} exported, ${validationFile.tests.length} current)`);
   expect(j.dataset.integrity&&Object.keys(JSON.stringify(j.dataset.integrity)).length>50,'dataset integrity block');
   const intg=JSON.stringify(j.dataset.integrity);
   expect(intg===JSON.stringify(integrityFile),'integrity block equals public/data/integrity.json');
@@ -213,33 +220,30 @@ await check('download follows the inputs (site, height, window, delay, limit) an
 
 await check('censored/undetermined and out-of-coverage warnings are shown and exported honestly',async()=>{
   const page=await compareReady(desktop,'warn');
-  // Sweep settings on the UI text only (Chrome throttles many automatic downloads), download once per interesting case.
-  const seen=new Set();const verified=new Set();
-  for(const days of ['3','7','14','28'])for(const limit of [0,24,72,200,400,1000]){
-    await page.selectOption('#days',days);await setLimit(page,limit);await page.waitForTimeout(120);
-    const text=(await page.locator('main').innerText()).replace(/\s+/g,' ');
-    const lower=/Lower bound only/.test(text),atLeast=/at least \d/.test(text);
-    if(lower)seen.add('undetermined');if(atLeast)seen.add('exceeds+lb');
-    const key=(lower?'u':'')+(atLeast?'e':'');
-    if(key&&!verified.has(key)){
-      verified.add(key);
-      const j=(await download(page)).json;
-      for(const s of j.scenarios){const a=s.exampleDarknessAssessment;
-        if(a.status==='undetermined')expect(a.lowerBound===true&&a.marginH===null&&s.summary.longestDarkness.censored,`undetermined must be a censored lower bound (${days}d, limit ${limit})`);
-        if(a.status==='exceeds'&&a.lowerBound)expect(/at least/.test(a.message)&&s.summary.longestDarkness.censored,'censored exceeds says at least');
-        if(a.status==='within')expect(!s.summary.longestDarkness.censored,`"within" with a censored gap (${days}d, limit ${limit})`);
-      }
-    }
-  }
-  expect(seen.size>0,'sweep never produced a censored case on the UI');
-  // out of coverage
-  await page.selectOption('#days','7');await page.fill('#arrival','2027-04-27');
+  const days=14,period=manifestFile.period,siteId=await page.inputValue('#site'),height=await page.inputValue('#height');
+  const candidate=arrivalSeries(siteFiles[siteId],period,height,days).find(entry=>entry.summary?.dark?.censored);
+  expect(!!candidate,`no censored ${days}-day stay exists for current site ${siteId} within this rolling coverage`);
+  await page.selectOption('#days',String(days));await page.fill('#arrival',candidate.date);await setLimit(page,0);await page.waitForTimeout(180);
+  const reported=(await download(page)).json;
+  const censored=reported.scenarios.filter(s=>s.summary?.longestDarkness.censored);
+  expect(censored.length>0,`UI export lost the censored darkness case for ${siteId} on ${candidate.date}`);
+  expect(censored.every(s=>s.exampleDarknessAssessment.lowerBound===true&&s.exampleDarknessAssessment.status==='exceeds'&&s.exampleDarknessAssessment.marginH>0&&/at least/.test(s.exampleDarknessAssessment.message)),`censored exceedance must be a lower-bound result: ${JSON.stringify(censored.map(s=>({label:s.label,status:s.exampleDarknessAssessment.status,lowerBound:s.exampleDarknessAssessment.lowerBound,marginH:s.exampleDarknessAssessment.marginH,message:s.exampleDarknessAssessment.message})))}`);
+  const pageText=(await page.locator('main').innerText()).replace(/\s+/g,' ');
+  expect(/At least \d/.test(pageText),`visible scenario text should mark censored darkness as a lower bound at ${candidate.date}`);
+  await setLimit(page,1000);await page.waitForTimeout(150);
+  const undetermined=(await download(page)).json.scenarios.filter(s=>s.summary?.longestDarkness.censored);
+  expect(undetermined.length>0&&undetermined.every(s=>s.exampleDarknessAssessment.status==='undetermined'&&s.exampleDarknessAssessment.lowerBound===true&&s.exampleDarknessAssessment.marginH===null),`a censored interval below the user limit must remain undetermined: ${JSON.stringify(undetermined.map(s=>({label:s.label,status:s.exampleDarknessAssessment.status,lowerBound:s.exampleDarknessAssessment.lowerBound,marginH:s.exampleDarknessAssessment.marginH})))}`);
+  expect((await page.locator('main').innerText()).includes('Lower bound only'),`visible UI should explain the undetermined lower bound at ${candidate.date}`);
+  // A date after the latest period endpoint is outside coverage for a 7-day stay.
+  await page.selectOption('#days','7');
+  const outsideDate=new Date(Date.parse(period.endUtc)+86400000).toISOString().slice(0,10);
+  await page.fill('#arrival',outsideDate);
   const j=(await download(page)).json;
   expect(j.scenarios.every(s=>s.status==='not-calculated'&&s.summary===null&&s.startUtc===null),'file must not invent numbers outside coverage');
   const rows=await page.locator('table').first().locator('tbody tr').allInnerTexts();
   expect(rows.every(r=>r.includes('Not calculated')),'UI says Not calculated');
   expect(/Outside|Not calculated|not calculated/.test(await page.locator('main').innerText()),'UI warns about coverage');
-  await page.close();return [...seen].join(',');
+  await page.close();return `censored date ${candidate.date}: limit 0 returns lower-bound exceedance; limit 1000 is undetermined; ${outsideDate} exports not-calculated`;
 });
 
 await check('limit input: zero, NaN, negative, huge and empty values never break the page or the file',async()=>{

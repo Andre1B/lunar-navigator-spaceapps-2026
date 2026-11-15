@@ -204,3 +204,7 @@ The public research report and private notes/index were handed back by the Luna 
 
 ### Pre-publication source scan
 339 tracked text files checked for valid UTF-8, replacement characters, selected credential prefixes and the operator private local-path pattern. Removed one historical design-reference absolute path from REDESIGN-V2.md, retaining the private-relative design reference and AI disclosure. Recheck returned0issues; git diff --check passed. This bounded scan is not a comprehensive security audit.
+
+## Final local integration gate - 2026-11-15
+Independent QA handed back the eight test files and closed Chrome. The six settled playback/text cases passed at1440x900,390x844,844x390 across sky/terrain, including mobile rendered-clock monotonicity. PDF/JSON downloads, explicit period wrap, rolling calendar, entry/reduced motion, remembered music Off, notes, keyboard, freezes, tracking and Review/Compare13/13 passed on app13e4616. The legacy5/27 run is individually triaged in tests/PROGRESS.md; no remaining product defect was established from those retired selectors/contracts. Hardware GPU FPS and novice comprehension are not inferred from SwiftShader.
+Root reran the integrated suite:168/168 passed,0fail/skip/todo,12.77s. check:data10/10, credits186packages/0missing repository URLs and production build passed. Rolling tests now derive dates from asOfUtcDate and independently cover leap anniversaries and final valid stays. Current publication, production QA/Lighthouse and fresh Linux daily generation remain pending.

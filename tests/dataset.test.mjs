@@ -20,6 +20,12 @@ const NEIGHBOR_SITE_IDS=['connecting-neighbor','shackleton-neighbor'];
 const SITE_IDS=[...ORIGINAL_SITE_IDS,...NEIGHBOR_SITE_IDS];
 const sites=Object.fromEntries(manifest.sites.map(s=>[s.id,load(s.file)]));
 const N=manifest.period.sampleCount,H=manifest.observerHeightsM.map(String);
+const addUtcCalendarYearsClamped=(isoDate,years)=>{
+  const [year,month,day]=isoDate.split('-').map(Number);
+  const targetYear=year+years,monthIndex=month-1;
+  const finalDay=new Date(Date.UTC(targetYear,monthIndex+1,0)).getUTCDate();
+  return new Date(Date.UTC(targetYear,monthIndex,Math.min(day,finalDay))).toISOString().slice(0,10);
+};
 const finite=(a)=>a.every(Number.isFinite);
 const inRange=(a,lo,hi)=>a.every(v=>v>=lo&&v<=hi);
 const unitVector=(azDeg,elDeg)=>{
@@ -37,14 +43,29 @@ const circleOverlapFraction=(r,R,d)=>{
 
 test('manifest publishes the rolling UTC window with endpoint-inclusive hourly samples',()=>{
   const p=manifest.period;
+  const policy=manifest.coveragePolicy;
+  const start=addUtcCalendarYearsClamped(policy.asOfUtcDate,-policy.calendarYearsBefore);
+  const end=addUtcCalendarYearsClamped(policy.asOfUtcDate,policy.calendarYearsAfter);
+  assert.match(policy.asOfUtcDate,/^\d{4}-\d{2}-\d{2}$/);
+  assert.equal(policy.mode,'rolling-calendar-years');
   assert.equal(p.sampleCount,N);
   assert.equal(p.stepMinutes,60);
-  assert.equal(Date.parse(p.endUtc)-Date.parse(p.startUtc),(N-1)*p.stepMinutes*60000);
-  assert.equal(p.startUtc,'2025-11-15T00:00:00Z');
-  assert.equal(p.endUtc,'2027-11-15T00:00:00Z');
-  assert.equal(N,17521);
+  assert.equal(p.startUtc,`${start}T00:00:00Z`,'window starts at the clamped UTC calendar anniversary');
+  assert.equal(p.endUtc,`${end}T00:00:00Z`,'window ends at the clamped UTC calendar anniversary');
+  const elapsedMs=Date.parse(p.endUtc)-Date.parse(p.startUtc),stepMs=p.stepMinutes*60000;
+  assert.equal(elapsedMs%stepMs,0,'period duration is an exact number of sample intervals');
+  assert.equal(elapsedMs,(N-1)*stepMs,'both endpoint samples match the UTC interval count');
+  assert.equal(N,elapsedMs/stepMs+1,'sample count is derived from both endpoints and step size');
   assert.deepEqual(sky.period,p);
   assert.deepEqual(manifest.observerHeightsM,[0.5,1,2,5,10]);
+});
+
+test('rolling calendar anniversary fixtures clamp February 29 without shortening the daily grid',()=>{
+  assert.equal(addUtcCalendarYearsClamped('2024-02-29',-1),'2023-02-28','prior non-leap anniversary clamps to February 28');
+  assert.equal(addUtcCalendarYearsClamped('2024-02-29',1),'2025-02-28','following non-leap anniversary clamps to February 28');
+  assert.equal(addUtcCalendarYearsClamped('2024-02-29',4),'2028-02-29','leap-year anniversary keeps February 29');
+  const start=Date.UTC(2024,1,28),nextDay=new Date(start+86400000).toISOString().slice(0,10);
+  assert.equal(nextDay,'2024-02-29','UTC day addition advances through the leap day');
 });
 
 test('manifest declares four published points and two explicit selections with sane coordinates',()=>{
