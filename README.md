@@ -75,3 +75,7 @@ The opening ends on Home, with the question and ready-to-use comparison. Normal-
 The active dataset covers one calendar year before and after its UTC reference day. See the manifest coveragePolicy and the visible Computed dates notice. The daily workflow regenerates in staging, verifies pinned sources and data hashes, runs tests and a production build, then commits validated data to main. Cloudflare Pages is connected to this repository and builds main into dist. No Cloudflare API credential is needed in the daily workflow. An end-to-end scheduled-refresh/deployment run remains pending until recorded in VERIFICATION. Old days leave the active dataset; version history remains auditable.
 
 Compare downloads a local, styled PDF: all three scenarios, time and arrival-disc percentages, horizon/timeline charts, the complete valid-arrival table, validation, source/version hashes and limitations. Advanced JSON remains available for reproducibility. The simulator can repeat the computed period with Loop; it does not extrapolate.
+
+## Further design research
+
+[Universe Symphony and four deeper winner studies](docs/WINNER-ROUND-SYMPHONY.md) records observed navigation, narrative, motion/audio behavior and source-level findings separately, with explicit inaccessible or inconclusive flows. Universe Symphony has no confirmed award in this study. The four winner projects were already catalogued; they are deeper studies, not new winner counts. No competitor code, images or music were copied.

@@ -101,3 +101,5 @@ The optional background score is original procedural music developed for this pr
 
 ### Original arrival calendar
 The UTC arrival calendar is original React/CSS, Apache-2.0, with no calendar dependency or external service. Its selectable range comes from the scientific manifest.
+
+Further presentation research: [Universe Symphony and four deeper existing-winner studies](docs/WINNER-ROUND-SYMPHONY.md). Universe Symphony is a user-requested reference with unconfirmed award status, not a claimed Space Apps winner. Sources, versions and limits of observation are recorded per project; no competitor code or assets incorporated.
