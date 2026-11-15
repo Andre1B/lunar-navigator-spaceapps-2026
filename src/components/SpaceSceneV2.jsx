@@ -129,7 +129,8 @@ export default function SpaceSceneV2({
     let observationKey = "",
       currentObservation = null,
       lastRendered = null;
-    let lastFrameAt = -Infinity,
+    let frameCredit = 1,
+      lastFrameAt = -Infinity,
       lastObservationAt = -Infinity,
       lastPublishedObservationKey = "",
       lastPublishedContext = "";
@@ -755,16 +756,20 @@ export default function SpaceSceneV2({
       if (disposed || !imageryReady) return;
       const p = latest.current,
         { sky, index, freeze, view, site, siteData, height } = p;
-      if (Number.isFinite(lastFrameAt)) {
-        const elapsed = now - lastFrameAt;
-        if (elapsed < frameInterval - 0.5) {
-          schedule();
-          return;
-        }
-        // Retain the remainder: a 120 fps ceiling on a 144 Hz display should
-        // not accidentally halve the display to 72 fps.
-        lastFrameAt = now - (elapsed % frameInterval);
-      } else lastFrameAt = now;
+      // Frame credit: one draw per frameInterval on average, so the 60/120 fps
+      // ceiling holds on 144/165 Hz displays without halving them to 72 fps.
+      // Credit carries at most one extra frame (e.g. after an idle pause).
+      if (Number.isFinite(lastFrameAt))
+        frameCredit = Math.min(
+          2,
+          frameCredit + (now - lastFrameAt) / frameInterval,
+        );
+      lastFrameAt = now;
+      if (frameCredit < 0.98) {
+        schedule();
+        return;
+      }
+      frameCredit -= 1;
       adaptResolution(now);
       settingCamera = true;
       if (sky) {
