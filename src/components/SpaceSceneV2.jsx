@@ -84,7 +84,8 @@ export default function SpaceSceneV2({
   const labels = useRef({});
   useEffect(() => {
     const el = host.current,
-      mobile = matchMedia("(max-width:720px)").matches,
+      mobile = matchMedia("(max-width:720px)").matches ||
+        (matchMedia("(pointer:coarse)").matches && !matchMedia("(hover:hover)").matches),
       reduced = matchMedia("(prefers-reduced-motion:reduce)").matches;
     const qaMode = new URLSearchParams(location.search).has("qa");
     let disposed = false,
@@ -1130,7 +1131,8 @@ export default function SpaceSceneV2({
             Math.max(1, el.clientHeight),
         ),
       );
-      glare.visible = p.opticalGlare;
+      glare.visible = p.opticalGlare &&
+        (p.view !== "sky" || currentObservation?.sun > 0);
       scene.position.copy(camera.position).negate();
       renderCamera.copy(camera, false);
       renderCamera.position.set(0, 0, 0);

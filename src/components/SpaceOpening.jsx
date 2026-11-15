@@ -5,6 +5,8 @@ export default function SpaceOpening({ onClose }) {
   const skip = useRef(null),
     enter = useRef(null);
   useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     skip.current?.focus({ preventScroll: true });
     const escape = (e) => {
       if (e.key === "Escape") onClose();
@@ -13,6 +15,7 @@ export default function SpaceOpening({ onClose }) {
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const timer = reduced ? null : setTimeout(onClose, 2400);
     return () => {
+      document.body.style.overflow = previousOverflow;
       clearTimeout(timer);
       window.removeEventListener("keydown", escape);
     };

@@ -59,8 +59,10 @@ export function surfaceMaterial() {
       "#include <color_fragment>",
       `#include <color_fragment>
       // Fine albedo grain is illustrative, NOT new rocks or elevation data.
+      float footprint=max(length(dFdx(surfacePosition)),length(dFdy(surfacePosition)));
+      float detail=1.0-smoothstep(0.02,0.15,footprint);
       float grain=fract(sin(dot(floor(surfacePosition*8.0),vec3(12.9898,78.233,37.719)))*43758.5453);
-      diffuseColor.rgb *= 0.90+0.10*grain;`,
+      diffuseColor.rgb *= 1.0-0.06*detail*(1.0-grain);`,
     );
   };
   material.customProgramCacheKey = () =>
