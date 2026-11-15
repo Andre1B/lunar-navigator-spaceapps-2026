@@ -3177,6 +3177,43 @@ details[open] > :not(summary) {
   font-size: 12px !important;
   color: #f6d08b;
 }
+.follow-toggle span,
+.vision-toggle span {
+  margin-left: 7px;
+  color: #c0d6e9;
+  font-size: 12px;
+}
+.follow-toggle[aria-pressed="true"],
+.vision-toggle[aria-pressed="true"] {
+  border-color: #99d2fc;
+  color: #fff;
+  background: #244d72;
+}
+.vision-explanation {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #b9d9f1;
+  padding: 12px 16px;
+  margin: 0;
+  border: 1px solid #3d5c77;
+  background: #122437;
+}
+/* Programmatic landmark focus is retained without selecting a whole page. */
+main:focus {
+  outline: none;
+}
+/* The route hook owns entrances: never animate an ancestor and its heading twice. */
+.page,
+.home-v2,
+.explorer-heading,
+.mission-task {
+  animation: none;
+}
+/* Titles stay sharp and readable while the craft/orbit supply the opening motion. */
+.opening-composition h1,
+.opening-composition p {
+  animation: none;
+}
 button.tracking-state {
   border-color: #72603c;
   background: #2a2419;

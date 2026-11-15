@@ -935,26 +935,16 @@ function Credits() {
 }
 export default function App() {
   const dataset = useDataset();
-  const [opening, setOpening] = useState(() => {
-    if (
-      routeNow() !== "home" ||
-      matchMedia("(prefers-reduced-motion:reduce)").matches
-    )
-      return false;
-    try {
-      return sessionStorage.getItem("lunar-opening-v1") !== "seen";
-    } catch {
-      return true;
-    }
-  });
+  // Every new document visit gets the opening. Storage/cookies never suppress it.
+  // In-app route changes do not replay it; reduced-motion visitors opt out.
+  const [opening, setOpening] = useState(
+    () => !matchMedia("(prefers-reduced-motion:reduce)").matches,
+  );
   const closeOpening = useCallback(() => {
     setOpening(false);
-    try {
-      sessionStorage.setItem("lunar-opening-v1", "seen");
-    } catch {
-      /* Storage is optional. */
-    }
-    go("simulator");
+    window.getSelection()?.removeAllRanges();
+    // Honor incoming deep links; the Home opening leads to the moving explorer.
+    if (routeNow() === "home") go("simulator");
     requestAnimationFrame(() =>
       document.getElementById("main")?.focus({ preventScroll: true }),
     );

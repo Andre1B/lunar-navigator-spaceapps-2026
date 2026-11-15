@@ -30,7 +30,7 @@ export default function SimulatorV2({
   tourActive = false,
 }) {
   const { manifest, sky, sites, planets } = dataset;
-  const [view, setView] = useState(() => inspecting ? "sky" : "overview"),
+  const [view, setView] = useState(() => (inspecting ? "sky" : "overview")),
     [immersive, setImmersive] = useState(false),
     [playing, setPlaying] = useState(
       () =>
@@ -42,6 +42,7 @@ export default function SimulatorV2({
     [surfaceStyle, setSurfaceStyle] = useState("terrain"),
     [lightPaths, setLightPaths] = useState(false),
     [opticalGlare, setOpticalGlare] = useState(true),
+    [enhancedVision, setEnhancedVision] = useState(false),
     [detailedShadows, setDetailedShadows] = useState(false),
     [freeze, setFreeze] = useState({}),
     [insight, setInsight] = useState("time");
@@ -351,6 +352,7 @@ export default function SimulatorV2({
                 surfaceStyle={surfaceStyle}
                 lightPaths={lightPaths}
                 opticalGlare={opticalGlare}
+                enhancedVision={enhancedVision}
                 detailedShadows={detailedShadows}
                 playing={playing}
                 speed={speed}
@@ -425,6 +427,7 @@ export default function SimulatorV2({
                   {view === "sky"
                     ? "true angular scale"
                     : "physical body sizes & distances"}
+                  {enhancedVision ? " · Enhanced vision (illustrative)" : ""}
                 </span>
               </>
             ) : null}
@@ -514,6 +517,14 @@ export default function SimulatorV2({
           {!immersive ? (
             <fieldset className="scene-visual-options">
               <legend>Visualization</legend>
+              <button
+                className="vision-toggle"
+                aria-pressed={enhancedVision}
+                onClick={() => setEnhancedVision((v) => !v)}
+              >
+                Enhanced vision{" "}
+                <span aria-hidden="true">{enhancedVision ? "On" : "Off"}</span>
+              </button>
               {view === "sky" ? (
                 <div
                   className="surface-style"
@@ -563,6 +574,17 @@ export default function SimulatorV2({
                 </label>
               ) : null}
             </fieldset>
+          ) : null}
+          {!immersive && enhancedVision ? (
+            <p className="vision-explanation">
+              Enhanced vision · illustrative{" "}
+              {view === "sky"
+                ? "outline of the calculated terrain horizon"
+                : view === "terrain"
+                  ? "outline of the 20 km terrain window"
+                  : "outline of the lunar limb"}
+              . Visibility, lighting and measurements are unchanged.
+            </p>
           ) : null}
           {!immersive ? (
             <p className="readout-guide scene-navigation-help">

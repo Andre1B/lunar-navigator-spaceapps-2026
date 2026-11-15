@@ -64,3 +64,6 @@ Twenty additional distinct global winners (2016-2019) were compared with this pr
 
 FIRST-MINUTE UPDATE
 Normal-motion simulator entries start playing; reduced-motion, guided tours and exact comparison inspections start paused. Look at Sun and Look at Earth continuously follow their current apparent direction. Dragging or directional controls release following; zoom keeps it. Six calculated points include two nearby selections offset by about 1 km. Compare can fill a nearby alternative in one click while preserving the original date, height and stay.
+
+VISION AND OPENING CONTROLS
+Keep following Sun can be switched on or off. Enhanced vision optionally outlines the lunar limb, the calculated observer horizon or the local terrain-window boundary. It is illustrative and does not change light, physical radii or visibility measurements. The skippable opening appears on each full page visit/reload, without relying on cookies. Navigation within the app does not replay it; deep links are preserved and reduced-motion visitors skip the automatic opening.

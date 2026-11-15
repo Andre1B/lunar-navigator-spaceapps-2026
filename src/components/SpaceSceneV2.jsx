@@ -34,6 +34,7 @@ export default function SpaceSceneV2({
   surfaceStyle = "terrain",
   lightPaths = false,
   opticalGlare = true,
+  enhancedVision = false,
   detailedShadows = false,
   playing = false,
   speed = 6,
@@ -64,6 +65,7 @@ export default function SpaceSceneV2({
     surfaceStyle,
     lightPaths,
     opticalGlare,
+    enhancedVision,
     detailedShadows,
     playing,
     speed,
@@ -274,6 +276,20 @@ export default function SpaceSceneV2({
     // Use physical surface normals here; local terrain has its own tight shadow map.
     moon.receiveShadow = false;
     scene.add(moon);
+    // A separate illustrative outline; the physical Moon mesh stays unchanged.
+    const moonOutline = new THREE.Mesh(
+      moon.geometry,
+      new THREE.MeshBasicMaterial({
+        color: "#a1d9ff",
+        side: THREE.BackSide,
+        transparent: true,
+        opacity: 0.8,
+        depthWrite: false,
+        toneMapped: false,
+      }),
+    );
+    moonOutline.scale.setScalar(1.0018);
+    scene.add(moonOutline);
     const earth = new THREE.Mesh(
       new THREE.SphereGeometry(1, 128, 80),
       new THREE.MeshPhongMaterial({
@@ -368,6 +384,29 @@ export default function SpaceSceneV2({
       }),
     );
     scene.add(wall);
+    const horizonOutline = new THREE.LineLoop(
+      new THREE.BufferGeometry(),
+      new THREE.LineBasicMaterial({
+        color: "#a1d9ff",
+        depthTest: false,
+        depthWrite: false,
+        toneMapped: false,
+      }),
+    );
+    horizonOutline.layers.set(2);
+    horizonOutline.frustumCulled = false;
+    scene.add(horizonOutline);
+    const terrainOutline = new THREE.LineLoop(
+      new THREE.BufferGeometry(),
+      new THREE.LineBasicMaterial({
+        color: "#a1d9ff",
+        depthTest: false,
+        depthWrite: false,
+        toneMapped: false,
+      }),
+    );
+    terrainOutline.renderOrder = 1000;
+    scene.add(terrainOutline);
     const surface = surfaceMaterial();
     const surfaceTerrain = new THREE.Mesh(terrain.geometry, surface.material);
     surfaceTerrain.layers.set(1);
@@ -551,6 +590,23 @@ export default function SpaceSceneV2({
           terrain.geometry.dispose();
           terrain.geometry = g;
           surfaceTerrain.geometry = g;
+          const side = Math.round(Math.sqrt(g.attributes.position.count)),
+            edge = [];
+          const add = (r, c) => {
+            const i = (r * side + c) * 3;
+            edge.push(...g.attributes.position.array.subarray(i, i + 3));
+          };
+          for (let c = 0; c < side; c++) add(0, c);
+          for (let r = 1; r < side; r++) add(r, side - 1);
+          for (let c = side - 2; c >= 0; c--) add(side - 1, c);
+          for (let r = side - 2; r > 0; r--) add(r, 0);
+          terrainOutline.geometry.dispose();
+          terrainOutline.geometry = new THREE.BufferGeometry();
+          terrainOutline.geometry.setAttribute(
+            "position",
+            new THREE.Float32BufferAttribute(edge, 3),
+          );
+          terrainOutline.geometry.computeBoundingSphere();
           surfaceAnchorSite = "";
           terrainGrid = grid;
           terrainTile = tile;
@@ -568,12 +624,18 @@ export default function SpaceSceneV2({
         });
     }
     function configureWall(profile) {
-      const v = [];
+      const v = [],
+        edge = [];
       for (let j = 0; j < profile.length; j++) {
         const a = (j * Math.PI * 2) / profile.length,
           b = ((j + 1) * Math.PI * 2) / profile.length,
           e = (profile[j] * Math.PI) / 180,
           f = (profile[(j + 1) % profile.length] * Math.PI) / 180;
+        edge.push(
+          10 * Math.sin(a) * Math.cos(e),
+          10 * Math.sin(e),
+          -10 * Math.cos(a) * Math.cos(e),
+        );
         v.push(
           10 * Math.sin(a) * Math.cos(e),
           10 * Math.sin(e),
@@ -593,6 +655,13 @@ export default function SpaceSceneV2({
         new THREE.Float32BufferAttribute(v, 3),
       );
       wall.geometry.computeBoundingSphere();
+      horizonOutline.geometry.dispose();
+      horizonOutline.geometry = new THREE.BufferGeometry();
+      horizonOutline.geometry.setAttribute(
+        "position",
+        new THREE.Float32BufferAttribute(edge, 3),
+      );
+      horizonOutline.geometry.computeBoundingSphere();
     }
     function draw(now) {
       frame = 0;
@@ -769,6 +838,13 @@ export default function SpaceSceneV2({
         ring.scale.setScalar(local ? 0.02 : 1);
         ring.visible = !exact;
         moon.visible = !exact && !local;
+        moonOutline.geometry = moon.geometry;
+        moonOutline.quaternion.copy(q);
+        moonOutline.visible = p.enhancedVision && moon.visible;
+        horizonOutline.visible = p.enhancedVision && exact && !!siteData;
+        terrainOutline.visible =
+          p.enhancedVision && local && terrainSite === site?.id;
+        terrainOutline.quaternion.copy(q);
         terrain.visible = local && terrainSite === site?.id;
         surfaceTerrain.visible =
           exact && p.surfaceStyle !== "diagram" && terrainSite === site?.id;
@@ -975,6 +1051,8 @@ export default function SpaceSceneV2({
           wall.quaternion.setFromRotationMatrix(
             new THREE.Matrix4().makeBasis(E, U, N.clone().negate()),
           );
+          horizonOutline.position.copy(wall.position);
+          horizonOutline.quaternion.copy(wall.quaternion);
         } else if (local && localCameraBody) {
           camera.position.copy(localCameraBody.clone().applyQuaternion(q));
           controls.target.copy(localTargetBody.clone().applyQuaternion(q));
@@ -1215,6 +1293,13 @@ export default function SpaceSceneV2({
           renderCamera.layers.mask = camera.layers.mask;
         } else {
           renderer.render(scene, renderCamera);
+        }
+        if (horizonOutline.visible) {
+          renderer.autoClear = false;
+          renderCamera.layers.set(2);
+          renderer.render(scene, renderCamera);
+          renderer.autoClear = true;
+          renderCamera.layers.mask = camera.layers.mask;
         }
         if (qaMode)
           lastRendered = {
@@ -1491,6 +1576,7 @@ export default function SpaceSceneV2({
           lightPaths: latest.current.lightPaths,
           glare: latest.current.opticalGlare,
           detailedShadows: latest.current.detailedShadows,
+          enhancedVision: latest.current.enhancedVision,
         },
         rendered: lastRendered,
       });
@@ -1544,6 +1630,7 @@ export default function SpaceSceneV2({
     surfaceStyle,
     lightPaths,
     opticalGlare,
+    enhancedVision,
     detailedShadows,
     playing,
     speed,
@@ -1600,7 +1687,21 @@ export default function SpaceSceneV2({
             <button onClick={() => onViewChange?.("terrain")}>
               See sunlit terrain
             </button>
-            {following ? (
+            <button
+              className="follow-toggle"
+              aria-pressed={following === "sun"}
+              onClick={() =>
+                following === "sun"
+                  ? engine.current?.releaseTracking()
+                  : engine.current?.focus("sun")
+              }
+            >
+              Keep following Sun{" "}
+              <span aria-hidden="true">
+                {following === "sun" ? "On" : "Off"}
+              </span>
+            </button>
+            {following && following !== "sun" ? (
               <button
                 className="tracking-state"
                 onClick={() => engine.current?.releaseTracking()}
@@ -1614,11 +1715,11 @@ export default function SpaceSceneV2({
                       following)}{" "}
                 · Stop following
               </button>
-            ) : (
+            ) : !following ? (
               <span className="tracking-state">
                 Free look · choose Sun or Earth to follow
               </span>
-            )}
+            ) : null}
           </>
         ) : null}
         <select
