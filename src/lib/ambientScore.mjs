@@ -48,7 +48,15 @@ export function createAmbientScore(context, initialVolume = 20) {
   setVolume(initialVolume);
   function tick() {
     if (disposed || context.state !== "running") return;
-    while (nextAt < context.currentTime + 0.2) {
+    const now = context.currentTime;
+    // A throttled background tab must skip missed notes, not allocate minutes
+    // of already-expired oscillators when its JavaScript timer resumes.
+    if (nextAt < now - 0.2) {
+      beat += Math.ceil((now - nextAt) / 1.5);
+      nextAt = now + 0.08;
+    }
+    let budget = 2;
+    while (nextAt < now + 0.2 && budget-- > 0) {
       const chordIndex = Math.floor(beat / 8) % chords.length;
       if (chordIndex !== lastChord) {
         pads.forEach(({ oscillator }, i) => {
@@ -63,6 +71,11 @@ export function createAmbientScore(context, initialVolume = 20) {
           );
         });
         lastChord = chordIndex;
+      }
+      if (notes.size >= 6) {
+        beat++;
+        nextAt += 1.5;
+        continue;
       }
       const oscillator = context.createOscillator(),
         gain = context.createGain();

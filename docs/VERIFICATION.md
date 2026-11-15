@@ -10,6 +10,12 @@ The local correction is committed through `1c3c681`: retain last rendered readin
 
 Executed locally: production build, data integrity 8/8, credits 163 packages / 0 missing repository URLs, and tracked-text UTF-8 / secret-pattern checks. Independent new-UI checks passed 7/7 (opening, focus, reduced motion, tutorial, exact event inspection, surface options, glare occlusion, and comparison/export without WebGL). The strengthened flicker checks, legacy-suite triage, final hardware measurement, current-source production QA and production Lighthouse are still pending. Caps are not measured FPS, and automated checks do not establish novice comprehension or absence of every possible bug.
 
+## Latest local additions (not a production sign-off)
+
+The current six-point dataset has ten integrity-checked core files; the four original site series, sky and original terrain tiles were byte-preserved. Independent browser coverage passed 420 combinations and 49 transitions before the optional edge/audio additions. The next focused checks cover those additions, repeatable opening with Home/deep-link preservation, music opt-in/lifecycle, settled text stability, touch and reset behavior. Earlier RC5 production flicker remains recorded as a real failure.
+
+Root native smoke confirmed: Home remains after opening; no AudioContext is created before a music gesture; one running context produces nonzero analyser samples; it persists through route navigation and suspends with a held clock after Music Off settles. Optional edge outlines rendered, Sun following toggled, and no console/page errors appeared in those directed samples. These checks do not replace independent current-source production QA or Lighthouse.
+
 ## Historical RC3 / RC4 evidence (superseded) ? V2 true-scale simulator
 
 **Release:** commit `090c45ec6c8756e07d26ef195bed372c54293b12`, tag `release-candidate-2026-11-14-3`. The tag is a candidate, not a submission.
