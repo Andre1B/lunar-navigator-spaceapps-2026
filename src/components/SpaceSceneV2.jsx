@@ -141,6 +141,7 @@ export default function SpaceSceneV2({
     let observationKey = "",
       currentObservation = null,
       lastRendered = null;
+    let wantsFrame = false;
     let frameCredit = 1,
       lastFrameAt = -Infinity,
       lastObservationAt = -Infinity,
@@ -977,7 +978,15 @@ export default function SpaceSceneV2({
         clouds.quaternion.copy(eq);
         // Illustrative cloud drift (one turn per 20 days relative to Earth),
         // not weather; still with reduced motion.
-        if (!reduced) clouds.rotateY((2 * Math.PI * i) / (24 * 20));
+        // Close Earth views also drift the layer in real time (one turn per
+        // 10 minutes) so it visibly moves while paused.
+        const earthClose = view === "earth" || trackedBody === "earth";
+        if (!reduced)
+          clouds.rotateY(
+            (2 * Math.PI * i) / (24 * 20) +
+              (earthClose ? (2 * Math.PI * now) / 600000 : 0),
+          );
+        if (!reduced && earthClose) wantsFrame = true;
         clouds.scale.setScalar((sky.radiiKm.earth + 10) / sky.radiiKm.moon);
         atmosphere.position.copy(earth.position);
         atmosphere.quaternion.copy(eq);
@@ -1678,7 +1687,8 @@ export default function SpaceSceneV2({
       }
       settingCamera = false;
       continuousLoop = !!(p.playing || transition);
-      if (p.playing) schedule();
+      if (p.playing || wantsFrame) schedule();
+      wantsFrame = false;
     }
     const change = () => {
       if (
@@ -1822,6 +1832,17 @@ export default function SpaceSceneV2({
           change();
         }
         schedule();
+      },
+      // Close orbit view of a body (Earth uses its own preset). From the
+      // surface views this switches to the orbit view first.
+      inspect(id) {
+        transition = null;
+        if (["sky", "terrain"].includes(latest.current.view)) {
+          pendingFocus = id;
+          latest.current.onViewChange?.(id === "earth" ? "earth" : "overview");
+          return;
+        }
+        this.focus(id);
       },
       focus(id) {
         transition = null;
@@ -2092,10 +2113,10 @@ export default function SpaceSceneV2({
           Inspect individual planets
         </span>
         <select
-          aria-label="Inspect individual planets: focus a celestial body"
+          aria-label="Inspect individual planets: close view of a body"
           defaultValue=""
           onChange={(e) => {
-            engine.current?.focus(e.target.value);
+            engine.current?.inspect(e.target.value);
             e.target.value = "";
           }}
         >
