@@ -22,6 +22,7 @@ import { percent, hours, timeAt } from "./lib/analysis.mjs";
 import ArrivalComparison from "./components/ArrivalComparison.jsx";
 import ComparisonAnswer from "./components/ComparisonAnswer.jsx";
 import { LedgerFigures } from "./components/HorizonLedger.jsx";
+import { comparisonHash, readComparisonHash } from "./lib/shareLink.mjs";
 import ExportComparison from "./components/ExportComparison.jsx";
 import CoverageNotice from "./components/CoverageNotice.jsx";
 import ArrivalSeries from "./components/ArrivalSeries.jsx";
@@ -317,10 +318,58 @@ function Setup({
     </aside>
   );
 }
+function ShareComparison({ settings, manifest, sharedNotice }) {
+  const [status, setStatus] = useState("");
+  const url =
+    location.origin + location.pathname + comparisonHash(settings);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setStatus("Link copied.");
+    } catch {
+      setStatus("Copy was blocked by the browser. Select the link below.");
+    }
+  };
+  return (
+    <section className="share-comparison" aria-labelledby="share-title">
+      <h2 id="share-title">Share these settings</h2>
+      {sharedNotice ? (
+        <p className="share-restored" role="status">
+          Settings restored from a link
+          {sharedNotice.rejected.length
+            ? `; ignored invalid ${sharedNotice.rejected.join(", ")}`
+            : ""}
+          {sharedNotice.covered
+            ? "."
+            : ". Part of this comparison is outside the computed dates, so those results are not calculated."}
+        </p>
+      ) : null}
+      <div className="share-row">
+        <button className="button secondary" onClick={copy}>
+          Copy comparison link
+        </button>
+        <span role="status" aria-live="polite">
+          {status}
+        </span>
+      </div>
+      <label className="share-url">
+        <span>Link</span>
+        <input readOnly value={url} onFocus={(e) => e.target.select()} />
+      </label>
+      <p className="caption">
+        The link stores the place, height, arrival date, stay, delay and
+        alternative point only. Results are recomputed from the dataset current
+        when it is opened (now generated {manifest.generatedAtUtc}); the PDF and
+        JSON exports keep a fixed record.
+      </p>
+    </section>
+  );
+}
 function Compare({
   dataset,
   settings,
   setters,
+  sharedNotice,
   setIndex,
   mode,
   tourActive = false,
@@ -360,6 +409,11 @@ function Compare({
               dataset={dataset}
               rows={rows}
               height={Number(settings.height)}
+            />
+            <ShareComparison
+              settings={settings}
+              manifest={manifest}
+              sharedNotice={sharedNotice}
             />
             <ExportComparison
               dataset={dataset}
@@ -1041,6 +1095,26 @@ export default function App() {
       }
     }
   }, [dataset.manifest]);
+  const [sharedNotice, setSharedNotice] = useState(null);
+  useEffect(() => {
+    const manifest = dataset.manifest;
+    if (!manifest) return;
+    const apply = () => {
+      const shared = readComparisonHash(location.hash, manifest);
+      if (!shared) return;
+      const s = shared.settings;
+      if (s.siteId) setSiteId(s.siteId);
+      if (s.alternative) setAlternative(s.alternative);
+      if (s.height !== undefined) setHeight(s.height);
+      if (s.date) setDate(s.date);
+      if (s.days !== undefined) setDays(s.days);
+      if (s.delay !== undefined) setDelay(s.delay);
+      setSharedNotice(shared);
+    };
+    apply();
+    window.addEventListener("hashchange", apply);
+    return () => window.removeEventListener("hashchange", apply);
+  }, [dataset.manifest]);
   const settings = { siteId, alternative, height, date, days, delay },
     setters = {
       setSiteId,
@@ -1144,6 +1218,7 @@ export default function App() {
             dataset={dataset}
             settings={settings}
             setters={setters}
+            sharedNotice={sharedNotice}
             index={Math.round(index)}
             setIndex={setIndex}
             mode={mode}
