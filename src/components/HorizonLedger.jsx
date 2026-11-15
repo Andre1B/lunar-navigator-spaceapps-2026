@@ -141,6 +141,11 @@ function HorizonPanel({ site, height, rows, period, compact }) {
       const d = Math.hypot(x1 - x0, y1 - y0);
       if (d <= 4 && (!best || d < best.d)) best = { j, d, x: (x0 + x1) / 2, y: (y0 + y1) / 2 };
     }
+    // Overlapping stays share identical samples; only the boundary where one
+    // stay ends as the other begins is marked among those.
+    const boundary =
+      best && best.j === i && i === rows[0].bounds.end && i === rows[1].bounds.start;
+    if (best && best.j === i && !boundary) continue;
     if (best && !crossings.some((c) => Math.hypot(c.x - best.x, c.y - best.y) < 14))
       crossings.push({ ...best, i });
   }
