@@ -1,4 +1,4 @@
-export default function HomeV2({ onStart, onTour }) {
+export default function HomeV2({ onStart, onTour, onReplayOpening }) {
   return (
     <main id="main" tabIndex={-1} className="home home-v2">
       <section className="home-intro" data-tour="purpose">
@@ -37,6 +37,7 @@ export default function HomeV2({ onStart, onTour }) {
               Show me how · interactive tour
             </button>
             <a href="#/learn">How it works</a>
+            <button onClick={onReplayOpening}>Replay the opening</button>
           </div>
           <p className="home-scope">
             For learning and comparing lunar conditions. Four south-pole study
@@ -142,8 +143,8 @@ export default function HomeV2({ onStart, onTour }) {
             <div>
               <h3>Choose a place and a time</h3>
               <p>
-                Four points on published south-pole terrain, with a defined study
-                period.
+                Four points on published south-pole terrain, with a defined
+                study period.
               </p>
             </div>
           </li>

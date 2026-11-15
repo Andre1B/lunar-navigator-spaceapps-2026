@@ -1,4 +1,5 @@
 import { useId, useMemo, useState } from "react";
+import AnimatedExplainer from "../components/AnimatedExplainer.jsx";
 import {
   glossary,
   intro,
@@ -487,7 +488,6 @@ function Stepper({ onOpen }) {
   );
 }
 
-
 /* Worked example with REAL dataset values (not a cartoon). */
 function WorkedExample({ dataset }) {
   const id = "malapert-massif";
@@ -505,39 +505,67 @@ function WorkedExample({ dataset }) {
   const h = (v, c) => (c ? "≥ " : "") + v.toFixed(0) + " h";
   const pc = (v) => (v * 100).toFixed(0) + "%";
   const rows = [
-    ["Longest period without direct Sun", h(m1.longestNoDirectSunH, m1.longestNoDirectSunCensored), h(m5.longestNoDirectSunH, m5.longestNoDirectSunCensored)],
-    ["Mean visible solar disc", pc(m1.meanSunVisibleFraction), pc(m5.meanSunVisibleFraction)],
-    ["Time with any direct Sun", pc(m1.sunlitTimeFraction), pc(m5.sunlitTimeFraction)],
-    ["Time with Earth above the terrain horizon", pc(m1.earthVisibleTimeFraction), pc(m5.earthVisibleTimeFraction)],
+    [
+      "Longest period without direct Sun",
+      h(m1.longestNoDirectSunH, m1.longestNoDirectSunCensored),
+      h(m5.longestNoDirectSunH, m5.longestNoDirectSunCensored),
+    ],
+    [
+      "Mean visible solar disc",
+      pc(m1.meanSunVisibleFraction),
+      pc(m5.meanSunVisibleFraction),
+    ],
+    [
+      "Time with any direct Sun",
+      pc(m1.sunlitTimeFraction),
+      pc(m5.sunlitTimeFraction),
+    ],
+    [
+      "Time with Earth above the terrain horizon",
+      pc(m1.earthVisibleTimeFraction),
+      pc(m5.earthVisibleTimeFraction),
+    ],
   ];
   return (
     <div className="learn-worked learn-card">
       <span className="learn-worked-label">Real data · not a cartoon</span>
       <h3>Worked example: {point.name.split(" (")[0]}, 1 m versus 5 m</h3>
       <p>
-        Same point ({point.latitudeDeg.toFixed(2)}°, {point.longitudeEastDeg.toFixed(2)}° E), same dates (
-        {period.startUtc.slice(0, 10)} to {period.endUtc.slice(0, 10)} UTC). Only the observer height changes.
+        Same point ({point.latitudeDeg.toFixed(2)}°,{" "}
+        {point.longitudeEastDeg.toFixed(2)}° E), same dates (
+        {period.startUtc.slice(0, 10)} to {period.endUtc.slice(0, 10)} UTC).
+        Only the observer height changes.
       </p>
       <div className="table-wrap">
         <table>
           <thead>
-            <tr><th scope="col">Whole computed period</th><th scope="col">1 m</th><th scope="col">5 m</th></tr>
+            <tr>
+              <th scope="col">Whole computed period</th>
+              <th scope="col">1 m</th>
+              <th scope="col">5 m</th>
+            </tr>
           </thead>
           <tbody>
             {rows.map(([k, a, b]) => (
-              <tr key={k}><th scope="row">{k}</th><td>{a}</td><td>{b}</td></tr>
+              <tr key={k}>
+                <th scope="row">{k}</th>
+                <td>{a}</td>
+                <td>{b}</td>
+              </tr>
             ))}
           </tbody>
         </table>
       </div>
       <p>
-        <strong>In one sentence:</strong> raising the eyes 4 m lets them look over nearby bumps, so the Sun is hidden for a
-        much shorter stretch. Near the pole the Sun stays close to the horizon, so small terrain matters.
+        <strong>In one sentence:</strong> raising the eyes 4 m lets them look
+        over nearby bumps, so the Sun is hidden for a much shorter stretch. Near
+        the pole the Sun stays close to the horizon, so small terrain matters.
       </p>
       <p className="caption">
-        Values read at run time from data/sites/{id}.json (metrics on a 5-minute grid; “≥” means the period touches the
-        edge of the computed window). Geometry only: not power, battery or communication sizing. The point is from a
-        published LOLA study area and is not a selected landing site.
+        Values read at run time from data/sites/{id}.json (metrics on a 5-minute
+        grid; “≥” means the period touches the edge of the computed window).
+        Geometry only: not power, battery or communication sizing. The point is
+        from a published LOLA study area and is not a selected landing site.
       </p>
     </div>
   );
@@ -573,6 +601,7 @@ export default function Learn({ onStartTour, onOpen, dataset }) {
           </button>
         </div>
       </div>
+      <AnimatedExplainer onOpen={onOpen} />
 
       <ul className="learn-facts">
         {intro.facts.map((f) => (

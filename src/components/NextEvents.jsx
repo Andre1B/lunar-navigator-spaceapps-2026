@@ -9,7 +9,13 @@ const NAMES = {
   earthset: "Earth leaves view",
 };
 
-export default function NextEvents({ siteData, period, index, height }) {
+export default function NextEvents({
+  siteData,
+  period,
+  index,
+  height,
+  onInspect,
+}) {
   const result = useMemo(
     () => nextEvents(siteData, period, index, height),
     [siteData, period, index, height],
@@ -53,6 +59,33 @@ export default function NextEvents({ siteData, period, index, height }) {
                           {" "}
                           (±{e.resolutionMin} min)
                         </span>
+                      ) : null}
+                      {onInspect ? (
+                        <div
+                          className="event-inspection"
+                          role="group"
+                          aria-label={NAMES[e.type] + ": inspect nearby times"}
+                        >
+                          {[-5, 5].map((minutes) => {
+                            const target =
+                              (Date.parse(e.utc) +
+                                minutes * 60000 -
+                                Date.parse(period.startUtc)) /
+                              (period.stepMinutes * 60000);
+                            return (
+                              <button
+                                key={minutes}
+                                disabled={
+                                  target < 0 || target > period.sampleCount - 1
+                                }
+                                onClick={() => onInspect(target)}
+                              >
+                                {Math.abs(minutes)} min{" "}
+                                {minutes < 0 ? "before" : "after"}
+                              </button>
+                            );
+                          })}
+                        </div>
                       ) : null}
                     </>
                   ) : (

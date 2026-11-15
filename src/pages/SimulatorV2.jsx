@@ -33,7 +33,11 @@ export default function SimulatorV2({
   const [view, setView] = useState("overview"),
     [immersive, setImmersive] = useState(false),
     [playing, setPlaying] = useState(false),
-    [speed, setSpeed] = useState(6),
+    [speed, setSpeed] = useState(1),
+    [surfaceStyle, setSurfaceStyle] = useState("terrain"),
+    [lightPaths, setLightPaths] = useState(false),
+    [opticalGlare, setOpticalGlare] = useState(true),
+    [detailedShadows, setDetailedShadows] = useState(false),
     [freeze, setFreeze] = useState({}),
     [insight, setInsight] = useState("time");
   const [inspection, setInspection] = useState(null);
@@ -54,6 +58,12 @@ export default function SimulatorV2({
   clock.current = index;
   const site = manifest?.sites.find((s) => s.id === siteId),
     data = sites[siteId];
+  // The clock can advance before the next GPU frame. Keep that last frame's
+  // reading visible, with its own timestamp, instead of flashing unavailable.
+  const frameObservation =
+    observation?.siteId === siteId && observation?.height === height
+      ? observation
+      : null;
   const atEnd = !!manifest && index >= manifest.period.sampleCount - 1;
   function restart(play = false) {
     clock.current = 0;
@@ -225,7 +235,9 @@ export default function SimulatorV2({
           </div>
           <details className="explorer-help">
             <summary>What are these locations?</summary>
-            <p>Points on published lunar terrain, not certified landing sites.</p>
+            <p>
+              Points on published lunar terrain, not certified landing sites.
+            </p>
             <a href="#/evidence">Sources and coordinates</a>
           </details>
         </aside>
@@ -300,6 +312,12 @@ export default function SimulatorV2({
                 onViewChange={setView}
                 onFocusChange={setInspection}
                 onObservation={setObservation}
+                surfaceStyle={surfaceStyle}
+                lightPaths={lightPaths}
+                opticalGlare={opticalGlare}
+                detailedShadows={detailedShadows}
+                playing={playing}
+                speed={speed}
               />
             </Suspense>
             <div className="world-meta">
@@ -312,7 +330,9 @@ export default function SimulatorV2({
               </span>
               <span>
                 {view === "sky"
-                  ? "Horizon diagram · true apparent sizes"
+                  ? surfaceStyle === "diagram"
+                    ? "Horizon diagram · true apparent sizes"
+                    : "Surface reconstruction · true apparent sizes"
                   : view === "terrain"
                     ? "20 km terrain window · visual geometry"
                     : "Physical sizes & distances · camera zoom only"}
@@ -327,29 +347,12 @@ export default function SimulatorV2({
               <div className="world-reading">
                 <span>
                   <i className="sun-dot" />
-                  Sun in view{" "}
-                  <strong>
-                    {percent(
-                      observation?.siteId === siteId &&
-                        observation?.index === index &&
-                        observation?.height === height
-                        ? observation.sun
-                        : null,
-                    )}
-                  </strong>
+                  Sun in view <strong>{percent(frameObservation?.sun)}</strong>
                 </span>
                 <span>
                   <i className="earth-dot" />
                   Earth in view{" "}
-                  <strong>
-                    {percent(
-                      observation?.siteId === siteId &&
-                        observation?.index === index &&
-                        observation?.height === height
-                        ? observation.earth
-                        : null,
-                    )}
-                  </strong>
+                  <strong>{percent(frameObservation?.earth)}</strong>
                 </span>
                 <small>
                   {mode === "free"
@@ -358,6 +361,14 @@ export default function SimulatorV2({
                       " · " +
                       height +
                       " m · interpolated geometry"}
+                  {frameObservation && manifest
+                    ? " · frame " +
+                      timeAt(manifest.period, frameObservation.index).slice(
+                        11,
+                        19,
+                      ) +
+                      " UTC"
+                    : ""}
                 </small>
               </div>
             ) : null}
@@ -382,61 +393,6 @@ export default function SimulatorV2({
               </>
             ) : null}
           </section>
-          {!immersive ? (
-            <p className="readout-guide scene-navigation-help">
-              {view === "sky"
-                ? "Drag to look around."
-                : "Drag to orbit the view."}{" "}
-              Scroll to zoom, or open Navigation for camera buttons.
-              {view === "earth" || inspection === "earth"
-                ? " Clouds are an illustration, not live weather."
-                : ""}
-            </p>
-          ) : null}
-          {!immersive && mode === "faithful" ? (
-            <p className="readout-guide">
-              Sun / Earth in view: the percentage of each disc above the hills{" "}
-              <strong>at this instant</strong>. 100% means the whole disc; 0%
-              means hidden. These are not percentages of time or power.
-            </p>
-          ) : null}
-          {view === "sky" ? (
-            <aside className="sky-view-guide">
-              <div>
-                <strong>
-                  This is a horizon diagram, not a photograph of the ground.
-                </strong>
-                <p>
-                  Grey means terrain blocks that part of the sky. It does not
-                  mean the ground is dark. The Sun is small because its apparent
-                  size is real. Use “Look at Sun” to find it.
-                </p>
-                {mode === "faithful" &&
-                observation?.siteId === siteId &&
-                observation?.height === height &&
-                observation?.index === index ? (
-                  <p>
-                    {observation.sun > 0
-                      ? "Some direct sunlight reaches this observer now."
-                      : "The terrain hides the Sun from this observer now."}{" "}
-                    {observation.earth > 0
-                      ? "Earth is also in view."
-                      : "Earth is out of view."}
-                  </p>
-                ) : null}
-              </div>
-              <button onClick={() => setView("terrain")}>
-                See sunlit terrain
-              </button>
-            </aside>
-          ) : null}
-          {view === "terrain" ? (
-            <p className="view-explainer">
-              Real elevation data, with sunlight from the selected time. This is
-              an overhead view of a 20 km patch. For what an observer at{" "}
-              {height} m can see over all the hills, choose Surface sky.
-            </p>
-          ) : null}
           <section className="explorer-time" data-tour="time-controls">
             <div className="playback">
               <div className="playback-buttons">
@@ -519,6 +475,123 @@ export default function SimulatorV2({
               )}
             </div>
           </section>
+          {!immersive ? (
+            <fieldset className="scene-visual-options">
+              <legend>Visualization</legend>
+              {view === "sky" ? (
+                <div
+                  className="surface-style"
+                  role="group"
+                  aria-label="Surface appearance"
+                >
+                  <button
+                    aria-pressed={surfaceStyle === "terrain"}
+                    onClick={() => setSurfaceStyle("terrain")}
+                  >
+                    Lunar surface
+                  </button>
+                  <button
+                    aria-pressed={surfaceStyle === "diagram"}
+                    onClick={() => setSurfaceStyle("diagram")}
+                  >
+                    Horizon diagram
+                  </button>
+                </div>
+              ) : null}
+              {view === "sky" || view === "terrain" ? (
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={lightPaths}
+                    onChange={(e) => setLightPaths(e.target.checked)}
+                  />
+                  Draw light paths · diagram
+                </label>
+              ) : null}
+              <label>
+                <input
+                  type="checkbox"
+                  checked={opticalGlare}
+                  onChange={(e) => setOpticalGlare(e.target.checked)}
+                />
+                Optical glare
+              </label>
+              {view === "sky" || view === "terrain" ? (
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={detailedShadows}
+                    onChange={(e) => setDetailedShadows(e.target.checked)}
+                  />
+                  Detailed shadows · more GPU use
+                </label>
+              ) : null}
+            </fieldset>
+          ) : null}
+          {!immersive ? (
+            <p className="readout-guide scene-navigation-help">
+              {view === "sky"
+                ? "Drag to look around."
+                : "Drag to orbit the view."}{" "}
+              Scroll to zoom, or open Navigation for camera buttons.
+              {view === "earth" || inspection === "earth"
+                ? " Clouds are an illustration, not live weather."
+                : ""}
+            </p>
+          ) : null}
+          {!immersive && mode === "faithful" ? (
+            <p className="readout-guide">
+              Sun / Earth in view: the percentage of each disc above the hills{" "}
+              <strong>at this instant</strong>. 100% means the whole disc; 0%
+              means hidden. These are not percentages of time or power.
+            </p>
+          ) : null}
+          {view === "sky" ? (
+            <aside className="sky-view-guide">
+              <div>
+                <strong>
+                  {surfaceStyle === "diagram"
+                    ? "This is a horizon diagram, not a photograph of the ground."
+                    : "A view from your selected point, with real terrain and solar direction."}
+                </strong>
+                <p>
+                  {surfaceStyle === "diagram"
+                    ? "Grey means terrain blocks that part of the sky, not that the ground is dark."
+                    : "The 40 m terrain is aligned at the observer. Fine surface grain and brightness are illustrative; this is not a photograph or a model of individual rocks. The calculated horizon controls what sky stays open."}{" "}
+                  The Sun keeps its real apparent size. Use “Look at Sun” to
+                  find it.
+                </p>
+                {surfaceStyle !== "diagram" ? <p className="polar-light-note">At the pole, seeing the Sun does not mean every slope is lit. The ground facing away can stay in shadow. “See sunlit terrain” gives an elevated view of the same place and time.</p> : null}
+                {mode === "faithful" && frameObservation ? (
+                  <p>
+                    {observation.sun > 0
+                      ? "Some direct sunlight reaches this observer now."
+                      : "The terrain hides the Sun from this observer now."}{" "}
+                    {observation.earth > 0
+                      ? "Earth is also in view."
+                      : "Earth is out of view."}
+                  </p>
+                ) : null}
+              </div>
+            </aside>
+          ) : null}
+          {!immersive &&
+          (lightPaths || detailedShadows) &&
+          (view === "sky" || view === "terrain") ? (
+            <p className="visual-effects-note">
+              Light paths are explanatory lines in the true solar direction, not
+              visible beams in a vacuum or a ray-tracing calculation. Detailed
+              shadows affect the visualization only; all numerical comparisons
+              stay unchanged.
+            </p>
+          ) : null}
+          {view === "terrain" ? (
+            <p className="view-explainer">
+              Real elevation data, with sunlight from the selected time. This is
+              an overhead view of a 20 km patch. For what an observer at{" "}
+              {height} m can see over all the hills, choose Surface sky.
+            </p>
+          ) : null}
           <p className="simulator-next">
             <a href="#/compare">
               What if arrival is delayed? Compare the results →
@@ -532,6 +605,12 @@ export default function SimulatorV2({
                 period={manifest.period}
                 index={index}
                 height={height}
+                onInspect={(target) => {
+                  setPlaying(false);
+                  clock.current = target;
+                  setIndex(target);
+                  setView("sky");
+                }}
               />
             ) : null}
             {mode === "faithful" && data && manifest ? (

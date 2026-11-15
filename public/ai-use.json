@@ -13,7 +13,9 @@
         "documentation",
         "integration",
         "verification",
-        "five-height scientific generator extension and bounded review after a Claude rate limit"
+        "five-height scientific generator extension and bounded review after a Claude rate limit",
+        "original SVG/CSS opening and animated walkthrough implementation",
+        "display-refresh playback and numerical-horizon-clipped surface visualization"
       ]
     },
     {
@@ -45,7 +47,7 @@
   ],
   "contentAcknowledgment": "Code and explanatory text were developed with AI assistance. Review and validation evidence is recorded separately; this acknowledgment does not claim correctness or eligibility certification.",
   "numericalData": "Positions, terrain horizons and visibility samples are computed by deterministic code from cited NASA/PDS/PGDA/NAIF resources. These numbers are not generated or estimated by a language model.",
-  "imagery": "Privately labeled AI-generated UI concepts informed the design; none is shipped as scientific output. Deployed imagery and visual elevation derive from credited NASA SVS/LROC/LOLA, Blue Marble and Gaia-based star-map resources. Conversion methods and hashes accompany each asset. The interactive scene is a code rendering: global and local terrain are visual geometry, scale adjustments are labeled, and numerical visibility uses separate published-data horizon calculations. The true-scale revision adds attributed Solar System Scope CC BY 4.0 illustrative cloud/specular masks over NASA ground imagery, plus code-based optical atmosphere/glare. Fixed clouds are not simulated weather. No AI-generated planet imagery is deployed.",
+  "imagery": "Privately labeled AI-generated UI concepts informed the design; none is shipped as scientific output. Deployed imagery and visual elevation derive from credited NASA SVS/LROC/LOLA, Blue Marble and Gaia-based star-map resources. Conversion methods and hashes accompany each asset. The interactive scene is a code rendering: global and local terrain are visual geometry, scale adjustments are labeled, and numerical visibility uses separate published-data horizon calculations. The true-scale revision adds attributed Solar System Scope CC BY 4.0 illustrative cloud/specular masks over NASA ground imagery, plus code-based optical atmosphere/glare. Fixed clouds are not simulated weather. No AI-generated planet imagery is deployed. New surface foreground uses the credited 40 m real DEM, with uniform visual observer alignment and numerical-horizon clipping. Fine grain is procedural illustrative albedo, not generated elevation or rocks. Original SVG opening and tutorial are illustrations, not scientific flight paths or imagery. OpenHiggsfield was inspected but not executed or used to generate deployed assets.",
   "humanDirection": "The user specified guided and unrestricted navigation, faithful and free simulation, independent freezes, immersive display, separate screens and the visual direction. Earlier research and planning were AI-assisted; no claim is made that the official interpretation of the ideation restriction has been resolved.",
   "limitations": "The project is an educational prototype, not NASA-authored output, operational guidance or a safety certification. Completion and check status must be read in the evidence page and project checkpoints."
 }

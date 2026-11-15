@@ -5,6 +5,10 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { horizonAt, visibleDiskFraction } from "../lib/analysis.mjs";
 import {
+  surfaceMaterial,
+  alignSurfaceAtObserver,
+} from "../lib/surfaceVisual.mjs";
+import {
   readJson,
   readGrid,
   displacedGlobe,
@@ -27,7 +31,20 @@ export default function SpaceSceneV2({
   onViewChange,
   onFocusChange,
   onObservation,
+  surfaceStyle = "terrain",
+  lightPaths = false,
+  opticalGlare = true,
+  detailedShadows = false,
+  playing = false,
+  speed = 6,
 }) {
+  const presentation = useRef({ index, playing, speed, at: performance.now() });
+  if (
+    presentation.current.index !== index ||
+    presentation.current.playing !== playing ||
+    presentation.current.speed !== speed
+  )
+    presentation.current = { index, playing, speed, at: performance.now() };
   const host = useRef(null),
     engine = useRef(null),
     latest = useRef({
@@ -44,6 +61,12 @@ export default function SpaceSceneV2({
       onObservation,
     });
   latest.current = {
+    surfaceStyle,
+    lightPaths,
+    opticalGlare,
+    detailedShadows,
+    playing,
+    speed,
     sky,
     planets,
     index,
@@ -88,8 +111,15 @@ export default function SpaceSceneV2({
     let observationKey = "",
       currentObservation = null,
       lastRendered = null;
+    let lastFrameAt = -Infinity,
+      lastObservationAt = -Infinity,
+      lastPublishedObservationKey = "",
+      lastPublishedContext = "";
+    const frameInterval = 1000 / (mobile ? 60 : 120);
     let terrainGrid = null,
-      terrainTile = null;
+      terrainTile = null,
+      surfaceAnchorSite = "",
+      surfaceAlignmentM = null;
     try {
       renderer = new THREE.WebGLRenderer({
         antialias: true,
@@ -123,6 +153,7 @@ export default function SpaceSceneV2({
       camera = new THREE.PerspectiveCamera(45, 1, 1e-7, 1e8),
       renderCamera = camera.clone();
     camera.position.set(0, 1, 3);
+    camera.layers.enable(1);
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = false;
     controls.minDistance = 1.03;
@@ -319,6 +350,7 @@ export default function SpaceSceneV2({
     );
     scene.add(glare);
     const terrain = new THREE.Mesh(new THREE.BufferGeometry(), lunarMaterial);
+    terrain.layers.set(1);
     terrain.castShadow = true;
     terrain.receiveShadow = true;
     scene.add(terrain);
@@ -332,6 +364,28 @@ export default function SpaceSceneV2({
       }),
     );
     scene.add(wall);
+    const surface = surfaceMaterial();
+    const surfaceTerrain = new THREE.Mesh(terrain.geometry, surface.material);
+    surfaceTerrain.layers.set(1);
+    surfaceTerrain.castShadow = surfaceTerrain.receiveShadow = true;
+    scene.add(surfaceTerrain);
+    const pathGeometry = new THREE.BufferGeometry();
+    const pathPositions = new Float32Array(12 * 2 * 3);
+    pathGeometry.setAttribute(
+      "position",
+      new THREE.BufferAttribute(pathPositions, 3),
+    );
+    const lightDiagram = new THREE.LineSegments(
+      pathGeometry,
+      new THREE.LineBasicMaterial({
+        color: "#ffd17a",
+        transparent: true,
+        opacity: 0.58,
+        depthWrite: false,
+      }),
+    );
+    lightDiagram.frustumCulled = false;
+    scene.add(lightDiagram);
     const pin = new THREE.Mesh(
       new THREE.SphereGeometry(0.009, 16, 12),
       new THREE.MeshBasicMaterial({ color: "#f46d61", toneMapped: false }),
@@ -343,6 +397,8 @@ export default function SpaceSceneV2({
     );
     scene.add(ring);
     const sunlight = new THREE.DirectionalLight("#fff2dc", 3.5);
+    sunlight.layers.set(1);
+    sunlight.shadow.camera.layers.enable(1);
     sunlight.castShadow = !mobile;
     sunlight.shadow.mapSize.set(mobile ? 1024 : 2048, mobile ? 1024 : 2048);
     sunlight.shadow.bias = -0.0000002;
@@ -358,7 +414,9 @@ export default function SpaceSceneV2({
       2,
     );
     scene.add(solarLight);
-    scene.add(new THREE.AmbientLight("#8baccf", 0.08));
+    const ambient = new THREE.AmbientLight("#8baccf", 0.08);
+    ambient.layers.enable(1);
+    scene.add(ambient);
     const planetMeshes = new Map();
     let localFrame = null,
       lookAz = 0,
@@ -481,6 +539,8 @@ export default function SpaceSceneV2({
           const g = localTerrain(grid, tile, mobile ? 160 : 300);
           terrain.geometry.dispose();
           terrain.geometry = g;
+          surfaceTerrain.geometry = g;
+          surfaceAnchorSite = "";
           terrainGrid = grid;
           terrainTile = tile;
           terrainSite = id;
@@ -528,9 +588,27 @@ export default function SpaceSceneV2({
       if (disposed || !imageryReady) return;
       const p = latest.current,
         { sky, index, freeze, view, site, siteData, height } = p;
+      if (Number.isFinite(lastFrameAt)) {
+        const elapsed = now - lastFrameAt;
+        if (elapsed < frameInterval - 0.5) {
+          schedule();
+          return;
+        }
+        // Retain the remainder: a 120 fps ceiling on a 144 Hz display should
+        // not accidentally halve the display to 72 fps.
+        lastFrameAt = now - (elapsed % frameInterval);
+      } else lastFrameAt = now;
       settingCamera = true;
       if (sky) {
-        const i = THREE.MathUtils.clamp(index, 0, sky.sunPosKm.length - 1),
+        // GPU presentation follows the display refresh. React text/data updates
+        // remain slower and explicitly identify the frame their values describe.
+        // At most 100 ms is presented between received clock anchors.
+        const presented = p.playing
+          ? index +
+            (Math.min(100, Math.max(0, now - presentation.current.at)) / 1000) *
+              p.speed
+          : index;
+        const i = THREE.MathUtils.clamp(presented, 0, sky.sunPosKm.length - 1),
           q = interpolateBodyQuaternion(
             sky.moonOrientationQuat,
             freeze.moonRotation ?? i,
@@ -565,7 +643,7 @@ export default function SpaceSceneV2({
         sun.scale.setScalar(sky.radiiKm.sun / sky.radiiKm.moon);
         solarLight.position.copy(sun.position);
         solarLight.visible = !local;
-        sunlight.visible = local;
+        sunlight.visible = local || exact;
         earth.visible = clouds.visible = atmosphere.visible = !local;
         for (const [order, b] of (p.planets?.planets ?? []).entries()) {
           if (!planetMeshes.has(b.id)) {
@@ -656,7 +734,16 @@ export default function SpaceSceneV2({
             ),
           };
           observationKey = observationId;
+        }
+        // Publish independently of recomputation: a final frame may have been
+        // computed under the throttle immediately before Play stops.
+        const context = site?.id + "|" + height;
+        if (currentObservation && observationKey !== lastPublishedObservationKey &&
+          (!p.playing || context !== lastPublishedContext || now-lastObservationAt >= 100)) {
           latest.current.onObservation?.(currentObservation);
+          lastObservationAt = now;
+          lastPublishedObservationKey = observationKey;
+          lastPublishedContext = context;
         }
         pin.position.copy(O).addScaledVector(U, local ? 0.00008 : 0.002);
         pin.scale.setScalar(local ? 0.012 : 1);
@@ -667,8 +754,36 @@ export default function SpaceSceneV2({
         ring.visible = !exact;
         moon.visible = !exact && !local;
         terrain.visible = local && terrainSite === site?.id;
+        surfaceTerrain.visible =
+          exact && p.surfaceStyle !== "diagram" && terrainSite === site?.id;
+        surfaceTerrain.quaternion.copy(q);
+        wall.material.color.set(
+          p.surfaceStyle === "diagram" ? "#697481" : "#080a0d",
+        );
         wall.visible = exact && !!siteData;
-        if (local && site) loadTerrain(site.id);
+        if ((local || (exact && p.surfaceStyle !== "diagram")) && site)
+          loadTerrain(site.id);
+        if (terrainSite === site?.id && surfaceAnchorSite !== site.id) {
+          const alignment = alignSurfaceAtObserver(
+            terrain.geometry,
+            bodyO,
+            uBody,
+          );
+          surfaceAlignmentM =
+            alignment === null ? null : alignment * MOON_RADIUS_M;
+          surfaceAnchorSite = site.id;
+        }
+        const alignment = uBody
+          .clone()
+          .multiplyScalar((surfaceAlignmentM ?? 0) / MOON_RADIUS_M);
+        surfaceTerrain.position.copy(alignment).applyQuaternion(q);
+        surface.uniforms.surfaceAlignment.value.copy(alignment);
+        surface.uniforms.surfaceObserver.value
+          .copy(bodyO)
+          .addScaledVector(uBody, height / MOON_RADIUS_M);
+        surface.uniforms.surfaceEast.value.copy(eBody);
+        surface.uniforms.surfaceNorth.value.copy(nBody);
+        surface.uniforms.surfaceUp.value.copy(uBody);
         const key = view + "|" + (site?.id ?? "");
         if (key !== previousKey) {
           camera.fov = exact ? 45 : 42;
@@ -684,7 +799,9 @@ export default function SpaceSceneV2({
             // leave both bodies off-screen. Apparent sizes remain physical.
             const direction = sun.position.clone().sub(O).normalize();
             lookAz = Math.atan2(direction.dot(E), direction.dot(N));
-            lookEl = Math.asin(THREE.MathUtils.clamp(direction.dot(U), -1, 1));
+            // Slightly lower framing includes the ground. The explicit Sun aim
+            // remains exact and does not alter observer position or body scale.
+            lookEl = Math.asin(THREE.MathUtils.clamp(direction.dot(U), -1, 1)) - 0.1;
             transition = null;
           } else if (local) {
             localCameraBody = bodyO
@@ -805,7 +922,12 @@ export default function SpaceSceneV2({
           camera.lookAt(camera.position.clone().add(dir));
           const hk = site?.id + "|" + height;
           if (siteData && hk !== wallKey) {
-            configureWall(siteData.horizon.elevationDeg[String(height)]);
+            const profile = siteData.horizon.elevationDeg[String(height)];
+            configureWall(profile);
+            surface.horizon.image.data.set(
+              profile.map((value) => THREE.MathUtils.degToRad(value)),
+            );
+            surface.horizon.needsUpdate = true;
             wallKey = hk;
           }
           wall.position.copy(camera.position);
@@ -817,9 +939,24 @@ export default function SpaceSceneV2({
           controls.target.copy(localTargetBody.clone().applyQuaternion(q));
           camera.up.copy(U);
         }
-        const lightTarget = local ? O : new THREE.Vector3(),
-          reach = local ? 0.1 : 10,
-          bounds = local ? 0.009 : 1.4;
+        const localLighting = local || exact;
+        const lightTarget = localLighting ? O : new THREE.Vector3(),
+          reach = localLighting ? 0.1 : 10,
+          bounds = localLighting ? 0.009 : 1.4;
+        const shadowSize = p.detailedShadows
+          ? mobile
+            ? 2048
+            : 4096
+          : mobile
+            ? 1024
+            : 2048;
+        renderer.shadowMap.enabled = !mobile || p.detailedShadows;
+        sunlight.castShadow = renderer.shadowMap.enabled;
+        if (sunlight.shadow.mapSize.x !== shadowSize) {
+          sunlight.shadow.mapSize.set(shadowSize, shadowSize);
+          sunlight.shadow.map?.dispose();
+          sunlight.shadow.map = null;
+        }
         sunlight.position
           .copy(lightTarget)
           .addScaledVector(sunDirection, reach);
@@ -829,10 +966,33 @@ export default function SpaceSceneV2({
           right: bounds,
           top: bounds,
           bottom: -bounds,
-          near: local ? 0.04 : 8,
-          far: local ? 0.16 : 12,
+          near: localLighting ? 0.04 : 8,
+          far: localLighting ? 0.16 : 12,
         });
         sunlight.shadow.camera.updateProjectionMatrix();
+        lightDiagram.visible =
+          p.lightPaths && localLighting && terrainSite === site?.id;
+        if (lightDiagram.visible) {
+          const sunBody = sunDirection
+            .clone()
+            .applyQuaternion(q.clone().invert());
+          for (let j = 0; j < 12; j++) {
+            const end = bodyO
+              .clone()
+              .addScaledVector(eBody, (((j % 4) - 1.5) * 1200) / MOON_RADIUS_M)
+              .addScaledVector(
+                nBody,
+                ((Math.floor(j / 4) - 1) * 1200) / MOON_RADIUS_M,
+              );
+            const start = end
+              .clone()
+              .addScaledVector(sunBody, 6000 / MOON_RADIUS_M);
+            pathPositions.set(start.toArray(), j * 6);
+            pathPositions.set(end.toArray(), j * 6 + 3);
+          }
+          pathGeometry.attributes.position.needsUpdate = true;
+          lightDiagram.quaternion.copy(q);
+        }
         if (transition && !exact && !local) {
           const t = THREE.MathUtils.clamp((now - transition.start) / 750, 0, 1),
             k = 1 - Math.pow(1 - t, 3);
@@ -970,7 +1130,7 @@ export default function SpaceSceneV2({
             Math.max(1, el.clientHeight),
         ),
       );
-      glare.visible = true;
+      glare.visible = p.opticalGlare;
       scene.position.copy(camera.position).negate();
       renderCamera.copy(camera, false);
       renderCamera.position.set(0, 0, 0);
@@ -994,7 +1154,26 @@ export default function SpaceSceneV2({
         );
       }
       if (shadersReady) {
-        renderer.render(scene, renderCamera);
+        if (p.view === "sky") {
+          // Three filters lights against the CAMERA, not each receiver's layer.
+          // Two depth-preserving passes keep the surface-only directional light
+          // from illuminating Earth/planets a second time.
+          renderCamera.layers.set(0);
+          solarLight.visible = true;
+          sunlight.visible = false;
+          renderer.render(scene, renderCamera);
+          if (surfaceTerrain.visible) {
+            renderer.autoClear = false;
+            renderCamera.layers.set(1);
+            solarLight.visible = false;
+            sunlight.visible = true;
+            renderer.render(scene, renderCamera);
+            renderer.autoClear = true;
+          }
+          renderCamera.layers.mask = camera.layers.mask;
+        } else {
+          renderer.render(scene, renderCamera);
+        }
         if (qaMode)
           lastRendered = {
             serial: (lastRendered?.serial ?? 0) + 1,
@@ -1002,13 +1181,19 @@ export default function SpaceSceneV2({
             siteId: p.site?.id,
             height: p.height,
             index: p.index,
+            presentedIndex: currentObservation?.index,
+            frameTimeMs: now,
+            fpsLimit: mobile ? 60 : 120,
             ready:
               imageryReady &&
               globeReady &&
-              (p.view !== "terrain" || terrainSite === p.site?.id),
+              (!["terrain", "sky"].includes(p.view) ||
+                (p.view === "sky" && p.surfaceStyle === "diagram") ||
+                terrainSite === p.site?.id),
           };
       }
       settingCamera = false;
+      if (p.playing) schedule();
     }
     const change = () => {
       if (
@@ -1016,10 +1201,9 @@ export default function SpaceSceneV2({
         latest.current.view === "terrain" &&
         latest.current.sky
       ) {
-        const q = interpolateBodyQuaternion(
-          latest.current.sky.moonOrientationQuat,
-          latest.current.freeze.moonRotation ?? latest.current.index,
-        ).invert();
+        // Input belongs to the pose actually presented, not the slower React
+        // clock anchor. Otherwise each gesture introduces body-frame drift.
+        const q = moon.quaternion.clone().invert();
         localCameraBody = camera.position.clone().applyQuaternion(q);
         localTargetBody = controls.target.clone().applyQuaternion(q);
       }
@@ -1247,6 +1431,15 @@ export default function SpaceSceneV2({
         origin: scene.position.toArray(),
         transition: !!transition,
         observation: currentObservation,
+        surface: {
+          style: latest.current.surfaceStyle,
+          alignmentM: surfaceAlignmentM,
+          terrainReady: terrainSite === latest.current.site?.id,
+          horizonClipped: true,
+          lightPaths: latest.current.lightPaths,
+          glare: latest.current.opticalGlare,
+          detailedShadows: latest.current.detailedShadows,
+        },
         rendered: lastRendered,
       });
     }
@@ -1279,6 +1472,7 @@ export default function SpaceSceneV2({
       cloudMap.dispose();
       starsMap.dispose();
       glareTexture.dispose();
+      surface.horizon.dispose();
       renderer.dispose();
       el.replaceChildren();
       engine.current = null;
@@ -1286,7 +1480,22 @@ export default function SpaceSceneV2({
   }, []);
   useEffect(() => {
     engine.current?.schedule();
-  }, [sky, planets, index, freeze, view, site, siteData, height]);
+  }, [
+    sky,
+    planets,
+    index,
+    freeze,
+    view,
+    site,
+    siteData,
+    height,
+    surfaceStyle,
+    lightPaths,
+    opticalGlare,
+    detailedShadows,
+    playing,
+    speed,
+  ]);
   return (
     <>
       <div className="space-canvas" ref={host} />
@@ -1328,6 +1537,7 @@ export default function SpaceSceneV2({
             <button onClick={() => engine.current?.focus("earth")}>
               Look at Earth
             </button>
+            <button onClick={() => onViewChange?.("terrain")}>See sunlit terrain</button>
           </>
         ) : null}
         <select

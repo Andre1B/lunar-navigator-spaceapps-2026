@@ -48,11 +48,11 @@ export default function SkyDescription({
   const matches =
     observation &&
     observation.siteId === siteId &&
-    observation.index === index &&
     observation.height === height &&
     !observation.frozen;
+  const current = matches && observation.index === index;
   useEffect(() => {
-    if (playing || !matches || !period) return undefined;
+    if (playing || !current || !period) return undefined;
     // Announce only after time settles, so Play and scrubbing do not flood screen readers.
     const t = setTimeout(() => {
       setAnnounced({
@@ -66,7 +66,7 @@ export default function SkyDescription({
       });
     }, SETTLE_MS);
     return () => clearTimeout(t);
-  }, [playing, matches, observation, siteName, height, index, period, key]);
+  }, [playing, current, observation, siteName, height, index, period, key]);
   const text = !playing && announced.key === key ? announced.text : "";
   return (
     <section
@@ -78,16 +78,20 @@ export default function SkyDescription({
       </h3>
       {matches ? (
         <p className="sky-description-plain">
-          {observation.sun > 0
+          <span>{observation.sun > 0
             ? "The Sun is in view."
-            : "The Sun is hidden by the terrain."}{" "}
-          {observation.earth > 0
+            : "The Sun is hidden by the terrain."}</span>{" "}
+          <span>{observation.earth > 0
             ? "Earth is in view."
-            : "Earth is hidden by the terrain."}{" "}
-          This describes the selected location, not every part of the 3D scene.
+            : "Earth is hidden by the terrain."}</span>
         </p>
       ) : null}
-      <p aria-live="polite" aria-atomic="true">
+      <p className="sky-description-context">This describes the selected location, not every part of the 3D scene.</p>
+      <details className="sky-description-details">
+        <summary>Angles and calculation details</summary>
+        <p>{playing ? "Pause to inspect the angles at a moment in time." : text || "Waiting for the sky geometry…"}</p>
+      </details>
+      <p className="sr-only" aria-live="polite" aria-atomic="true">
         {playing
           ? "Paused description: it updates when time stops."
           : text || "Waiting for the sky geometry…"}

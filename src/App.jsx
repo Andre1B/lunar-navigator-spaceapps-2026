@@ -1,5 +1,14 @@
 // AI-assisted implementation and copy: /ai-use.json. No simulated metrics are invented.
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import SpaceOpening from "./components/SpaceOpening.jsx";
+import { usePageMotion } from "./lib/usePageMotion.js";
 import { useDataset } from "./lib/useDataset.js";
 import {
   chapters,
@@ -868,6 +877,7 @@ function Credits() {
           Research references and inspiration, not reused application code or
           assets. Their reported performance was not independently reproduced.
         </p>
+        <p><a href="https://github.com/Andre1B/lunar-navigator-spaceapps-2026/blob/main/docs/WINNER-GAP-20.md" target="_blank" rel="noreferrer">Twenty additional global winners: evidence, useful gaps and what we chose to apply ↗</a></p>
         <ul>
           {researchProjects.map(([name, url, use]) => (
             <li key={name}>
@@ -898,6 +908,29 @@ function Credits() {
 }
 export default function App() {
   const dataset = useDataset();
+  const [opening, setOpening] = useState(() => {
+    if (
+      routeNow() !== "home" ||
+      matchMedia("(prefers-reduced-motion:reduce)").matches
+    )
+      return false;
+    try {
+      return sessionStorage.getItem("lunar-opening-v1") !== "seen";
+    } catch {
+      return true;
+    }
+  });
+  const closeOpening = useCallback(() => {
+    setOpening(false);
+    try {
+      sessionStorage.setItem("lunar-opening-v1", "seen");
+    } catch {
+      /* Storage is optional. */
+    }
+    requestAnimationFrame(() =>
+      document.getElementById("main")?.focus({ preventScroll: true }),
+    );
+  }, []);
   const [route, setRoute] = useState(routeNow),
     [mode, setMode] = useState("faithful"),
     [chapter, setChapter] = useState(0),
@@ -905,6 +938,7 @@ export default function App() {
     [index, setIndex] = useState(12),
     [journal, setJournal] = useState({}),
     [tourStep, setTourStep] = useState(null);
+  usePageMotion(route);
   const tourOrigin = useRef(null);
   const startTour = () => {
     tourOrigin.current = document.activeElement;
@@ -957,121 +991,129 @@ export default function App() {
     };
   return (
     <>
-      <a
-        className="skip-link"
-        href="#main"
-        onClick={(e) => {
-          e.preventDefault();
-          document.getElementById("main")?.focus();
-        }}
-      >
-        Skip to content
-      </a>
-      <Header route={route} mode={mode} onTour={startTour} />
-      {route === "home" ? (
-        <HomeV2
-          onTour={startTour}
-          onStart={(m) => {
-            setMode(m);
-            setChapter(0);
-            go("simulator");
-          }}
-        />
-      ) : route === "review" ? (
-        <Suspense
-          fallback={
-            <main id="main" tabIndex={-1} className="page">
-              <h1>Loading the short review…</h1>
-            </main>
-          }
-        >
-          <Review dataset={dataset} settings={settings} />
-        </Suspense>
-      ) : route === "learn" ? (
-        <Suspense
-          fallback={
-            <main id="main" className="page">
-              <h1>Loading the interactive guide...</h1>
-            </main>
-          }
-        >
-          <Learn onStartTour={startTour} onOpen={go} dataset={dataset} />
-        </Suspense>
-      ) : route === "mission" ? (
-        <Mission
-          chapter={chapter}
-          setChapter={setChapter}
-          mode={mode}
-          journal={journal}
-          setJournal={setJournal}
-        />
-      ) : route === "simulator" ? (
-        <SimulatorV2
-          tourActive={tourStep !== null}
-          onTour={startTour}
-          dataset={dataset}
-          index={index}
-          setIndex={setIndex}
-          mode={mode}
-          setMode={setMode}
-          siteId={inspectedSiteId ?? siteId}
-          inspecting={inspectedSiteId !== null}
-          setSiteId={inspectedSiteId === null ? setSiteId : setInspectedSiteId}
-          height={inspectedSiteId === null ? height : inspectedHeight}
-          setHeight={inspectedSiteId === null ? setHeight : setInspectedHeight}
-        />
-      ) : route === "compare" ? (
-        <Compare
-          onInspect={(row) => {
-            setInspectedSiteId(row.id);
-            setInspectedHeight(height);
-            setIndex(row.bounds.start);
-            setMode("faithful");
-            go("simulator");
-          }}
-          tourActive={tourStep !== null}
-          dataset={dataset}
-          settings={settings}
-          setters={setters}
-          index={Math.round(index)}
-          setIndex={setIndex}
-          mode={mode}
-        />
-      ) : route === "evidence" ? (
-        <Evidence dataset={dataset} />
-      ) : route === "credits" ? (
-        <Credits />
-      ) : (
-        <main id="main" tabIndex={-1} className="page">
-          <h1>This route is not available.</h1>
-          <a href="#/home">Return home</a>
-        </main>
-      )}
-      {tourStep !== null ? (
-        <InteractiveTour
-          index={tourStep}
-          onChange={setTourStep}
-          onClose={closeTour}
-          onNavigate={go}
-        />
-      ) : null}
-      <footer className="footer">
+      <div className="app-shell" inert={opening ? true : undefined}>
         <a
-          className="event-mark"
-          href="https://www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator/"
+          className="skip-link"
+          href="#main"
+          onClick={(e) => {
+            e.preventDefault();
+            document.getElementById("main")?.focus();
+          }}
         >
-          <img
-            src="/assets/space-apps-official-white.png"
-            width="180"
-            height="65"
-            alt="NASA International Space Apps Challenge"
-          />
+          Skip to content
         </a>
-        <a href="#/home">Lunar Navigator</a>
-        <span>NASA Space Apps 2026 · Team An0r4k</span>
-        <a href="#/credits">Sources, credits & open source</a>
-        <a href="/summary.html">About the project</a>
-      </footer>
+        <Header route={route} mode={mode} onTour={startTour} />
+        {route === "home" ? (
+          <HomeV2
+            onReplayOpening={() => setOpening(true)}
+            onTour={startTour}
+            onStart={(m) => {
+              setMode(m);
+              setChapter(0);
+              go("simulator");
+            }}
+          />
+        ) : route === "review" ? (
+          <Suspense
+            fallback={
+              <main id="main" tabIndex={-1} className="page">
+                <h1>Loading the short review…</h1>
+              </main>
+            }
+          >
+            <Review dataset={dataset} settings={settings} />
+          </Suspense>
+        ) : route === "learn" ? (
+          <Suspense
+            fallback={
+              <main id="main" className="page">
+                <h1>Loading the interactive guide...</h1>
+              </main>
+            }
+          >
+            <Learn onStartTour={startTour} onOpen={go} dataset={dataset} />
+          </Suspense>
+        ) : route === "mission" ? (
+          <Mission
+            chapter={chapter}
+            setChapter={setChapter}
+            mode={mode}
+            journal={journal}
+            setJournal={setJournal}
+          />
+        ) : route === "simulator" ? (
+          <SimulatorV2
+            tourActive={tourStep !== null}
+            onTour={startTour}
+            dataset={dataset}
+            index={index}
+            setIndex={setIndex}
+            mode={mode}
+            setMode={setMode}
+            siteId={inspectedSiteId ?? siteId}
+            inspecting={inspectedSiteId !== null}
+            setSiteId={
+              inspectedSiteId === null ? setSiteId : setInspectedSiteId
+            }
+            height={inspectedSiteId === null ? height : inspectedHeight}
+            setHeight={
+              inspectedSiteId === null ? setHeight : setInspectedHeight
+            }
+          />
+        ) : route === "compare" ? (
+          <Compare
+            onInspect={(row) => {
+              setInspectedSiteId(row.id);
+              setInspectedHeight(height);
+              setIndex(row.bounds.start);
+              setMode("faithful");
+              go("simulator");
+            }}
+            tourActive={tourStep !== null}
+            dataset={dataset}
+            settings={settings}
+            setters={setters}
+            index={Math.round(index)}
+            setIndex={setIndex}
+            mode={mode}
+          />
+        ) : route === "evidence" ? (
+          <Evidence dataset={dataset} />
+        ) : route === "credits" ? (
+          <Credits />
+        ) : (
+          <main id="main" tabIndex={-1} className="page">
+            <h1>This route is not available.</h1>
+            <a href="#/home">Return home</a>
+          </main>
+        )}
+        {tourStep !== null ? (
+          <InteractiveTour
+            index={tourStep}
+            onChange={setTourStep}
+            onClose={closeTour}
+            onNavigate={go}
+          />
+        ) : null}
+        <footer className="footer">
+          <a
+            className="event-mark"
+            href="https://www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator/"
+          >
+            <img
+              src="/assets/space-apps-official-white.png"
+              width="180"
+              height="65"
+              alt="NASA International Space Apps Challenge"
+            />
+          </a>
+          <a href="#/home">Lunar Navigator</a>
+          <span>NASA Space Apps 2026 · Team An0r4k</span>
+          <a href="#/credits">Sources, credits & open source</a>
+          <a href="/summary.html">About the project</a>
+        </footer>
+      </div>
+      {opening ? <SpaceOpening onClose={closeOpening} /> : null}
     </>
   );
 }
