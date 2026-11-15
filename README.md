@@ -55,6 +55,7 @@ AI-assisted research, code, explanatory text, documentation and verification are
 - [HTML summary](public/summary.html)
 - [Plain-text summary](public/summary.txt)
 - [Six-slide public demo](https://lunar-navigator-2026.pages.dev/demo/)
+- [29-second demo video](https://lunar-navigator-2026.pages.dev/demo/lunar-navigator-demo.mp4) with [English captions (SRT)](https://lunar-navigator-2026.pages.dev/demo/lunar-navigator-demo.en.srt)
 - [Executed release verification](docs/VERIFICATION.md)
 - [Machine-readable release evidence](docs/release-evidence.json)
 - [Production checkpoint / ownership](docs/PROGRESS.md)
