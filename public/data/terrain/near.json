@@ -1,0 +1,141 @@
+{
+ "schemaVersion": "1.0.0",
+ "purpose": "Near-field foreground for the Surface sky view only. Visual geometry: horizons, occlusion and metrics come from sites/*.json, not from these patches. Not a claim of 5 m physical accuracy or photometry.",
+ "encoding": "Raw little-endian int16, row-major, DECIMETRES relative to baseHeightM; height above the 1737.4 km sphere = baseHeightM + value / 10.",
+ "grid": {
+  "projection": "south polar stereographic on the 1737.4 km sphere, true scale at the pole; same X/Y convention as terrain/terrain.json",
+  "cellCentre": "x = xMin + (c + 0.5) * cellSizeM ; y = yMax - (r + 0.5) * cellSizeM",
+  "sampling": "bilinear sample of the PGDA 5 m DEM at each cell centre (no averaging)",
+  "frame": "MOON_ME of DE421 (same as all DEMs here)"
+ },
+ "patches": [
+  {
+   "siteId": "connecting-ridge",
+   "file": "terrain/connecting-ridge-2km-5m-dm.i16",
+   "width": 400,
+   "height": 400,
+   "cellSizeM": 5.0,
+   "boundsPolarStereoM": {
+    "xMin": -12102.5,
+    "xMax": -10102.5,
+    "yMin": -12942.5,
+    "yMax": -10942.5
+   },
+   "siteXYM": [
+    -11102.5,
+    -11942.5
+   ],
+   "baseHeightM": 1950.934,
+   "minM": 1639.0,
+   "maxM": 1959.2,
+   "sha256": "6eb336c76b661bf1ba62352986626b373dc155643d5dc5382279f411a8717012"
+  },
+  {
+   "siteId": "shackleton-rim",
+   "file": "terrain/shackleton-rim-2km-5m-dm.i16",
+   "width": 400,
+   "height": 400,
+   "cellSizeM": 5.0,
+   "boundsPolarStereoM": {
+    "xMin": -3812.5,
+    "xMax": -1812.5,
+    "yMin": -7647.5,
+    "yMax": -5647.5
+   },
+   "siteXYM": [
+    -2812.5,
+    -6647.5
+   ],
+   "baseHeightM": 1729.121,
+   "minM": 1245.0,
+   "maxM": 1738.6,
+   "sha256": "713089699fe6ea1736c287d94ab1413d34720eeb54166e467bc1004a156d8d25"
+  },
+  {
+   "siteId": "nobile-rim-1",
+   "file": "terrain/nobile-rim-1-2km-5m-dm.i16",
+   "width": 400,
+   "height": 400,
+   "cellSizeM": 5.0,
+   "boundsPolarStereoM": {
+    "xMin": 85002.0,
+    "xMax": 87002.0,
+    "yMin": 112742.0,
+    "yMax": 114742.0
+   },
+   "siteXYM": [
+    86002.0,
+    113742.0
+   ],
+   "baseHeightM": 6762.669,
+   "minM": 6371.3,
+   "maxM": 6781.7,
+   "sha256": "893245e1eb5539f9379758981c18f9011c3a3c89aa3c5b78349d1ba3c15d8cc6"
+  },
+  {
+   "siteId": "malapert-massif",
+   "file": "terrain/malapert-massif-2km-5m-dm.i16",
+   "width": 400,
+   "height": 400,
+   "cellSizeM": 5.0,
+   "boundsPolarStereoM": {
+    "xMin": -5938.0,
+    "xMax": -3938.0,
+    "yMin": 121162.0,
+    "yMax": 123162.0
+   },
+   "siteXYM": [
+    -4938.0,
+    122162.0
+   ],
+   "baseHeightM": 4984.354,
+   "minM": 4737.2,
+   "maxM": 4993.4,
+   "sha256": "81122d6c11c6097d4c713f601713b91d5cd083076e81e9cc7487a786e0718f42"
+  },
+  {
+   "siteId": "connecting-neighbor",
+   "file": "terrain/connecting-neighbor-2km-5m-dm.i16",
+   "width": 400,
+   "height": 400,
+   "cellSizeM": 5.0,
+   "boundsPolarStereoM": {
+    "xMin": -11102.5,
+    "xMax": -9102.5,
+    "yMin": -12942.5,
+    "yMax": -10942.5
+   },
+   "siteXYM": [
+    -10102.5,
+    -11942.5
+   ],
+   "baseHeightM": 1905.628,
+   "minM": 1659.3,
+   "maxM": 1951.1,
+   "sha256": "2bffb9e3b49429945f7c252a919475eafcc7355e37d222c6ce045170f6b9363a"
+  },
+  {
+   "siteId": "shackleton-neighbor",
+   "file": "terrain/shackleton-neighbor-2km-5m-dm.i16",
+   "width": 400,
+   "height": 400,
+   "cellSizeM": 5.0,
+   "boundsPolarStereoM": {
+    "xMin": -3812.5,
+    "xMax": -1812.5,
+    "yMin": -6647.5,
+    "yMax": -4647.5
+   },
+   "siteXYM": [
+    -2812.5,
+    -5647.5
+   ],
+   "baseHeightM": 1698.728,
+   "minM": 1290.6,
+   "maxM": 1738.6,
+   "sha256": "114d5da2fe9c5f3482710eb5daefd3ee91d0e23baa6b4268988cdb386b70edfd"
+  }
+ ],
+ "source": "PGDA High-Resolution LOLA Topography for Lunar South Pole Sites, 5 m/pix (Barker et al. 2021), https://pgda.gsfc.nasa.gov/products/78",
+ "generator": "scientific/build_terrain_patches.py"
+}

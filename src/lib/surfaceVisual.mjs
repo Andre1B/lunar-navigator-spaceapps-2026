@@ -2,24 +2,34 @@
 import * as THREE from "three";
 import { MOON_RADIUS_M } from "./sceneGeometry.mjs";
 
-export function surfaceMaterial() {
-  const horizon = new THREE.DataTexture(
-    new Float32Array(720),
-    720,
-    1,
-    THREE.RedFormat,
-    THREE.FloatType,
-  );
-  horizon.minFilter = horizon.magFilter = THREE.NearestFilter;
-  horizon.needsUpdate = true;
-  const uniforms = {
+// `role` splits the foreground: "far" (the 40 m tile) is cut away inside
+// patchRadius and "near" (the 5 m patch) outside it. Both share uniforms so the
+// numerical horizon clip is identical. Pass `shared` to reuse another
+// material's uniforms and horizon texture.
+export function surfaceMaterial({ role = "far", shared = null } = {}) {
+  let horizon = shared?.horizon;
+  if (!horizon) {
+    horizon = new THREE.DataTexture(
+      new Float32Array(720),
+      720,
+      1,
+      THREE.RedFormat,
+      THREE.FloatType,
+    );
+    horizon.minFilter = horizon.magFilter = THREE.NearestFilter;
+    horizon.needsUpdate = true;
+  }
+  const uniforms = shared?.uniforms ?? {
     surfaceHorizon: { value: horizon },
     surfaceObserver: { value: new THREE.Vector3() },
     surfaceAlignment: { value: new THREE.Vector3() },
     surfaceEast: { value: new THREE.Vector3() },
     surfaceNorth: { value: new THREE.Vector3() },
     surfaceUp: { value: new THREE.Vector3() },
+    patchRadius: { value: 0 },
   };
+  // Each mesh keeps its own radial alignment under the observer.
+  const own = new THREE.Vector3();
   const material = new THREE.MeshStandardMaterial({
     color: "#aaa69e",
     roughness: 1,
@@ -27,18 +37,19 @@ export function surfaceMaterial() {
   });
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms);
+    shader.uniforms.ownAlignment = { value: own };
     shader.vertexShader =
-      `uniform vec3 surfaceObserver; uniform vec3 surfaceAlignment;
+      `uniform vec3 surfaceObserver; uniform vec3 ownAlignment;
       varying vec3 surfaceRay; varying vec3 surfacePosition;\n` +
       shader.vertexShader;
     shader.vertexShader = shader.vertexShader.replace(
       "#include <begin_vertex>",
       `#include <begin_vertex>
-      surfaceRay = (position + surfaceAlignment - surfaceObserver) * ${MOON_RADIUS_M.toFixed(1)};
+      surfaceRay = (position + ownAlignment - surfaceObserver) * ${MOON_RADIUS_M.toFixed(1)};
       surfacePosition = position * ${MOON_RADIUS_M.toFixed(1)};`,
     );
     shader.fragmentShader =
-      `uniform sampler2D surfaceHorizon; uniform vec3 surfaceEast;
+      `uniform sampler2D surfaceHorizon; uniform vec3 surfaceEast; uniform float patchRadius;
       uniform vec3 surfaceNorth; uniform vec3 surfaceUp;
       varying vec3 surfaceRay; varying vec3 surfacePosition;\n` +
       shader.fragmentShader;
@@ -53,7 +64,9 @@ export function surfaceMaterial() {
       float limit = mix(h0,h1,fract(phase));
       float elevation = asin(clamp(dot(ray,surfaceUp),-1.0,1.0));
       // Numerical horizon is authoritative: foreground cannot cover open sky.
-      if(elevation > limit) discard;`,
+      if(elevation > limit) discard;
+      float across = length(surfaceRay - dot(surfaceRay, surfaceUp) * surfaceUp);
+      ${role === "near" ? "if(across > patchRadius) discard;" : "if(patchRadius > 0.0 && across < patchRadius) discard;"}`,
     );
     shader.fragmentShader = shader.fragmentShader.replace(
       "#include <color_fragment>",
@@ -66,8 +79,8 @@ export function surfaceMaterial() {
     );
   };
   material.customProgramCacheKey = () =>
-    "numerical-horizon-clipped-regolith-v1";
-  return { material, horizon, uniforms };
+    "numerical-horizon-clipped-regolith-v2-" + role;
+  return { material, horizon, uniforms, alignment: own };
 }
 
 // Align the actual rendered triangle under the observer, rather than a nearest

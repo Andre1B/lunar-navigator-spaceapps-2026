@@ -493,6 +493,72 @@ export default function SpaceSceneV2({
     surfaceTerrain.layers.set(1);
     surfaceTerrain.castShadow = surfaceTerrain.receiveShadow = true;
     scene.add(surfaceTerrain);
+    // Surface sky foreground: a 5 m patch of the same PGDA DEM around the
+    // observer replaces the 40 m tile within NEAR_RADIUS_M. Visual only; the
+    // numerical horizon still clips both and decides every visibility value.
+    const NEAR_HALF_M = 400,
+      NEAR_RADIUS_M = 380;
+    const nearSurface = surfaceMaterial({ role: "near", shared: surface });
+    const nearTerrain = new THREE.Mesh(
+      new THREE.BufferGeometry(),
+      nearSurface.material,
+    );
+    nearTerrain.layers.set(1);
+    nearTerrain.castShadow = nearTerrain.receiveShadow = true;
+    nearTerrain.visible = false;
+    scene.add(nearTerrain);
+    let nearSite = "",
+      nearLoading = "",
+      nearAnchorSite = "",
+      nearAlignmentM = null;
+    function loadNear(id) {
+      if (nearLoading === id || nearSite === id) return;
+      nearLoading = id;
+      readJson("/data/terrain/near.json")
+        .then((meta) => {
+          const patch = meta.patches.find((t) => t.siteId === id);
+          if (!patch) throw Error("No near patch");
+          return readGrid("/data/" + patch.file, patch.width, patch.height).then(
+            (grid) => ({ grid, patch }),
+          );
+        })
+        .then(({ grid, patch }) => {
+          if (disposed || latest.current.site?.id !== id) return;
+          // Central NEAR_HALF_M square, decimetres -> metres above the sphere.
+          const cells = Math.round((2 * NEAR_HALF_M) / patch.cellSizeM),
+            first = Math.round((patch.width - cells) / 2),
+            values = new Float32Array(cells * cells);
+          for (let r = 0; r < cells; r++)
+            for (let c = 0; c < cells; c++)
+              values[r * cells + c] =
+                patch.baseHeightM +
+                grid.values[(first + r) * patch.width + first + c] / 10;
+          const b = patch.boundsPolarStereoM,
+            off = first * patch.cellSizeM,
+            span = cells * patch.cellSizeM;
+          const g = localTerrain(
+            { values, width: cells, height: cells },
+            {
+              boundsPolarStereoM: {
+                xMin: b.xMin + off,
+                xMax: b.xMin + off + span,
+                yMax: b.yMax - off,
+                yMin: b.yMax - off - span,
+              },
+            },
+            cells,
+          );
+          nearTerrain.geometry.dispose();
+          nearTerrain.geometry = g;
+          nearSite = id;
+          nearAnchorSite = "";
+          nearLoading = "";
+          schedule();
+        })
+        .catch(() => {
+          nearLoading = "";
+        });
+    }
     const pathGeometry = new THREE.BufferGeometry();
     const pathPositions = new Float32Array(12 * 2 * 3);
     pathGeometry.setAttribute(
@@ -970,6 +1036,26 @@ export default function SpaceSceneV2({
         surfaceTerrain.visible =
           exact && p.surfaceStyle !== "diagram" && terrainSite === site?.id;
         surfaceTerrain.quaternion.copy(q);
+        const nearWanted =
+          surfaceTerrain.visible && terrainDetail === "full" && !!site;
+        if (nearWanted) loadNear(site.id);
+        nearTerrain.visible = nearWanted && nearSite === site.id;
+        nearTerrain.quaternion.copy(q);
+        surface.uniforms.patchRadius.value = nearTerrain.visible
+          ? NEAR_RADIUS_M
+          : 0;
+        if (nearTerrain.visible && nearAnchorSite !== site.id) {
+          const a = alignSurfaceAtObserver(nearTerrain.geometry, bodyO, uBody);
+          nearAlignmentM = a === null ? null : a * MOON_RADIUS_M;
+          nearAnchorSite = site.id;
+        }
+        if (nearTerrain.visible) {
+          const nearShift = uBody
+            .clone()
+            .multiplyScalar((nearAlignmentM ?? 0) / MOON_RADIUS_M);
+          nearTerrain.position.copy(nearShift).applyQuaternion(q);
+          nearSurface.alignment.copy(nearShift);
+        }
         wall.material.color.set(
           p.surfaceStyle === "diagram" ? "#697481" : "#080a0d",
         );
@@ -990,7 +1076,7 @@ export default function SpaceSceneV2({
           .clone()
           .multiplyScalar((surfaceAlignmentM ?? 0) / MOON_RADIUS_M);
         surfaceTerrain.position.copy(alignment).applyQuaternion(q);
-        surface.uniforms.surfaceAlignment.value.copy(alignment);
+        surface.alignment.copy(alignment);
         surface.uniforms.surfaceObserver.value
           .copy(bodyO)
           .addScaledVector(uBody, height / MOON_RADIUS_M);
@@ -1697,6 +1783,8 @@ export default function SpaceSceneV2({
         surface: {
           style: latest.current.surfaceStyle,
           alignmentM: surfaceAlignmentM,
+          nearAlignmentM,
+          nearVisible: nearTerrain.visible,
           terrainReady: terrainSite === latest.current.site?.id,
           horizonClipped: true,
           lightPaths: latest.current.lightPaths,
@@ -1741,6 +1829,8 @@ export default function SpaceSceneV2({
       globeFar?.dispose();
       terrainFull?.dispose();
       terrainLow?.dispose();
+      nearTerrain.geometry.dispose();
+      nearSurface.material.dispose();
       renderer.dispose();
       el.replaceChildren();
       engine.current = null;
