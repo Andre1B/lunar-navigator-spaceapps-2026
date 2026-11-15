@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 
-// Original, code-native illustration. Not a spacecraft trajectory simulation.
+// Original, code-native opening. An illustration of the question (a later
+// arrival, a low Sun, a ridge), not computed data or a flight path.
 export default function SpaceOpening({ onClose }) {
   const skip = useRef(null),
     enter = useRef(null);
@@ -13,16 +14,18 @@ export default function SpaceOpening({ onClose }) {
     };
     window.addEventListener("keydown", escape);
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const timer = reduced ? null : setTimeout(onClose, 2400);
+    const timer = reduced ? null : setTimeout(onClose, 2600);
     return () => {
       document.body.style.overflow = previousOverflow;
       clearTimeout(timer);
       window.removeEventListener("keydown", escape);
     };
   }, [onClose]);
+  const ridge =
+    "M0 196 L48 188 L92 192 L130 170 L168 176 L204 146 L236 152 L268 128 L300 138 L336 158 L372 150 L410 172 L452 166 L500 184 L560 178 L600 190";
   return (
     <div
-      className="space-opening"
+      className="space-opening lc-open"
       role="dialog"
       aria-modal="true"
       aria-labelledby="opening-title"
@@ -38,73 +41,72 @@ export default function SpaceOpening({ onClose }) {
         }
       }}
     >
-      <button className="opening-skip" ref={skip} onClick={onClose}>
+      <button className="opening-skip lc-skip" ref={skip} onClick={onClose}>
         Skip intro <span aria-hidden="true">↗</span>
       </button>
-      <div className="opening-stars" aria-hidden="true" />
-      <div className="opening-composition">
-        <svg
-          className="opening-symbol"
-          viewBox="0 0 360 260"
-          aria-hidden="true"
-        >
+      <div className="lc-grid">
+        <div className="lc-brand">
+          <svg className="lc-mark" viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <clipPath id="lc-mark-clip">
+                <circle cx="32" cy="32" r="22" />
+              </clipPath>
+            </defs>
+            <g clipPath="url(#lc-mark-clip)">
+              <circle cx="32" cy="32" r="22" fill="#14130f" />
+              <circle className="lc-mark-sun" cx="37" cy="35" r="6.5" fill="#f2b544" />
+              <path d="M8 40l7-3 5 2 6-6 5 4 4-2 6 5 6-3 9 4V58H8z" fill="#2a2824" />
+              <path
+                d="M8 40l7-3 5 2 6-6 5 4 4-2 6 5 6-3 9 4"
+                fill="none"
+                stroke="#bdb6a8"
+                strokeWidth="1.6"
+              />
+            </g>
+            <circle cx="32" cy="32" r="22" fill="none" stroke="#ece7dc" strokeWidth="2" />
+          </svg>
+          <h1 id="opening-title">Lunacline</h1>
+          <p className="lc-descriptor">Lunar arrival comparison</p>
+          <p id="opening-description" className="lc-question">
+            Same place. A later arrival.
+            <br />
+            <em>A different sky.</em>
+          </p>
+          <button ref={enter} className="lc-enter" onClick={onClose}>
+            Compare arrival times <span aria-hidden="true">→</span>
+          </button>
+        </div>
+        <svg className="lc-scene" viewBox="0 0 600 260" aria-hidden="true">
           <defs>
-            <linearGradient id="opening-light">
-              <stop stopColor="#f6c36f" />
-              <stop offset="1" stopColor="#e9f2ff" />
-            </linearGradient>
+            <clipPath id="lc-sky">
+              <path d={`${ridge} L600 0 L0 0 Z`} />
+            </clipPath>
           </defs>
-          <circle
-            className="opening-orbit"
-            cx="180"
-            cy="130"
-            r="96"
-            fill="none"
-            stroke="#7495b1"
-            strokeWidth="1"
-          />
-          <circle
-            className="opening-moon"
-            cx="180"
-            cy="130"
-            r="54"
-            fill="#e4ebf2"
-          />
+          {[40, 80, 120].map((y) => (
+            <line key={y} className="lc-grid-line" x1="0" x2="600" y1={y} y2={y} />
+          ))}
           <path
-            className="opening-moon"
-            d="M180 76a54 54 0 0 1 0 108z"
-            fill="#2776c9"
+            className="lc-path"
+            d="M20 92 C150 70 300 96 420 150 S560 214 590 222"
           />
-          <path
-            className="opening-trail"
-            d="M52 211 308 49"
-            fill="none"
-            stroke="url(#opening-light)"
-            strokeWidth="2"
-          />
-          <g className="opening-craft">
-            <path d="m0-9 5 15-5-3-5 3z" fill="#f4f8ff" />
-            <path d="m-2 8 2 8 2-8" fill="#f6c36f" />
+          <g clipPath="url(#lc-sky)">
+            <circle className="lc-sun" cx="0" cy="0" r="13" />
           </g>
-          <circle
-            className="opening-arrival"
-            cx="180"
-            cy="130"
-            r="68"
-            fill="none"
-            stroke="#78aadd"
-          />
+          <path className="lc-ground" d={`${ridge} L600 260 L0 260 Z`} />
+          <path className="lc-ridge" d={ridge} pathLength="1" />
+          <g className="lc-ruler">
+            {Array.from({ length: 15 }, (_, i) => (
+              <g key={i} transform={`translate(${20 + i * 40} 236)`}>
+                <line y2={i % 2 ? 6 : 12} />
+                {i % 2 ? null : <text y="26">+{i / 2} d</text>}
+              </g>
+            ))}
+          </g>
+          <line className="lc-cursor" x1="0" x2="0" y1="18" y2="232" />
         </svg>
-        <h1 id="opening-title">Lunacline</h1>
-        <p id="opening-description">
-          Compare lunar places. See what a delay changes.
-        </p>
-        <button ref={enter} className="opening-enter" onClick={onClose}>
-          Start exploring <span aria-hidden="true">→</span>
-        </button>
       </div>
-      <p className="opening-credit">
-        Opening illustration · not a real flight path
+      <p className="lc-credit">
+        Opening illustration · not computed data
       </p>
     </div>
   );
