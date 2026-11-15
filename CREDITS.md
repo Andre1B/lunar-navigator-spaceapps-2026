@@ -2,7 +2,7 @@
 
 ## Original project
 
-Lunar Navigator — Team An0r4k, NASA Space Apps 2026, Lunar Landing Site Navigator challenge. Original code is Apache-2.0. This license does not relicense third-party libraries, data, branding or imagery.
+Lunacline (formerly Lunar Navigator) — Team An0r4k, NASA Space Apps 2026, Lunar Landing Site Navigator challenge. Original code is Apache-2.0. This license does not relicense third-party libraries, data, branding or imagery.
 
 ## Open-source software actually used
 

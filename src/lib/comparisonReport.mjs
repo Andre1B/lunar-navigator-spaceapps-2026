@@ -84,7 +84,9 @@ export function comparisonReport(dataset, settings, limitH) {
     schemaVersion: "1.0.0",
     reportType: "faithful-comparison",
     generatedAtUtc: new Date().toISOString(),
-    project: "Lunar Navigator",
+    project: "Lunacline",
+    aiAssistance:
+      "Built with AI assistance (code and text); see /ai-use.json. Results are computed from the listed sources, not generated.",
     sourceCode: "https://github.com/Andre1B/lunar-navigator-spaceapps-2026",
     build: typeof __BUILD_INFO__ === "undefined" ? null : __BUILD_INFO__,
     dataset: {

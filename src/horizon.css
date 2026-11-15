@@ -1068,3 +1068,17 @@ input[type="range"] {
 .app-shell > main {
   min-height: 100vh;
 }
+.export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+@media (max-width: 720px) {
+  .comparison-export {
+    grid-template-columns: 1fr;
+  }
+  .export-actions {
+    justify-content: flex-start;
+  }
+}
