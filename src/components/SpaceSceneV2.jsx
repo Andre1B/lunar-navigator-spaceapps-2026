@@ -543,9 +543,16 @@ export default function SpaceSceneV2({
             j0 = Math.floor(v),
             fu = u - i0,
             fv = v - j0;
+          // Same triangles as localTerrain: (a, a+1, d) and (a+1, d+1, d),
+          // split by the diagonal from (i+1, j) to (i, j+1).
+          const h00 = node(i0, j0),
+            h10 = node(i0 + 1, j0),
+            h01 = node(i0, j0 + 1),
+            h11 = node(i0 + 1, j0 + 1);
           const far =
-            (node(i0, j0) * (1 - fu) + node(i0 + 1, j0) * fu) * (1 - fv) +
-            (node(i0, j0 + 1) * (1 - fu) + node(i0 + 1, j0 + 1) * fu) * fv;
+            fu + fv <= 1
+              ? h00 + fu * (h10 - h00) + fv * (h01 - h00)
+              : h11 + (1 - fu) * (h01 - h11) + (1 - fv) * (h10 - h11);
           const k = r * count + c;
           P.fromBufferAttribute(pos, k);
           const old = (P.length() - 1) * MOON_RADIUS_M,
