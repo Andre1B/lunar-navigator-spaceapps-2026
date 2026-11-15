@@ -119,12 +119,40 @@ export default function AmbientMusic() {
         return;
       requestPlayback();
     };
+    // A soft one-shot chime other parts of the app may request (the intro's
+    // Sun glint). Only when music is on and already running, at its volume;
+    // it never unlocks audio or plays before a user gesture.
+    const chime = () => {
+      const context = audioContext.current;
+      if (!wanted.current || !active.current || context?.state !== "running")
+        return;
+      const level = (volumeRef.current / 100) * 0.12;
+      if (level <= 0) return;
+      const t = context.currentTime;
+      for (const [freq, share] of [
+        [880, 1],
+        [1320, 0.35],
+      ]) {
+        const osc = context.createOscillator(),
+          gain = context.createGain();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(level * share, t + 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 1.6);
+        osc.connect(gain).connect(context.destination);
+        osc.start(t);
+        osc.stop(t + 1.7);
+      }
+    };
     window.addEventListener("pointerdown", unlock, true);
     window.addEventListener("keydown", unlock, true);
+    window.addEventListener("lunacline:chime", chime);
     return () => {
       mounted.current = false;
       window.removeEventListener("pointerdown", unlock, true);
       window.removeEventListener("keydown", unlock, true);
+      window.removeEventListener("lunacline:chime", chime);
       if (audioContext.current) audioContext.current.onstatechange = null;
       engine.current?.dispose();
       engine.current = null;

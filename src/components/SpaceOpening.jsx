@@ -14,10 +14,18 @@ export default function SpaceOpening({ onClose }) {
     };
     window.addEventListener("keydown", escape);
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const timer = reduced ? null : setTimeout(onClose, 2600);
+    const timer = reduced ? null : setTimeout(onClose, 3000);
+    // One soft chime as the Sun glints on the ridge, only if music is on.
+    const glint = reduced
+      ? null
+      : setTimeout(
+          () => window.dispatchEvent(new Event("lunacline:chime")),
+          2050,
+        );
     return () => {
       document.body.style.overflow = previousOverflow;
       clearTimeout(timer);
+      clearTimeout(glint);
       window.removeEventListener("keydown", escape);
     };
   }, [onClose]);
@@ -81,15 +89,22 @@ export default function SpaceOpening({ onClose }) {
             <clipPath id="lc-sky">
               <path d={`${ridge} L600 0 L0 0 Z`} />
             </clipPath>
+            <linearGradient id="lc-flare">
+              <stop offset="0" stopColor="#fff4d6" stopOpacity="0" />
+              <stop offset="0.5" stopColor="#fff4d6" stopOpacity="0.85" />
+              <stop offset="1" stopColor="#fff4d6" stopOpacity="0" />
+            </linearGradient>
+            <radialGradient id="lc-halo">
+              <stop offset="0" stopColor="#fff4d6" stopOpacity="0.9" />
+              <stop offset="0.25" stopColor="#f2b544" stopOpacity="0.45" />
+              <stop offset="1" stopColor="#f2b544" stopOpacity="0" />
+            </radialGradient>
           </defs>
           {[40, 80, 120].map((y) => (
             <line key={y} className="lc-grid-line" x1="0" x2="600" y1={y} y2={y} />
           ))}
-          <path
-            className="lc-path"
-            d="M20 92 C150 70 300 96 420 150 S560 214 590 222"
-          />
           <g clipPath="url(#lc-sky)">
+            <circle className="lc-sun-halo" cx="0" cy="0" r="46" fill="url(#lc-halo)" />
             <circle className="lc-sun" cx="0" cy="0" r="13" />
           </g>
           <path className="lc-ground" d={`${ridge} L600 260 L0 260 Z`} />
@@ -102,7 +117,12 @@ export default function SpaceOpening({ onClose }) {
               </g>
             ))}
           </g>
-          <line className="lc-cursor" x1="0" x2="0" y1="18" y2="232" />
+          {/* Brief glint where the Sun meets the ridge: a soft bloom and a thin
+              horizontal flare, once, then it fades to a steady glow. */}
+          <g className="lc-glint">
+            <circle r="30" fill="url(#lc-halo)" />
+            <ellipse rx="46" ry="1.1" fill="url(#lc-flare)" />
+          </g>
         </svg>
       </div>
       <p className="lc-credit">
