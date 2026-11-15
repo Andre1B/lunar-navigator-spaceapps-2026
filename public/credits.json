@@ -1,5 +1,5 @@
 {
-  "generatedAtUtc": "2026-11-15T05:05:41.429Z",
+  "generatedAtUtc": "2026-11-15T13:55:50.816Z",
   "scope": "Installed direct and transitive runtime, build and verification packages",
   "packages": [
     {
@@ -30,12 +30,12 @@
       "noticeFile": null
     },
     {
-      "name": "@cloudflare/workerd-linux-64",
+      "name": "@cloudflare/workerd-windows-64",
       "version": "1.20261113.1",
       "license": "Apache-2.0",
       "repository": "https://github.com/cloudflare/workerd",
       "repositoryNote": null,
-      "url": "https://www.npmjs.com/package/@cloudflare/workerd-linux-64",
+      "url": "https://www.npmjs.com/package/@cloudflare/workerd-windows-64",
       "noticeFile": null
     },
     {
@@ -48,12 +48,12 @@
       "noticeFile": "/licenses/@cspotcode__source-map-support.txt"
     },
     {
-      "name": "@esbuild/linux-x64",
+      "name": "@esbuild/win32-x64",
       "version": "0.28.2",
       "license": "MIT",
       "repository": "https://github.com/evanw/esbuild",
       "repositoryNote": null,
-      "url": "https://www.npmjs.com/package/@esbuild/linux-x64",
+      "url": "https://www.npmjs.com/package/@esbuild/win32-x64",
       "noticeFile": null
     },
     {
@@ -64,6 +64,24 @@
       "repositoryNote": null,
       "url": "https://fontsource.org/fonts/fira-code",
       "noticeFile": "/licenses/@fontsource__fira-code.txt"
+    },
+    {
+      "name": "@fontsource/ibm-plex-mono",
+      "version": "5.3.0",
+      "license": "OFL-1.1",
+      "repository": "https://github.com/fontsource/font-files",
+      "repositoryNote": null,
+      "url": "https://fontsource.org/fonts/ibm-plex-mono",
+      "noticeFile": "/licenses/@fontsource__ibm-plex-mono.txt"
+    },
+    {
+      "name": "@fontsource/instrument-serif",
+      "version": "5.3.0",
+      "license": "OFL-1.1",
+      "repository": "https://github.com/fontsource/font-files",
+      "repositoryNote": null,
+      "url": "https://fontsource.org/fonts/instrument-serif",
+      "noticeFile": "/licenses/@fontsource__instrument-serif.txt"
     },
     {
       "name": "@fontsource/overpass",
@@ -129,40 +147,22 @@
       "noticeFile": "/licenses/@img__colour.txt"
     },
     {
-      "name": "@img/sharp-libvips-linux-x64",
-      "version": "1.3.4",
-      "license": "LGPL-3.0-or-later",
-      "repository": "https://github.com/lovell/sharp-libvips",
-      "repositoryNote": null,
-      "url": "https://sharp.pixelplumbing.com",
-      "noticeFile": null
-    },
-    {
-      "name": "@img/sharp-libvips-linuxmusl-x64",
-      "version": "1.3.4",
-      "license": "LGPL-3.0-or-later",
-      "repository": "https://github.com/lovell/sharp-libvips",
-      "repositoryNote": null,
-      "url": "https://sharp.pixelplumbing.com",
-      "noticeFile": null
-    },
-    {
-      "name": "@img/sharp-linux-x64",
+      "name": "@img/sharp-wasm32",
       "version": "0.35.5",
-      "license": "Apache-2.0",
+      "license": "Apache-2.0 AND LGPL-3.0-or-later AND MIT",
       "repository": "https://github.com/lovell/sharp",
       "repositoryNote": null,
       "url": "https://sharp.pixelplumbing.com",
-      "noticeFile": "/licenses/@img__sharp-linux-x64.txt"
+      "noticeFile": "/licenses/@img__sharp-wasm32.txt"
     },
     {
-      "name": "@img/sharp-linuxmusl-x64",
+      "name": "@img/sharp-win32-x64",
       "version": "0.35.5",
-      "license": "Apache-2.0",
+      "license": "Apache-2.0 AND LGPL-3.0-or-later",
       "repository": "https://github.com/lovell/sharp",
       "repositoryNote": null,
       "url": "https://sharp.pixelplumbing.com",
-      "noticeFile": "/licenses/@img__sharp-linuxmusl-x64.txt"
+      "noticeFile": "/licenses/@img__sharp-win32-x64.txt"
     },
     {
       "name": "@isaacs/nonrecursive-glob-match",
@@ -210,16 +210,7 @@
       "noticeFile": "/licenses/@opentelemetry__api.txt"
     },
     {
-      "name": "@oxc-parser/binding-linux-x64-gnu",
-      "version": "0.152.0",
-      "license": "MIT",
-      "repository": "https://github.com/oxc-project/oxc",
-      "repositoryNote": null,
-      "url": "https://oxc.rs/docs/guide/usage/parser",
-      "noticeFile": null
-    },
-    {
-      "name": "@oxc-parser/binding-linux-x64-musl",
+      "name": "@oxc-parser/binding-win32-x64-msvc",
       "version": "0.152.0",
       "license": "MIT",
       "repository": "https://github.com/oxc-project/oxc",
@@ -282,16 +273,7 @@
       "noticeFile": null
     },
     {
-      "name": "@rolldown/binding-linux-x64-gnu",
-      "version": "1.2.19",
-      "license": "MIT",
-      "repository": "https://github.com/rolldown/rolldown",
-      "repositoryNote": null,
-      "url": "https://rolldown.rs/",
-      "noticeFile": null
-    },
-    {
-      "name": "@rolldown/binding-linux-x64-musl",
+      "name": "@rolldown/binding-win32-x64-msvc",
       "version": "1.2.19",
       "license": "MIT",
       "repository": "https://github.com/rolldown/rolldown",
@@ -1020,22 +1002,13 @@
       "noticeFile": "/licenses/lightningcss.txt"
     },
     {
-      "name": "lightningcss-linux-x64-gnu",
+      "name": "lightningcss-win32-x64-msvc",
       "version": "1.33.0",
       "license": "MPL-2.0",
       "repository": "https://github.com/parcel-bundler/lightningcss",
       "repositoryNote": null,
-      "url": "https://www.npmjs.com/package/lightningcss-linux-x64-gnu",
-      "noticeFile": "/licenses/lightningcss-linux-x64-gnu.txt"
-    },
-    {
-      "name": "lightningcss-linux-x64-musl",
-      "version": "1.33.0",
-      "license": "MPL-2.0",
-      "repository": "https://github.com/parcel-bundler/lightningcss",
-      "repositoryNote": null,
-      "url": "https://www.npmjs.com/package/lightningcss-linux-x64-musl",
-      "noticeFile": "/licenses/lightningcss-linux-x64-musl.txt"
+      "url": "https://www.npmjs.com/package/lightningcss-win32-x64-msvc",
+      "noticeFile": "/licenses/lightningcss-win32-x64-msvc.txt"
     },
     {
       "name": "lru-cache",

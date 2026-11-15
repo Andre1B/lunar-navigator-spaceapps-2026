@@ -21,6 +21,7 @@ import {
 import { percent, hours, timeAt } from "./lib/analysis.mjs";
 import ArrivalComparison from "./components/ArrivalComparison.jsx";
 import ComparisonAnswer from "./components/ComparisonAnswer.jsx";
+import { LedgerFigures } from "./components/HorizonLedger.jsx";
 import ExportComparison from "./components/ExportComparison.jsx";
 import CoverageNotice from "./components/CoverageNotice.jsx";
 import ArrivalSeries from "./components/ArrivalSeries.jsx";
@@ -354,6 +355,11 @@ function Compare({
               manifest={manifest}
               settings={settings}
               onInspect={onInspect}
+            />
+            <LedgerFigures
+              dataset={dataset}
+              rows={rows}
+              height={Number(settings.height)}
             />
             <ExportComparison
               dataset={dataset}

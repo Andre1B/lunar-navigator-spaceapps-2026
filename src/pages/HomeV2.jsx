@@ -1,4 +1,4 @@
-import DelayBriefing from "../components/DelayBriefing.jsx";
+import HorizonLedger from "../components/HorizonLedger.jsx";
 
 export default function HomeV2({
   dataset,
@@ -9,45 +9,37 @@ export default function HomeV2({
 }) {
   return (
     <main id="main" tabIndex={-1} className="home home-v2">
-      <section className="home-intro" data-tour="purpose">
+      <section className="home-intro hl-hero" data-tour="purpose">
         <div className="home-copy">
           <p className="home-story-kicker">
-            The question behind the simulation
+            A question about time, terrain and the low polar Sun
           </p>
           <h1>
-            A Moon landing is delayed.
+            Land a week late,
             <br />
-            <span>What changes on the ground?</span>
+            and the ridge <span>may take the Sun.</span>
           </h1>
           <p className="lead">
-            Imagine arriving a week late. The place is the same. The sky above
-            it is not.
-          </p>
-          <p>
-            Near the Moon’s south pole, the Sun skims the ridges. As time
-            passes, terrain can hide the Sun or Earth. These changing lines of
-            sight matter when studying potential solar power and direct-to-Earth
-            communication.
-          </p>
-          <p>
-            Lunar Navigator lets you compare the original arrival, the same
-            place later, and another place later. See how long the Sun and Earth
-            are in view, then explore the terrain that explains the difference.
+            Near the Moon’s south pole the Sun circles just above the horizon.
+            Arrive on a different day and it meets a different part of the
+            hills. Lunar Navigator measures that change for six study points,
+            five observer heights and any arrival date in the computed period:
+            how long the Sun and Earth stay in view.
           </p>
         </div>
-        <DelayBriefing dataset={dataset} onOpen={onExperiment} />
+        <HorizonLedger dataset={dataset} onOpen={onExperiment} />
         <div className="home-start">
           <div className="home-actions">
             <a className="button" href="#/compare">
               Compare a landing delay
-              <small>A ready-to-use example · change any setting</small>
+              <small>Choose the place, height, date and delay</small>
             </a>
             <button
               className="button secondary"
               onClick={() => onStart("faithful")}
             >
               Open the simulator
-              <small>Explore the Moon, sunlight and shadows in 3D</small>
+              <small>Fly the terrain and watch the sky in 3D</small>
             </button>
           </div>
           <div className="home-help">
@@ -70,148 +62,6 @@ export default function HomeV2({
             Just evaluating? Review the project in 3 minutes →
           </a>
         </div>
-      </section>
-      <section
-        className="home-problem-story"
-        aria-labelledby="problem-story-title"
-      >
-        <div className="home-story-visual">
-          <svg
-            viewBox="0 0 560 230"
-            role="img"
-            aria-label="Illustrative diagram: a low Sun moves behind a ridge, interrupting its view from the surface."
-          >
-            <defs>
-              <clipPath id="story-sky">
-                <path d="M0 0H560V155L450 145 370 94 285 164 215 135 130 172 0 158Z" />
-              </clipPath>
-            </defs>
-            <path
-              d="M30 92Q280 -10 530 112"
-              fill="none"
-              stroke="#536780"
-              strokeDasharray="4 7"
-            />
-            <g clipPath="url(#story-sky)">
-              <g className="home-story-sun">
-                <circle cx="85" cy="64" r="18" fill="#ffc266" />
-                <path
-                  d="M85 32v-9m0 82v-9M53 64h-9m82 0h-9M62 41l-7-7m60 60-7-7M62 87l-7 7m60-60-7 7"
-                  fill="none"
-                  stroke="#ffc266"
-                  strokeWidth="2"
-                />
-              </g>
-            </g>
-            <path
-              d="M0 158 130 172 215 135 285 164 370 94 450 145 560 155V230H0Z"
-              fill="#17283b"
-            />
-            <path
-              d="M0 158 130 172 215 135 285 164 370 94 450 145 560 155"
-              fill="none"
-              stroke="#9bb0c7"
-              strokeWidth="2"
-            />
-            <circle cx="155" cy="168" r="5" fill="#79c9e8" />
-            <path d="M155 168v-24" stroke="#79c9e8" strokeWidth="2" />
-            <text x="25" y="210" fill="#c2d0df" fontSize="14">
-              Same ground. A changing view.
-            </text>
-          </svg>
-          <p className="caption">
-            Illustrative diagram, not a calculated site or solar path.
-          </p>
-        </div>
-        <div>
-          <p className="home-story-kicker">Why it matters</p>
-          <h2 id="problem-story-title">A date is part of the place.</h2>
-          <ol>
-            <li>
-              <strong>Start with a plan.</strong>
-              <span>A place, an arrival date and a length of stay.</span>
-            </li>
-            <li>
-              <strong>Let the date move.</strong>
-              <span>The Sun and Earth move relative to the local ridges.</span>
-            </li>
-            <li>
-              <strong>Compare the consequence.</strong>
-              <span>
-                How long without direct sunlight? How much time with Earth in
-                view?
-              </span>
-            </li>
-          </ol>
-          <p>
-            Visibility is a starting point for understanding conditions. It does
-            not calculate electrical power, certify a landing or guarantee a
-            radio link.
-          </p>
-          <a className="button" href="#/compare">
-            Try the comparison
-          </a>
-        </div>
-      </section>
-      <section className="home-questions" aria-label="What you can discover">
-        <a href="#/simulator">
-          <span className="feature-symbol sun-symbol" aria-hidden="true">
-            <svg
-              viewBox="0 0 24 24"
-              width="24"
-              height="24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            >
-              <circle cx="12" cy="12" r="4" />
-              <path d="M12 1v3m0 16v3M1 12h3m16 0h3M4.2 4.2l2.1 2.1m11.4 11.4 2.1 2.1M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" />
-            </svg>
-          </span>
-          <h2>Follow the light.</h2>
-          <p>Move time and see why a small ridge can hide the low polar Sun.</p>
-          <span>Explore the moving sky →</span>
-        </a>
-        <a href="#/compare">
-          <span className="feature-symbol earth-symbol" aria-hidden="true">
-            <svg
-              viewBox="0 0 24 24"
-              width="24"
-              height="24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            >
-              <circle cx="12" cy="12" r="9" />
-              <ellipse cx="12" cy="12" rx="4" ry="9" />
-              <path d="M3 12h18M5 6.5h14M5 17.5h14" />
-            </svg>
-          </span>
-          <h2>Keep Earth in view.</h2>
-          <p>
-            Discover where the terrain interrupts a direct view of our planet.
-          </p>
-          <span>Compare visibility windows →</span>
-        </a>
-        <a href="#/mission">
-          <span className="feature-symbol delay-symbol" aria-hidden="true">
-            <svg
-              viewBox="0 0 24 24"
-              width="24"
-              height="24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            >
-              <path d="M20 9a8 8 0 1 0 0 6M20 3v6h-6M12 7v5l3 2" />
-            </svg>
-          </span>
-          <h2>Challenge the plan.</h2>
-          <p>
-            A landing is delayed. Keep your location or find an alternative.
-          </p>
-          <span>Open the guided analysis →</span>
-        </a>
       </section>
       <section className="home-how">
         <div>

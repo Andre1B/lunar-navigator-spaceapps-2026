@@ -16,7 +16,7 @@ Lunar Navigator — Team An0r4k, NASA Space Apps 2026, Lunar Landing Site Naviga
 - [tifffile](https://github.com/cgohlke/tifffile): reading published terrain rasters, BSD-3-Clause.
 - [PyShp](https://github.com/GeospatialPython/pyshp): used once to inspect PGDA RoI shapefiles; not a runtime dependency, MIT.
 - [Python](https://github.com/python/cpython): scientific runtime, PSF License.
-- [Fontsource](https://github.com/fontsource/fontsource): self-hosted Overpass and Fira Code packages; font software uses SIL Open Font License 1.1. [Overpass](https://github.com/RedHatOfficial/Overpass), [Fira Code](https://github.com/tonsky/FiraCode).
+- [Fontsource](https://github.com/fontsource/fontsource): self-hosted Overpass, Fira Code, Instrument Serif and IBM Plex Mono packages; font software uses SIL Open Font License 1.1. [Overpass](https://github.com/RedHatOfficial/Overpass), [Fira Code](https://github.com/tonsky/FiraCode), [Instrument Serif](https://github.com/Instrument/instrument-serif), [IBM Plex](https://github.com/IBM/plex).
 - [Wrangler / Cloudflare workers-sdk](https://github.com/cloudflare/workers-sdk): publishing the static Pages artifact, Apache-2.0/MIT per package notice.
 - [Lighthouse](https://github.com/GoogleChrome/lighthouse): production auditing, Apache-2.0.
 
