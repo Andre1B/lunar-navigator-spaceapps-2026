@@ -150,7 +150,67 @@ export default function SpaceSceneV2({
       );
       return;
     }
-    renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.25 : 1.5));
+    const basePixelRatio = Math.min(devicePixelRatio, mobile ? 1.25 : 1.5);
+    renderer.setPixelRatio(basePixelRatio);
+    // Adaptive resolution: when the GPU cannot hold a smooth frame rate, draw
+    // fewer pixels. Only sharpness changes; geometry, data, occlusion and the
+    // shared clock are untouched. Measured between consecutive drawn frames.
+    let renderScale = 1,
+      prevDrawAt = null,
+      slowFrames = 0,
+      fastFrames = 0,
+      failedScaleAt = -Infinity,
+      failedScale = 2;
+    function adaptResolution(now) {
+      const dt = prevDrawAt === null ? null : now - prevDrawAt;
+      prevDrawAt = now;
+      // Gaps longer than 400 ms are idle time, not rendering cost.
+      if (dt === null || dt > 400) return;
+      if (dt > 26) {
+        slowFrames++;
+        fastFrames = 0;
+      } else if (dt < 19.5) {
+        fastFrames++;
+        slowFrames = 0;
+      } else {
+        slowFrames = 0;
+        fastFrames = 0;
+      }
+      let next = renderScale;
+      // Still too slow at the lowest resolution: use a coarser visual mesh for
+      // the local terrain. Numerical horizons and alignment use the full mesh.
+      if (
+        slowFrames >= 6 &&
+        renderScale <= 0.45 &&
+        terrainDetail === "full" &&
+        terrainGrid &&
+        terrainFull
+      ) {
+        terrainDetail = "low";
+        terrainLow = localTerrain(terrainGrid, terrainTile, 120);
+        terrain.geometry = terrainLow;
+        surfaceTerrain.geometry = terrainLow;
+        slowFrames = 0;
+        return;
+      }
+      if (slowFrames >= 6 && renderScale > 0.45) {
+        failedScale = renderScale;
+        failedScaleAt = now;
+        next = Math.max(0.45, renderScale * 0.75);
+      } else if (
+        fastFrames >= 90 &&
+        renderScale < 1 &&
+        (renderScale * 1.2 < failedScale || now - failedScaleAt > 10000)
+      )
+        next = Math.min(1, renderScale * 1.2);
+      if (next !== renderScale) {
+        renderScale = next;
+        slowFrames = 0;
+        fastFrames = 0;
+        renderer.setPixelRatio(basePixelRatio * renderScale);
+        renderer.setSize(el.clientWidth, el.clientHeight, false);
+      }
+    }
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.setClearColor("#030811");
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -473,6 +533,11 @@ export default function SpaceSceneV2({
     ambient.layers.enable(1);
     scene.add(ambient);
     const planetMeshes = new Map();
+    let globeDetail = null,
+      globeFar = null,
+      terrainFull = null,
+      terrainLow = null,
+      terrainDetail = "full";
     let localFrame = null,
       lookAz = 0,
       lookEl = 0,
@@ -498,6 +563,12 @@ export default function SpaceSceneV2({
           }
           moon.geometry.dispose();
           moon.geometry = g;
+          // Visual level of detail only: the explanatory globe drops to a
+          // coarser mesh when it covers few screen pixels. Numerical
+          // visibility never uses this mesh.
+          globeDetail = g;
+          globeFar?.dispose();
+          globeFar = displacedGlobe(grid, 240);
           globeReady = true;
           if (imageryReady) setStatus("");
           schedule();
@@ -599,9 +670,13 @@ export default function SpaceSceneV2({
         .then(({ grid, tile }) => {
           if (disposed || latest.current.site?.id !== id) return;
           const g = localTerrain(grid, tile, mobile ? 160 : 300);
-          terrain.geometry.dispose();
-          terrain.geometry = g;
-          surfaceTerrain.geometry = g;
+          terrainFull?.dispose();
+          terrainLow?.dispose();
+          terrainFull = g;
+          terrainLow =
+            terrainDetail === "low" ? localTerrain(grid, tile, 120) : null;
+          terrain.geometry = terrainLow ?? g;
+          surfaceTerrain.geometry = terrain.geometry;
           const side = Math.round(Math.sqrt(g.attributes.position.count)),
             edge = [];
           const add = (r, c) => {
@@ -690,6 +765,7 @@ export default function SpaceSceneV2({
         // not accidentally halve the display to 72 fps.
         lastFrameAt = now - (elapsed % frameInterval);
       } else lastFrameAt = now;
+      adaptResolution(now);
       settingCamera = true;
       if (sky) {
         // GPU presentation follows the display refresh. React text/data updates
@@ -857,6 +933,19 @@ export default function SpaceSceneV2({
         ring.scale.setScalar(local ? 0.02 : 1);
         ring.visible = !exact;
         moon.visible = !exact && !local;
+        if (globeDetail && globeFar && moon.visible) {
+          // Projected radius of the Moon in CSS pixels.
+          const d = Math.max(
+            camera.position.distanceTo(moon.position) / moon.scale.x,
+            1.0001,
+          );
+          const px =
+            (Math.tan(Math.asin(1 / d)) /
+              Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) *
+            (el.clientHeight / 2);
+          const want = px > 900 ? globeDetail : globeFar;
+          if (moon.geometry !== want) moon.geometry = want;
+        }
         moonOutline.geometry = moon.geometry;
         moonOutline.quaternion.copy(q);
         moonOutline.visible = p.enhancedVision && moon.visible;
@@ -876,7 +965,7 @@ export default function SpaceSceneV2({
           loadTerrain(site.id);
         if (terrainSite === site?.id && surfaceAnchorSite !== site.id) {
           const alignment = alignSurfaceAtObserver(
-            terrain.geometry,
+            terrainFull ?? terrain.geometry,
             bodyO,
             uBody,
           );
@@ -1329,6 +1418,10 @@ export default function SpaceSceneV2({
             index: p.index,
             presentedIndex: currentObservation?.index,
             frameTimeMs: now,
+            renderScale,
+            terrainDetail,
+            drawCalls: renderer.info.render.calls,
+            triangles: renderer.info.render.triangles,
             fpsLimit: mobile ? 60 : 120,
             ready:
               imageryReady &&
@@ -1630,6 +1723,10 @@ export default function SpaceSceneV2({
       starsMap.dispose();
       glareTexture.dispose();
       surface.horizon.dispose();
+      globeDetail?.dispose();
+      globeFar?.dispose();
+      terrainFull?.dispose();
+      terrainLow?.dispose();
       renderer.dispose();
       el.replaceChildren();
       engine.current = null;
