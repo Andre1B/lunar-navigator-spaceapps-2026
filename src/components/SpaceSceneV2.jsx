@@ -511,6 +511,52 @@ export default function SpaceSceneV2({
       nearLoading = "",
       nearAnchorSite = "",
       nearAlignmentM = null;
+    // Between 300 m and the cut at NEAR_RADIUS_M, ease the 5 m heights onto the
+    // 40 m mesh surface (its own vertex lattice and alignment), so both
+    // foregrounds meet at the same height where one hands over to the other.
+    function morphNearSeam(g) {
+      const meta = g.userData.near;
+      if (!meta || !terrainGrid || !terrainTile) return;
+      const T = terrainTile.boundsPolarStereoM,
+        seg = mobile ? 160 : 300,
+        node = (i, j) =>
+          sampleGrid(
+            terrainGrid,
+            (Math.min(seg, Math.max(0, i)) / seg) * terrainGrid.width - 0.5,
+            (Math.min(seg, Math.max(0, j)) / seg) * terrainGrid.height - 0.5,
+          );
+      const shift = (surfaceAlignmentM ?? 0) - (nearAlignmentM ?? 0);
+      const pos = g.attributes.position,
+        count = meta.cells + 1,
+        P = new THREE.Vector3();
+      for (let r = 0; r < count; r++)
+        for (let c = 0; c < count; c++) {
+          const x = meta.xMin + (c / meta.cells) * meta.span,
+            y = meta.yMax - (r / meta.cells) * meta.span,
+            d = Math.hypot(x - meta.site[0], y - meta.site[1]);
+          if (d <= 300) continue;
+          const t = Math.min(1, (d - 300) / (NEAR_RADIUS_M - 300)),
+            w = t * t * (3 - 2 * t);
+          const u = ((x - T.xMin) / (T.xMax - T.xMin)) * seg,
+            v = ((T.yMax - y) / (T.yMax - T.yMin)) * seg,
+            i0 = Math.floor(u),
+            j0 = Math.floor(v),
+            fu = u - i0,
+            fv = v - j0;
+          const far =
+            (node(i0, j0) * (1 - fu) + node(i0 + 1, j0) * fu) * (1 - fv) +
+            (node(i0, j0 + 1) * (1 - fu) + node(i0 + 1, j0 + 1) * fu) * fv;
+          const k = r * count + c;
+          P.fromBufferAttribute(pos, k);
+          const old = (P.length() - 1) * MOON_RADIUS_M,
+            next = (1 - w) * old + w * (far + shift);
+          P.multiplyScalar((1 + next / MOON_RADIUS_M) / (1 + old / MOON_RADIUS_M));
+          pos.setXYZ(k, P.x, P.y, P.z);
+        }
+      pos.needsUpdate = true;
+      g.computeVertexNormals();
+      g.computeBoundingSphere();
+    }
     function loadNear(id) {
       if (nearLoading === id || nearSite === id) return;
       nearLoading = id;
@@ -548,6 +594,13 @@ export default function SpaceSceneV2({
             },
             cells,
           );
+          g.userData.near = {
+            cells,
+            xMin: b.xMin + off,
+            yMax: b.yMax - off,
+            span,
+            site: patch.siteXYM,
+          };
           nearTerrain.geometry.dispose();
           nearTerrain.geometry = g;
           nearSite = id;
@@ -1044,9 +1097,14 @@ export default function SpaceSceneV2({
         surface.uniforms.patchRadius.value = nearTerrain.visible
           ? NEAR_RADIUS_M
           : 0;
-        if (nearTerrain.visible && nearAnchorSite !== site.id) {
+        if (
+          nearTerrain.visible &&
+          nearAnchorSite !== site.id &&
+          surfaceAnchorSite === site.id
+        ) {
           const a = alignSurfaceAtObserver(nearTerrain.geometry, bodyO, uBody);
           nearAlignmentM = a === null ? null : a * MOON_RADIUS_M;
+          morphNearSeam(nearTerrain.geometry);
           nearAnchorSite = site.id;
         }
         if (nearTerrain.visible) {
