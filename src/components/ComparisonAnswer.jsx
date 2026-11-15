@@ -42,36 +42,71 @@ export default function ComparisonAnswer({
           const point = manifest.sites.find((s) => s.id === row.id);
           return (
             <article key={row.label} className="answer-scenario">
-              <h3>{row.label}</h3>
-              <p className="answer-context">
-                {point?.name.split(" (")[0]}
-                <br />
-                {row.bounds
-                  ? `${timeAt(manifest.period, row.bounds.start).slice(0, 10)} · ${settings.days}-day stay · ${settings.height} m`
-                  : "Outside the calculated period"}
-              </p>
+              <h3>
+                <span className="answer-letter" aria-hidden="true">
+                  {"ABC"[i]}
+                </span>
+                {row.label}
+                {i ? (
+                  <small>
+                    {i === 1
+                      ? ` · same place, +${settings.delay} days`
+                      : ` · another place, same delayed date`}
+                  </small>
+                ) : (
+                  <small> · your plan</small>
+                )}
+              </h3>
+              <dl className="answer-context">
+                <div>
+                  <dt>Place</dt>
+                  <dd>{point?.name.split(" (")[0]}</dd>
+                </div>
+                <div>
+                  <dt>Arrival (UTC)</dt>
+                  <dd>
+                    {row.bounds
+                      ? timeAt(manifest.period, row.bounds.start)
+                          .slice(0, 16)
+                          .replace("T", " ")
+                      : "Outside the calculated period"}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Stay · observer height</dt>
+                  <dd>
+                    {settings.days} days · {settings.height} m above the ground
+                  </dd>
+                </div>
+              </dl>
               <dl>
                 <div>
-                  <dt>Longest stretch without sunlight</dt>
+                  <dt>Longest stretch without direct sunlight</dt>
                   <dd>{duration(row.summary?.dark)}</dd>
                 </div>
                 <div>
-                  <dt>Sun visible · % of your stay</dt>
+                  <dt>
+                    Sun visible · % of your stay
+                    <small>hours with any part of the Sun in view</small>
+                  </dt>
                   <dd className="answer-sun-percent">
                     {percent(row.summary?.sunlitFraction)}
                   </dd>
                 </div>
                 <div>
-                  <dt>Earth visible · % of your stay</dt>
+                  <dt>
+                    Earth visible · % of your stay
+                    <small>hours with any part of Earth in view</small>
+                  </dt>
                   <dd className="answer-earth-percent">
                     {percent(row.summary?.earthFraction)}
                   </dd>
                 </div>
               </dl>
               <div className="answer-arrival">
-                <strong>At the arrival instant</strong>
+                <strong>At the arrival instant only</strong>
                 <p>
-                  Unblocked disc:{" "}
+                  Share of each disc unblocked:{" "}
                   <span>
                     Sun {percent(row.arrival?.sunVisibleDiscFraction)}
                   </span>{" "}

@@ -700,3 +700,82 @@ input[type="range"] {
     white-space: nowrap;
   }
 }
+
+/* Compare: scenario identity and labels */
+.answer-scenario h3 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  font-size: 20px;
+}
+.answer-scenario h3 small {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ink-2);
+}
+.answer-letter {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: #111;
+  background: var(--sun);
+  border-radius: 2px;
+  padding: 1px 7px;
+}
+.answer-scenario .answer-context {
+  display: grid;
+  gap: 2px;
+  margin: 8px 0 12px;
+}
+.answer-scenario .answer-context div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 2px 12px;
+}
+.answer-scenario .answer-context dt {
+  color: var(--ink-2);
+  font-size: 13px;
+}
+.answer-scenario .answer-context dd {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--ink);
+}
+.answer-scenario dt {
+  font-size: 15px;
+  color: var(--ink);
+}
+.answer-scenario dt small {
+  display: block;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.answer-arrival strong {
+  font-size: 14px;
+  color: var(--ink);
+}
+
+/* Overlap of the two Sun paths: blended colour, never a blended value */
+.hl-cross circle {
+  fill: none;
+  stroke: #f7d49a;
+  stroke-width: 2;
+}
+.hl-cross:focus-visible circle,
+.hl-cross:hover circle {
+  stroke-width: 3;
+  stroke: #fff1d6;
+}
+.hl-cross:focus {
+  outline: none;
+}
+.hl-key.cross {
+  background: none;
+  border: 2px solid #f7d49a;
+}
+.hl-key.late {
+  border-radius: 1px;
+  transform: rotate(45deg) scale(0.85);
+}

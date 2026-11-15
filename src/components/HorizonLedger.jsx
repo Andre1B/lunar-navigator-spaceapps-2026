@@ -107,22 +107,45 @@ function HorizonPanel({ site, height, rows, period, compact }) {
   const elTicks = [];
   for (let e = eLo; e <= eHi; e++) elTicks.push(e);
   const causes = new Set();
+  // On-time samples are circles, delayed samples diamonds, so the two stays
+  // stay distinguishable without relying on colour.
+  const at = (i) => [X(unwrap(site.sun.azDeg[i])), Y(site.sun.elDeg[i])];
   const dots = tracks.map((pts, t) =>
     pts.map((i) => {
       const cause = hiddenCause(site, key, i);
       if (cause !== "lit") causes.add(cause);
       const v = site.sun.visibleFraction[key][i];
-      return (
-        <circle
+      const [x, y] = at(i);
+      const r = cause === "lit" ? 1.4 + 2.6 * v : 2;
+      const cls = `hl-dot ${t ? "late" : "ontime"} ${cause}`;
+      return t ? (
+        <path
           key={i}
-          className={`hl-dot ${t ? "late" : "ontime"} ${cause}`}
-          cx={X(unwrap(site.sun.azDeg[i])).toFixed(1)}
-          cy={Y(site.sun.elDeg[i]).toFixed(1)}
-          r={cause === "lit" ? (1.4 + 2.6 * v).toFixed(1) : 2}
+          className={cls}
+          d={`M${x.toFixed(1)},${(y - r * 1.3).toFixed(1)}l${(r * 1.3).toFixed(1)},${(r * 1.3).toFixed(1)}l${(-r * 1.3).toFixed(1)},${(r * 1.3).toFixed(1)}l${(-r * 1.3).toFixed(1)},${(-r * 1.3).toFixed(1)}z`}
         />
+      ) : (
+        <circle key={i} className={cls} cx={x.toFixed(1)} cy={y.toFixed(1)} r={r.toFixed(1)} />
       );
     }),
   );
+  // Where both paths pass the same place IN THIS DRAWING (within 4 units),
+  // mark the crossing with a blended colour. A visual coincidence only: the
+  // two samples are hours or days apart and are never averaged.
+  const crossings = [];
+  for (const i of tracks[1]) {
+    const [x1, y1] = at(i);
+    let best = null;
+    for (const j of tracks[0]) {
+      const [x0, y0] = at(j);
+      const d = Math.hypot(x1 - x0, y1 - y0);
+      if (d <= 4 && (!best || d < best.d)) best = { j, d, x: (x0 + x1) / 2, y: (y0 + y1) / 2 };
+    }
+    if (best && !crossings.some((c) => Math.hypot(c.x - best.x, c.y - best.y) < 14))
+      crossings.push({ ...best, i });
+  }
+  const pct = (v) => (v * 100).toFixed(1) + "%";
+  const utc = (i) => timeAt(period, i).slice(0, 16).replace("T", " ") + " UTC";
   const startLabel = (pts, cls, text) => {
     const x = X(unwrap(site.sun.azDeg[pts[0]])),
       y = Y(site.sun.elDeg[pts[0]]);
@@ -183,6 +206,18 @@ function HorizonPanel({ site, height, rows, period, compact }) {
         ))}
         <g>{dots[0]}</g>
         <g>{dots[1]}</g>
+        {crossings.map((c) => {
+          const label =
+            c.i === c.j
+              ? `Same instant, ${utc(c.i)}: the on-time stay ends as the delayed stay begins. Sun ${pct(site.sun.visibleFraction[key][c.i])} visible.`
+              : `Both paths pass this spot of the drawing at different times: on-time stay ${utc(c.j)}, Sun ${pct(site.sun.visibleFraction[key][c.j])} visible; delayed stay ${utc(c.i)}, Sun ${pct(site.sun.visibleFraction[key][c.i])} visible.`;
+          return (
+            <g key={"x" + c.i} className="hl-cross" tabIndex={0} role="img" aria-label={label}>
+              <title>{label}</title>
+              <circle cx={c.x.toFixed(1)} cy={c.y.toFixed(1)} r="7" />
+            </g>
+          );
+        })}
         {compact ? null : startLabel(tracks[0], "ontime", `arrive ${d0}`)}
         {compact ? null : startLabel(tracks[1], "late", `arrive ${d1}`)}
       </svg>
@@ -193,6 +228,12 @@ function HorizonPanel({ site, height, rows, period, compact }) {
         <span>
           <i className="hl-key late" /> stay arriving {d1}
         </span>
+        {crossings.length ? (
+          <span>
+            <i className="hl-key cross" /> both paths meet in this drawing
+            (focus or hover for both UTC times; usually different instants)
+          </span>
+        ) : null}
         {causes.has("terrain") ? (
           <span>
             <i className="hl-key hollow" /> Sun hidden by the computed terrain
