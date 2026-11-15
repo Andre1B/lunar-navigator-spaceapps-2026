@@ -703,11 +703,11 @@ function Evidence({ dataset }) {
   const methods = {
     solar: [
       "Mean visible Sun",
-      "The time average of the visible solar-disc fraction above the terrain horizon. Computed by trapezoidal integration of hourly samples. Not sunlight hours, electrical power or a battery model.",
+      "The time average of the fraction of the solar disc that is above the terrain horizon and not covered by Earth (Earth is treated as an opaque sphere, so solar eclipses seen from the Moon count as dark). Computed by trapezoidal integration of hourly samples. Not sunlight hours, electrical power or a battery model.",
     ],
     darkness: [
       "Longest darkness",
-      "The longest interval with no part of the Sun above the terrain horizon. A five-minute event search is refined to at most one minute; shorter events can be missed. An interval touching a window edge is a lower bound (≥), never a complete duration claim.",
+      "The longest interval with no part of the Sun visible: below the terrain horizon or fully covered by Earth during an eclipse. A five-minute event search is refined to at most one minute; shorter events can be missed. An interval touching a window edge is a lower bound (≥), never a complete duration claim.",
     ],
     earth: [
       "Earth visible",
@@ -747,6 +747,24 @@ function Evidence({ dataset }) {
           visible. The comparison summarizes those fractions over the selected
           operating window.
         </p>
+        <ol className="pipeline" aria-label="How a result is computed">
+          <li>
+            <strong>Data</strong>
+            <span>LOLA terrain (PGDA/PDS) and NAIF SPICE positions of the Sun, Earth and Moon</span>
+          </li>
+          <li>
+            <strong>Horizon and occultation</strong>
+            <span>720-direction terrain horizon per height; Earth as an opaque sphere in front of the Sun</span>
+          </li>
+          <li>
+            <strong>Visible fraction</strong>
+            <span>Share of each disc above the horizon and not covered, every hour</span>
+          </li>
+          <li>
+            <strong>Intervals</strong>
+            <span>5-minute event search refined to about 1 minute; window edges give lower bounds (≥)</span>
+          </li>
+        </ol>
         <p>
           The globe is an explanatory view. Numerical terrain visibility comes
           from the published elevation products, not the appearance of the globe
@@ -890,24 +908,28 @@ function Evidence({ dataset }) {
   );
 }
 function Credits() {
-  const [credits, setCredits] = useState(null);
+  // null = loading, "error" = the inventory could not be read (never shown
+  // as an empty, apparently complete list).
+  const [credits, setCredits] = useState(null),
+    [attempt, setAttempt] = useState(0);
   useEffect(() => {
     let live = true;
+    setCredits(null);
     fetch("/credits.json")
       .then((r) => {
         if (!r.ok) throw Error();
         return r.json();
       })
       .then((x) => {
-        if (live) setCredits(x);
+        if (live) setCredits(Array.isArray(x?.packages) ? x : "error");
       })
       .catch(() => {
-        if (live) setCredits({ packages: [] });
+        if (live) setCredits("error");
       });
     return () => {
       live = false;
     };
-  }, []);
+  }, [attempt]);
   return (
     <main id="main" tabIndex={-1} className="page prose">
       <h1>Built with open knowledge.</h1>
@@ -946,15 +968,70 @@ function Credits() {
         </a>
       </section>
       <section>
+        <h2>Sources at a glance</h2>
+        <dl className="credit-groups">
+          <div>
+            <dt>Data</dt>
+            <dd>LRO LOLA terrain via NASA PGDA and PDS; Sun, Earth and Moon positions from NASA JPL NAIF SPICE kernels.</dd>
+          </div>
+          <div>
+            <dt>Imagery</dt>
+            <dd>Moon: NASA SVS / LROC. Earth: NASA Blue Marble. Sun, planets, Saturn&apos;s ring and Earth clouds: Solar System Scope, CC BY 4.0. Stars: Gaia-based map, as credited in the asset provenance.</dd>
+          </div>
+          <div>
+            <dt>Fonts</dt>
+            <dd>Overpass, Instrument Serif, IBM Plex Mono and Fira Code via Fontsource, SIL Open Font License.</dd>
+          </div>
+          <div>
+            <dt>Audio</dt>
+            <dd>Original procedural score synthesized in the browser; no recordings or samples.</dd>
+          </div>
+          <div>
+            <dt>Code</dt>
+            <dd>Original code Apache-2.0; every reused package keeps its own license, listed below.</dd>
+          </div>
+        </dl>
+      </section>
+      <section>
         <h2>Software used</h2>
         <p>
           Direct and transitive dependencies, including build and verification
           tools. Project links identify their maintainers; no affiliation or
           endorsement is implied.
         </p>
-        {credits ? (
+        {credits === "error" ? (
+          <div className="warning" role="alert">
+            <p>
+              The dependency inventory could not be loaded, so this list is
+              incomplete. The full list is also in{" "}
+              <a
+                href="https://github.com/Andre1B/lunar-navigator-spaceapps-2026/blob/main/CREDITS.md"
+                target="_blank"
+                rel="noreferrer"
+              >
+                CREDITS.md ↗
+              </a>
+              .
+            </p>
+            <button className="button secondary" onClick={() => setAttempt((n) => n + 1)}>
+              Try again
+            </button>
+          </div>
+        ) : null}
+        {credits === null ? (
+          <p role="status">Loading dependency credits…</p>
+        ) : (
+          <details className="credit-details" open={credits === "error" || undefined}>
+            <summary>
+              {credits === "error"
+                ? `Scientific software (${scientificSoftware.length})`
+                : `All ${scientificSoftware.length + credits.packages.length} projects with licenses and sources`}
+            </summary>
           <div className="credit-list">
-            {[...scientificSoftware, ...credits.packages].map((p) => (
+            {[
+              ...scientificSoftware,
+              ...(credits === "error" ? [] : credits.packages),
+            ].map((p) => (
               <article key={p.name + "@" + p.version}>
                 <h3>
                   {p.name} <small>{p.version}</small>
@@ -984,8 +1061,7 @@ function Credits() {
               </article>
             ))}
           </div>
-        ) : (
-          <p>Loading dependency credits…</p>
+          </details>
         )}
       </section>
       <section>

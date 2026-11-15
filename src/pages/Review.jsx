@@ -18,47 +18,48 @@ export default function Review({ dataset, settings }) {
         how does sunlight change?
       </h1>
       <p className="lead">
-        This tool compares how long a lunar place can see the Sun and Earth.
-        Choose a place, arrival date and observer height. Compare the original
-        arrival, a delay and another place; use the 3D simulator to see why.
+        Lunacline compares how long a place near the lunar south pole sees the
+        Sun and Earth if the landing slips. Below is the answer for your current
+        settings; Compare lets you change them. The 3D view is optional and
+        shows why.
       </p>
       <nav className="review-jumps" aria-label="Review steps">
-        <a href="#/simulator">Inspect the simulator</a>
-        <a href="#/compare">Change the scenario</a>
+        <a className="primary" href="#/compare">Compare arrival times</a>
         <a href="#/evidence">Audit the evidence</a>
+        <a href="#/simulator">Optional: see it in 3D</a>
         <a href="/demo/">Six-slide demo</a>
       </nav>
       <div className="review-layout">
         <section>
-          <p className="section-label">30 seconds · the question</p>
-          <h2>Terrain and time decide what you can see.</h2>
-          <p>
-            Choose one of {dataset.manifest?.sites.length ?? 6} points within
-            published LOLA polar study regions and an observer height of 0.5, 1,
-            2, 5 or 10 metres. Two points are published region centroids; two
-            are our selections from the published illumination map, and two are
-            nearby points we selected by fixed offsets of about 1 km. Their
-            exact coordinates and selection methods are public.
-          </p>
-          <p>
-            Move one astronomical clock in Faithful Mode, inspect the terrain
-            horizon, then compare a delay and an alternative point.
-          </p>
-          <p>
-            The 3D model preserves physical body sizes and distances. Camera
-            presets change the viewpoint. Free Mode is a separate, explicitly
-            artificial experiment.
-          </p>
-          <a href="#/learn">See how the model works →</a>
-        </section>
-        <section>
-          <p className="section-label">90 seconds · the experiment</p>
+          <p className="section-label">Your comparison · now</p>
           <h2>Same assumptions. Three consequences.</h2>
           <p>
             {settings.date} arrival · {settings.days}-day operation ·{" "}
             {settings.height} m observer · +{formatDelay(settings.delay)} delay. These
             are your current comparison settings.
           </p>
+          {rows.length && rows.every((r) => r.summary) ? (
+            <div className="review-charts">
+              {[
+                ["Time with some direct Sun, % of the stay", (r) => r.summary.sunlitFraction, 1, (r) => percent(r.summary.sunlitFraction)],
+                ["Time with Earth in view, % of the stay", (r) => r.summary.earthFraction, 1, (r) => percent(r.summary.earthFraction)],
+                ...(rows.some((r) => r.summary.dark.hours > 0)
+                  ? [["Longest time without direct Sun, hours", (r) => r.summary.dark.hours, Math.max(...rows.map((r) => r.summary.dark.hours)), (r) => hours(r.summary.dark)]]
+                  : []),
+              ].map(([title, value, max, label]) => (
+                <figure key={title} className="review-bars">
+                  <figcaption>{title}</figcaption>
+                  {rows.map((r, j) => (
+                    <div key={r.label} className={"review-bar " + ["ontime", "late", "alt"][j]}>
+                      <span>{"ABC"[j]} · {r.label}</span>
+                      <i style={{ width: `${(value(r) / max) * 100}%` }} />
+                      <b>{label(r)}</b>
+                    </div>
+                  ))}
+                </figure>
+              ))}
+            </div>
+          ) : null}
           <div className="review-results">
             {rows.length ? (
               rows.map((r) => (
@@ -96,6 +97,25 @@ export default function Review({ dataset, settings }) {
           <a className="button" href="#/compare">
             Change the inputs & download the result
           </a>
+        </section>
+        <section>
+          <p className="section-label">The question behind the numbers</p>
+          <h2>Terrain and time decide what you can see.</h2>
+          <p>
+            Choose one of {dataset.manifest?.sites.length ?? 6} points within
+            published LOLA polar study regions and an observer height of 0.5, 1,
+            2, 5 or 10 metres. Two points are published region centroids; two
+            are our selections from the published illumination map, and two are
+            nearby points we selected by fixed offsets of about 1 km. Their
+            exact coordinates and selection methods are public.
+          </p>
+          <p>
+            The same calculation runs for the original arrival, the delayed
+            arrival and another place. The optional 3D view keeps physical
+            sizes and distances; its Free Mode is a separate, labelled
+            experiment that never changes these numbers.
+          </p>
+          <a href="#/learn">See how the model works →</a>
         </section>
         <section className="review-evidence">
           <p className="section-label">60 seconds · the evidence</p>

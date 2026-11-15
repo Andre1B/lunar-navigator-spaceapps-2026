@@ -1154,3 +1154,115 @@ input[type="range"] {
   list-style: none;
   padding: 0;
 }
+
+/* Evidence: compact computation pipeline. */
+.pipeline {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px;
+  counter-reset: step;
+}
+.pipeline li {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px 12px 40px;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--sky-2);
+  counter-increment: step;
+}
+.pipeline li::before {
+  content: counter(step);
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  font: 12px var(--mono);
+  color: var(--sun);
+}
+.pipeline strong {
+  font-size: 14px;
+}
+.pipeline span {
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+/* Credits: compact source groups. */
+.credit-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+.credit-groups > div {
+  padding: 12px 14px;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--sky-2);
+}
+.credit-groups dt {
+  font: 12px var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sun);
+}
+.credit-groups dd {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.credit-details > summary {
+  cursor: pointer;
+  margin: 8px 0 12px;
+}
+
+/* Review: Compare first; one bar per scenario for the longest dark stretch. */
+.review-jumps a.primary {
+  border-color: var(--sun);
+  color: var(--ink);
+}
+.review-bars {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 16px;
+}
+.review-bars figcaption {
+  font: 12px var(--mono);
+  color: var(--ink-2);
+}
+.review-bar {
+  display: grid;
+  grid-template-columns: minmax(120px, 34%) 1fr auto;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+.review-bar i {
+  display: block;
+  height: 12px;
+  min-width: 2px;
+  border-radius: 2px;
+  background: var(--ink);
+}
+.review-bar.late i {
+  background: var(--sun);
+}
+.review-bar.alt i {
+  background: #9a958a;
+}
+.review-bar b {
+  font: 13px var(--mono);
+}
+.review-charts {
+  display: grid;
+  gap: 14px;
+  margin: 12px 0 16px;
+}
+.review-charts .review-bars {
+  margin: 0;
+}
