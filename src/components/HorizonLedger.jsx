@@ -442,29 +442,48 @@ export default function HorizonLedger({ dataset, onOpen }) {
       </div>
       <div className="briefing-results hl-readout" aria-live="polite" aria-atomic="true">
         {ready ? (
-          <>
-            <article>
-              <h3>Arrive {d0}</h3>
-              <p className="hl-num">{fmt(rows[0])}</p>
-              <p>
-                longest without direct sunlight · Sun visible{" "}
-                {percent(rows[0].summary.sunlitFraction)} of the stay · Earth{" "}
-                {percent(rows[0].summary.earthFraction)}
-              </p>
+          [0, 1].map((n) => (
+            <article key={n} className={n ? "late" : "ontime"}>
+              <h3>
+                {n ? `Arrive ${delay} days later` : `Arrive ${d0}`}
+                <span className="hl-scenario">
+                  {n ? `${d1} · same place` : "original plan"} ·{" "}
+                  {settings.height} m · {settings.days}-day stay
+                </span>
+              </h3>
+              <p className="hl-label">Longest stretch without direct sunlight</p>
+              <p className="hl-num">{fmt(rows[n])}</p>
+              <dl className="hl-facts">
+                <div>
+                  <dt>Hours with some of the Sun in view</dt>
+                  <dd>{percent(rows[n].summary.sunlitFraction)} of the stay</dd>
+                </div>
+                <div>
+                  <dt>Hours with some of Earth in view</dt>
+                  <dd>{percent(rows[n].summary.earthFraction)} of the stay</dd>
+                </div>
+              </dl>
             </article>
-            <article className="late">
-              <h3>Arrive {delay} days later</h3>
-              <p className="hl-num">{fmt(rows[1])}</p>
-              <p>
-                longest without direct sunlight · Sun visible{" "}
-                {percent(rows[1].summary.sunlitFraction)} of the stay · Earth{" "}
-                {percent(rows[1].summary.earthFraction)}
-              </p>
-            </article>
-          </>
+          ))
         ) : (
           <p>Loading the real lunar comparison…</p>
         )}
+      </div>
+      <div className="hl-actions">
+        <button
+          className="button"
+          disabled={!ready}
+          onClick={() => onOpen(settings)}
+        >
+          Compare arrival times →
+        </button>
+        <p className="briefing-source">
+          Opens Compare with this example; change the place, height, date or
+          delay there. Same calculation as Compare and the PDF: NASA LRO LOLA
+          terrain and NAIF SPICE positions. Study points, not certified landing
+          sites; sunlight is not electrical power.{" "}
+          <a href="#/evidence">Check the method</a>.
+        </p>
       </div>
       {ready && site ? (
         <>
@@ -478,20 +497,6 @@ export default function HorizonLedger({ dataset, onOpen }) {
           <Ledger dataset={dataset} rows={rows} height={settings.height} names={names} />
         </>
       ) : null}
-      <div className="hl-actions">
-        <button
-          className="button"
-          disabled={!ready}
-          onClick={() => onOpen(settings)}
-        >
-          Change the place, date or height →
-        </button>
-        <p className="briefing-source">
-          Same calculation as Compare and the PDF: NASA LRO LOLA terrain and
-          NAIF SPICE positions. Study points, not certified landing sites;
-          sunlight is not electrical power. <a href="#/evidence">Check the method</a>.
-        </p>
-      </div>
     </section>
   );
 }

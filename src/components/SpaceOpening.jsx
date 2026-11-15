@@ -95,7 +95,7 @@ export default function SpaceOpening({ onClose }) {
             stroke="#78aadd"
           />
         </svg>
-        <h1 id="opening-title">Lunar Navigator</h1>
+        <h1 id="opening-title">Lunacline</h1>
         <p id="opening-description">
           Compare lunar places. See what a delay changes.
         </p>

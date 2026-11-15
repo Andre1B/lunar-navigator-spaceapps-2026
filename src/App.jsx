@@ -37,12 +37,13 @@ import {
   assessDarkness,
 } from "./lib/comparisonReport.mjs";
 import Learn from "./pages/Learn.jsx";
+// Comparison is the product; the 3D view visualizes its results.
 const links = [
+  ["compare", "Compare arrival times"],
+  ["simulator", "3D view"],
   ["review", "3-min review"],
   ["learn", "How it works"],
   ["mission", "Guided analysis"],
-  ["simulator", "Simulator"],
-  ["compare", "Compare"],
   ["evidence", "Evidence"],
   ["credits", "Credits"],
 ];
@@ -71,8 +72,9 @@ function Header({ route, mode, onTour }) {
   return (
     <header className="header">
       <a className="brand" href="#/home">
-        <img src="/icon.svg" width="29" height="29" alt="" />
-        LUNAR NAVIGATOR
+        <img src="/icon.svg" width="30" height="30" alt="" />
+        <span className="brand-name">LUNACLINE</span>
+        <span className="brand-descriptor">Lunar arrival comparison</span>
       </a>
       <nav aria-label="Main navigation">
         {links.map(([id, label]) => (
@@ -1254,7 +1256,7 @@ export default function App() {
               alt="NASA International Space Apps Challenge"
             />
           </a>
-          <a href="#/home">Lunar Navigator</a>
+          <a href="#/home">Lunacline · lunar arrival comparison</a>
           <span>NASA Space Apps 2026 · Team An0r4k</span>
           <a href="#/credits">Sources, credits & open source</a>
           <a href="/summary.html">About the project</a>

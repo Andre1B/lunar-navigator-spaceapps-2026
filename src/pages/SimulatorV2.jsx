@@ -145,22 +145,23 @@ export default function SimulatorV2({
     >
       <div className="explorer-heading">
         <div>
-          <h1>What changes if a Moon landing is delayed?</h1>
-          <p>
-            Watch the hills hide the Sun and Earth. Then compare arrival dates
-            to measure time without sunlight and time with Earth in view.
+          <p className="section-label">3D view · optional visualization</p>
+          <h1>See the sky behind the comparison.</h1>
+          <p className="explorer-purpose" role="note">
+            This view visualizes the sky. Compare arrival times to see what
+            changes.
           </p>
         </div>
         <div className="explorer-actions">
           <a className="button" href="#/compare">
-            Compare arrivals →
+            Compare arrival times →
           </a>
           <button className="button secondary" onClick={onTour}>
             Take a tour
           </button>
           <button
             ref={enter}
-            className="button"
+            className="button secondary"
             onClick={() => setImmersive(true)}
           >
             Explore fullscreen

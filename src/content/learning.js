@@ -3,7 +3,7 @@
 // None of it is NASA data and none of it comes from the dataset in public/data.
 
 export const intro = {
-  title: "How Lunar Navigator works",
+  title: "How Lunacline works",
   lead: "Imagine a spacecraft lands near the Moon's south pole, but the landing slips by a few days. Will the spot still get sunlight? Can it still see Earth? This app lets you test that, and this page teaches you how to read the answers.",
   facts: [
     {

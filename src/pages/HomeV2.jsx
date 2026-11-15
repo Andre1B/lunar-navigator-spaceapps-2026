@@ -22,7 +22,7 @@ export default function HomeV2({
           <p className="lead">
             Near the Moon’s south pole the Sun circles just above the horizon.
             Arrive on a different day and it meets a different part of the
-            hills. Lunar Navigator measures that change for six study points,
+            hills. Lunacline measures that change for six study points,
             five observer heights and any arrival date in the computed period:
             how long the Sun and Earth stay in view.
           </p>
@@ -30,16 +30,12 @@ export default function HomeV2({
         <HorizonLedger dataset={dataset} onOpen={onExperiment} />
         <div className="home-start">
           <div className="home-actions">
-            <a className="button" href="#/compare">
-              Compare a landing delay
-              <small>Choose the place, height, date and delay</small>
-            </a>
             <button
               className="button secondary"
               onClick={() => onStart("faithful")}
             >
-              Open the simulator
-              <small>Fly the terrain and watch the sky in 3D</small>
+              View comparison in 3D
+              <small>Optional: see the sky and terrain behind the numbers</small>
             </button>
           </div>
           <div className="home-help">
