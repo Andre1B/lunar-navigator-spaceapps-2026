@@ -11,18 +11,28 @@ export default function HomeV2({
     <main id="main" tabIndex={-1} className="home home-v2">
       <section className="home-intro" data-tour="purpose">
         <div className="home-copy">
+          <p className="home-story-kicker">
+            The question behind the simulation
+          </p>
           <h1>
             A Moon landing is delayed.
             <br />
             <span>What changes on the ground?</span>
           </h1>
           <p className="lead">
-            Find out how a new arrival date changes time without sunlight and
-            time with Earth in view. Compare places, then use 3D to see why.
+            Imagine arriving a week late. The place is the same. The sky above
+            it is not.
           </p>
           <p>
-            Choose a place, a date and the height of a camera or antenna above
-            the ground. We show the changes. The 3D simulator helps you see why.
+            Near the Moon’s south pole, the Sun skims the ridges. As time
+            passes, terrain can hide the Sun or Earth. These changing lines of
+            sight matter when studying potential solar power and direct-to-Earth
+            communication.
+          </p>
+          <p>
+            Lunar Navigator lets you compare the original arrival, the same
+            place later, and another place later. See how long the Sun and Earth
+            are in view, then explore the terrain that explains the difference.
           </p>
         </div>
         <DelayBriefing dataset={dataset} onOpen={onExperiment} />
@@ -53,11 +63,93 @@ export default function HomeV2({
           <p className="home-scope">
             For learning and comparing lunar conditions.{" "}
             {dataset?.manifest?.sites.length ?? 6} points on published
-            south-pole terrain · March–April 2027. This is not a certified
-            landing plan.
+            south-pole terrain · dates shown in the computed dataset. This is
+            not a certified landing plan.
           </p>
           <a className="quick-review" href="#/review">
             Just evaluating? Review the project in 3 minutes →
+          </a>
+        </div>
+      </section>
+      <section
+        className="home-problem-story"
+        aria-labelledby="problem-story-title"
+      >
+        <div className="home-story-visual">
+          <svg
+            viewBox="0 0 560 230"
+            role="img"
+            aria-label="Illustrative diagram: a low Sun moves behind a ridge, interrupting its view from the surface."
+          >
+            <defs>
+              <clipPath id="story-sky">
+                <path d="M0 0H560V155L450 145 370 94 285 164 215 135 130 172 0 158Z" />
+              </clipPath>
+            </defs>
+            <path
+              d="M30 92Q280 -10 530 112"
+              fill="none"
+              stroke="#536780"
+              strokeDasharray="4 7"
+            />
+            <g clipPath="url(#story-sky)">
+              <g className="home-story-sun">
+                <circle cx="85" cy="64" r="18" fill="#ffc266" />
+                <path
+                  d="M85 32v-9m0 82v-9M53 64h-9m82 0h-9M62 41l-7-7m60 60-7-7M62 87l-7 7m60-60-7 7"
+                  fill="none"
+                  stroke="#ffc266"
+                  strokeWidth="2"
+                />
+              </g>
+            </g>
+            <path
+              d="M0 158 130 172 215 135 285 164 370 94 450 145 560 155V230H0Z"
+              fill="#17283b"
+            />
+            <path
+              d="M0 158 130 172 215 135 285 164 370 94 450 145 560 155"
+              fill="none"
+              stroke="#9bb0c7"
+              strokeWidth="2"
+            />
+            <circle cx="155" cy="168" r="5" fill="#79c9e8" />
+            <path d="M155 168v-24" stroke="#79c9e8" strokeWidth="2" />
+            <text x="25" y="210" fill="#c2d0df" fontSize="14">
+              Same ground. A changing view.
+            </text>
+          </svg>
+          <p className="caption">
+            Illustrative diagram, not a calculated site or solar path.
+          </p>
+        </div>
+        <div>
+          <p className="home-story-kicker">Why it matters</p>
+          <h2 id="problem-story-title">A date is part of the place.</h2>
+          <ol>
+            <li>
+              <strong>Start with a plan.</strong>
+              <span>A place, an arrival date and a length of stay.</span>
+            </li>
+            <li>
+              <strong>Let the date move.</strong>
+              <span>The Sun and Earth move relative to the local ridges.</span>
+            </li>
+            <li>
+              <strong>Compare the consequence.</strong>
+              <span>
+                How long without direct sunlight? How much time with Earth in
+                view?
+              </span>
+            </li>
+          </ol>
+          <p>
+            Visibility is a starting point for understanding conditions. It does
+            not calculate electrical power, certify a landing or guarantee a
+            radio link.
+          </p>
+          <a className="button" href="#/compare">
+            Try the comparison
           </a>
         </div>
       </section>

@@ -3813,7 +3813,7 @@ button.tracking-state {
   border-color: #8bb8db;
   background: #17364f;
 }
-.music-toggle[aria-pressed="true"] svg {
+.music-toggle[data-playing="true"] svg {
   transform-origin: center;
   animation: music-breathe 750ms ease-in-out infinite alternate;
 }
@@ -3946,3 +3946,19 @@ button.tracking-state {
   min-height: 36px;
   margin-top: 4px;
 }
+
+.home-story-kicker { font: 600 12px/1.5 Overpass, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #79c9e8; }
+.home-problem-story { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; padding: 48px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.home-problem-story h2 { font-size: clamp(28px, 3vw, 42px); line-height: 1.15; margin: 10px 0 24px; }
+.home-story-visual { background: #080f1b; border: 1px solid var(--line); padding: 16px; }
+.home-story-visual svg { width: 100%; height: auto; display: block; }
+.home-story-visual .caption { margin: 12px 8px 0; }
+.home-problem-story ol { margin: 0; padding: 0; list-style: none; counter-reset: story; }
+.home-problem-story li { counter-increment: story; position: relative; padding: 0 0 18px 36px; }
+.home-problem-story li::before { content: counter(story, decimal-leading-zero); position: absolute; left: 0; top: 2px; font: 12px/1.5 "Fira Code", monospace; color: #ffc266; }
+.home-problem-story strong, .home-problem-story li span { display: block; }
+.home-problem-story li span, .home-problem-story p { color: #c2d0df; line-height: 1.6; }
+.home-story-sun { animation: story-sun-journey 3s ease-in-out 1 both; }
+@keyframes story-sun-journey { from { transform: translate(0, 0); } to { transform: translate(270px, 58px); } }
+@media (max-width: 760px) { .home-problem-story { grid-template-columns: 1fr; gap: 24px; padding: 32px 0; } }
+@media (prefers-reduced-motion: reduce) { .home-story-sun { animation: none; } }

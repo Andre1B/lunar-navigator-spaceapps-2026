@@ -1,5 +1,5 @@
 // Original procedural ambient composition. No samples, external tracks or requests.
-// The caller creates/resumes AudioContext only after a user gesture.
+// The caller starts scheduling only after the browser allows AudioContext to run.
 export function createAmbientScore(context, initialVolume = 20) {
   const output = context.createGain();
   output.gain.value = 0;

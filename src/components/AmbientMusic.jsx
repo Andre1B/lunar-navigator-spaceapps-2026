@@ -1,24 +1,127 @@
 import { useEffect, useRef, useState } from "react";
 import { createAmbientScore } from "../lib/ambientScore.mjs";
 
+const preferenceKey = "lunar-music-v1";
+function musicEnabled() {
+  try {
+    return localStorage.getItem(preferenceKey) !== "off";
+  } catch {
+    return true;
+  }
+}
+
 export default function AmbientMusic() {
+  const [enabled, setEnabled] = useState(musicEnabled);
   const engine = useRef(null),
+    audioContext = useRef(null),
     pending = useRef(false),
-    settings = useRef(null);
+    settings = useRef(null),
+    mounted = useRef(false),
+    active = useRef(false),
+    wanted = useRef(enabled),
+    volumeRef = useRef(20);
   const [playing, setPlaying] = useState(false),
     [volume, setVolume] = useState(20),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
-  useEffect(
-    () => () => {
+
+  function ensureEngine() {
+    if (!audioContext.current) {
+      const Context = window.AudioContext || window.webkitAudioContext;
+      if (!Context) throw new Error("unavailable");
+      const context = new Context();
+      audioContext.current = context;
+      context.onstatechange = () => {
+        if (!mounted.current) return;
+        if (context.state === "running" && wanted.current) void start();
+        else {
+          active.current = false;
+          setPlaying(false);
+        }
+      };
+      engine.current = createAmbientScore(context, volumeRef.current);
+    }
+    return engine.current;
+  }
+  async function start() {
+    if (
+      !mounted.current ||
+      !wanted.current ||
+      active.current ||
+      pending.current ||
+      audioContext.current?.state !== "running"
+    )
+      return;
+    pending.current = true;
+    try {
+      await engine.current.play();
+      if (!mounted.current) return;
+      if (!wanted.current) {
+        await engine.current.pause();
+        return;
+      }
+      active.current = audioContext.current.state === "running";
+      setPlaying(active.current);
+      setError("");
+    } catch {
+      if (mounted.current)
+        setError("Music is unavailable. All exploration tools still work.");
+    } finally {
+      pending.current = false;
+    }
+  }
+  function requestPlayback() {
+    if (!wanted.current || !mounted.current) return;
+    try {
+      ensureEngine();
+      const context = audioContext.current;
+      // Browsers may hold resume until a real user gesture. Never keep the UI
+      // busy or start the note scheduler while the context is suspended.
+      if (context.state === "running") void start();
+      else
+        void context
+          .resume()
+          .then(() => {
+            if (mounted.current && wanted.current) void start();
+          })
+          .catch(() => {});
+    } catch {
+      if (mounted.current)
+        setError("Music is unavailable. All exploration tools still work.");
+    }
+  }
+  useEffect(() => {
+    mounted.current = true;
+    requestPlayback();
+    const unlock = (event) => {
+      if (event.target?.closest?.(".music-toggle")) return;
+      if (
+        event.type === "keydown" &&
+        (event.repeat ||
+          event.ctrlKey ||
+          event.metaKey ||
+          event.altKey ||
+          event.key === "Escape")
+      )
+        return;
+      requestPlayback();
+    };
+    window.addEventListener("pointerdown", unlock, true);
+    window.addEventListener("keydown", unlock, true);
+    return () => {
+      mounted.current = false;
+      window.removeEventListener("pointerdown", unlock, true);
+      window.removeEventListener("keydown", unlock, true);
+      if (audioContext.current) audioContext.current.onstatechange = null;
       engine.current?.dispose();
       engine.current = null;
-    },
-    [],
-  );
+      audioContext.current = null;
+      active.current = false;
+    };
+  }, []);
   useEffect(() => {
-    const outside = (e) => {
-      if (settings.current?.open && !settings.current.contains(e.target))
+    const outside = (event) => {
+      if (settings.current?.open && !settings.current.contains(event.target))
         settings.current.open = false;
     };
     document.addEventListener("pointerdown", outside);
@@ -26,39 +129,41 @@ export default function AmbientMusic() {
   }, []);
   async function toggle() {
     if (pending.current) return;
-    pending.current = true;
-    setBusy(true);
+    const next = !wanted.current;
+    wanted.current = next;
+    setEnabled(next);
     setError("");
     try {
-      if (!engine.current) {
-        const Context = window.AudioContext || window.webkitAudioContext;
-        if (!Context) throw new Error("unavailable");
-        engine.current = createAmbientScore(new Context(), volume);
-      }
-      if (playing) {
-        await engine.current.pause();
-        setPlaying(false);
-      } else {
-        await engine.current.play();
-        setPlaying(true);
-      }
+      localStorage.setItem(preferenceKey, next ? "on" : "off");
     } catch {
-      setPlaying(false);
-      setError(
-        "Music is unavailable in this browser. All exploration tools still work.",
-      );
-      engine.current?.dispose();
-      engine.current = null;
+      /* Optional preference. */
+    }
+    if (next) {
+      requestPlayback();
+      return;
+    }
+    active.current = false;
+    setPlaying(false);
+    pending.current = true;
+    setBusy(true);
+    try {
+      await engine.current?.pause();
     } finally {
       pending.current = false;
-      setBusy(false);
+      if (mounted.current) setBusy(false);
     }
   }
   return (
     <div className="ambient-music">
       <button
         className="music-toggle"
-        aria-pressed={playing}
+        aria-pressed={enabled}
+        data-playing={playing}
+        title={
+          enabled && !playing
+            ? "Enabled: playback starts on your first interaction if the browser blocks autoplay."
+            : "Toggle background music"
+        }
         disabled={busy}
         onClick={toggle}
       >
@@ -73,7 +178,7 @@ export default function AmbientMusic() {
         >
           <path d="M3 8v4m4-7v10m4-12v14m4-11v8m3-6v4" />
         </svg>
-        Music <span>{playing ? "On" : "Off"}</span>
+        Music <span>{playing ? "On" : enabled ? "Ready" : "Off"}</span>
       </button>
       <details
         className="music-settings"
@@ -116,13 +221,16 @@ export default function AmbientMusic() {
             onChange={(e) => {
               const v = Number(e.target.value);
               setVolume(v);
+              volumeRef.current = v;
               engine.current?.setVolume(v);
+              volumeRef.current = v;
             }}
           />
           <p>
-            Original space score: warm chords, a soft bass pulse and answering
-            arpeggios. Synthesized here; no external audio or scientific
-            sonification.
+            Music starts automatically where the browser allows it, otherwise on
+            your first interaction. Your Off choice is remembered. Original
+            space score: warm chords, a soft bass pulse and answering arpeggios.
+            Synthesized here; no external audio or scientific sonification.
           </p>
           <a href="#/credits">Music credits</a>
         </div>

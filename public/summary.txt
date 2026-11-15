@@ -69,9 +69,9 @@ VISION AND OPENING CONTROLS
 Keep following Sun can be switched on or off. Enhanced vision optionally outlines the lunar limb, the calculated observer horizon or the local terrain-window boundary. It is illustrative and does not change light, physical radii or visibility measurements. The skippable opening appears on each full page visit/reload, without relying on cookies. Navigation within the app does not replay it; deep links are preserved and reduced-motion visitors skip the automatic opening.
 
 OPTIONAL AMBIENT MUSIC
-An original synthesized ambient score can be enabled from Music in the header, with volume and pause controls. It starts off and uses no external recordings, samples or audio downloads. It continues across in-app navigation. The opening ends on Home; the simulator still starts playing when opened (except reduced-motion, tours and exact comparison inspections).
+An original synthesized ambient score can be enabled from Music in the header, with volume and pause controls. It starts enabled, subject to browser autoplay permission, and remembers an explicit Off preference and uses no external recordings, samples or audio downloads. It continues across in-app navigation. The opening ends on Home; the simulator still starts playing when opened (except reduced-motion, tours and exact comparison inspections).
 
-Arrival calendar: select a UTC day with keyboard or pointer, or type YYYY-MM-DD. Selectable days are limited to the computed period; operating windows outside it are not calculated. Optional original music adds bass pulses and arpeggios, starts off, and has volume/pause controls.
+Arrival calendar: select a UTC day with keyboard or pointer, or type YYYY-MM-DD. Selectable days are limited to the computed period; operating windows outside it are not calculated. Optional original music adds bass pulses and arpeggios, starts enabled, subject to browser autoplay permission, and remembers an explicit Off preference, and has volume/pause controls.
 
 ROLLING DATES AND DOWNLOADS
 The simulator can loop the computed period; turn Loop off to stop at the end. It never extrapolates. The PDF and on-screen comparison distinguish the percentage of a stay with some part visible from the percentage of the disc visible at arrival. The old March–April 2027 values above remain a fixed worked example, not whole-window rolling metrics.

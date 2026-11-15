@@ -98,6 +98,13 @@ export const sources = [
 ];
 export const scientificSoftware = [
   {
+    name: "FontTools",
+    version: "optional report-font conversion tool",
+    license: "MIT",
+    repository: "https://github.com/fonttools/fonttools",
+    role: "Convert installed Overpass WOFF2 into report TTF; outlines and OFL notices preserved",
+  },
+  {
     name: "GitHub Actions checkout",
     version: "v6 pinned at d23441a48e516b6c34aea4fa41551a30e30af803",
     license: "MIT",
