@@ -2,8 +2,9 @@
 import * as THREE from "three";
 import { MOON_RADIUS_M } from "./sceneGeometry.mjs";
 
-// `role` splits the foreground: "far" (the 40 m tile) is cut away inside
-// patchRadius and "near" (the 5 m patch) outside it. Both share uniforms so the
+// `role` splits the foreground: "near" (the 5 m patch) is cut away outside
+// patchRadius and "far" (the 40 m tile) inside patchRadius - 40 m. The 40 m
+// overlap band lets depth testing close any height step at the seam. Both share uniforms so the
 // numerical horizon clip is identical. Pass `shared` to reuse another
 // material's uniforms and horizon texture.
 export function surfaceMaterial({ role = "far", shared = null } = {}) {
@@ -66,7 +67,7 @@ export function surfaceMaterial({ role = "far", shared = null } = {}) {
       // Numerical horizon is authoritative: foreground cannot cover open sky.
       if(elevation > limit) discard;
       float across = length(surfaceRay - dot(surfaceRay, surfaceUp) * surfaceUp);
-      ${role === "near" ? "if(across > patchRadius) discard;" : "if(patchRadius > 0.0 && across < patchRadius) discard;"}`,
+      ${role === "near" ? "if(across > patchRadius) discard;" : "if(patchRadius > 0.0 && across < patchRadius - 40.0) discard;"}`,
     );
     shader.fragmentShader = shader.fragmentShader.replace(
       "#include <color_fragment>",
