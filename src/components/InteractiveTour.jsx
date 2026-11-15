@@ -20,7 +20,7 @@ export const tourSteps = [
     route: "simulator",
     target: '[data-tour="sim-location"]',
     title: "Choose a location and height.",
-    body: "These four points come from published lunar studies. A taller observer can see over some terrain, so 1 metre and 5 metres can produce different results.",
+    body: "These points lie on published lunar terrain, including two nearby points selected by us. A taller observer can see over some terrain; five calculated heights let you test that change.",
     try: "Choose another location or observer height. These are study points, not certified landing sites.",
   },
   {

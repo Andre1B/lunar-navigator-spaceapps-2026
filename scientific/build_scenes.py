@@ -63,6 +63,22 @@ SITES = [
         "pgda": "Site23",
         "coordinateSource": "60 m pixel with the highest long-term average solar visibility (PDS AVGVISIB_85S_060M_201608) inside the PGDA Site23 5 m DEM, at least 6 km from its edges",
     },
+    {
+        "id": "connecting-neighbor",
+        "name": "Connecting region neighbor (our selection)",
+        "regionLabel": "Connecting ridge region, 1 km map-X offset from the published centroid",
+        "xy": (-10102.5, -11942.5),
+        "pgda": "Site01",
+        "coordinateSource": "Selected by our team using a fixed +1000 m polar-stereographic X offset from connecting-ridge (PGDA Site01 RoI 5 centroid). Not a published RoI centroid, selected landing site, or an illumination optimum; results computed independently from the same DEMs.",
+    },
+    {
+        "id": "shackleton-neighbor",
+        "name": "Shackleton region neighbor (our selection)",
+        "regionLabel": "Shackleton region, 1 km map-Y offset from the published centroid",
+        "xy": (-2812.5, -5647.5),
+        "pgda": "Site04",
+        "coordinateSource": "Selected by our team using a fixed +1000 m polar-stereographic Y offset from shackleton-rim (PGDA Site04 RoI 1 centroid). Not a published RoI centroid, selected landing site, or an illumination optimum; results computed independently from the same DEMs.",
+    },
 ]
 
 
@@ -239,7 +255,7 @@ def main():
     dem_files = [("LDEM_80S_80M.IMG", f"{IMBRIUM}/DATA/LOLA_GDR/POLAR/IMG/LDEM_80S_80M.IMG", "mid (5-100 km)"),
                  ("LDEM_75S_240M.IMG", f"{IMBRIUM}/DATA/LOLA_GDR/POLAR/IMG/LDEM_75S_240M.IMG", "far (>100 km)")]
     dem_files += [(f"{s['pgda']}/{s['pgda']}_final_adj_5mpp_surf.tif",
-                   f"{PGDA}/{s['pgda']}/{s['pgda']}_final_adj_5mpp_surf.tif", "near (<5 km)") for s in SITES]
+                   f"{PGDA}/{s['pgda']}/{s['pgda']}_final_adj_5mpp_surf.tif", "near (<5 km)") for s in {s["pgda"]: s for s in SITES}.values()]
     manifest = {
         "schemaVersion": SCHEMA_VERSION,
         "generatedAtUtc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -279,7 +295,7 @@ def main():
             f"Durations and metrics from a {INTERNAL_STEP_MIN}-min grid; rise/set times refined by bisection to <= 30 s and reported with 1-min resolution.",
         ],
         "limitations": [
-            "Points of interest from published LOLA studies; not NASA-selected landing sites and not mission recommendations.",
+            "Four original points from published LOLA studies and two neighboring points selected by our team using fixed map-coordinate offsets; none are NASA-selected landing sites or mission recommendations.",
             "No power, battery, thermal, communications-link (DSN), landing-safety or hazard assessment.",
             "Visibility windows shorter than the internal grid step may be missed.",
             "DEM interpolation, boulders and sub-pixel relief are not modelled; near-field horizon is sensitive to DEM error at low observer heights, especially 0.5 m and 1 m (Barker et al. 2021); a 0.5 m model height does not imply 0.5 m terrain accuracy.",

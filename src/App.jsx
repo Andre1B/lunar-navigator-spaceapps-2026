@@ -40,6 +40,12 @@ const links = [
   ["evidence", "Evidence"],
   ["credits", "Credits"],
 ];
+const nearbyPoints = {
+  "connecting-ridge": "connecting-neighbor",
+  "connecting-neighbor": "connecting-ridge",
+  "shackleton-rim": "shackleton-neighbor",
+  "shackleton-neighbor": "shackleton-rim",
+};
 const routeNow = () => location.hash.slice(2).split("?")[0] || "home";
 const go = (route) => {
   location.hash = "/" + route;
@@ -289,6 +295,18 @@ function Setup({
         {manifest.period.endUtc.slice(0, 10)}. Windows beyond coverage are not
         calculated.
       </p>
+      {nearbyPoints[siteId] &&
+      manifest.sites.some((s) => s.id === nearbyPoints[siteId]) ? (
+        <button
+          className="nearby-point"
+          onClick={() => setAlternative(nearbyPoints[siteId])}
+        >
+          Try a point about 1 km away{" "}
+          <small>
+            Only the alternative place changes. Dates and height stay the same.
+          </small>
+        </button>
+      ) : null}
     </aside>
   );
 }
@@ -877,7 +895,16 @@ function Credits() {
           Research references and inspiration, not reused application code or
           assets. Their reported performance was not independently reproduced.
         </p>
-        <p><a href="https://github.com/Andre1B/lunar-navigator-spaceapps-2026/blob/main/docs/WINNER-GAP-20.md" target="_blank" rel="noreferrer">Twenty additional global winners: evidence, useful gaps and what we chose to apply ↗</a></p>
+        <p>
+          <a
+            href="https://github.com/Andre1B/lunar-navigator-spaceapps-2026/blob/main/docs/WINNER-GAP-20.md"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Twenty additional global winners: evidence, useful gaps and what we
+            chose to apply ↗
+          </a>
+        </p>
         <ul>
           {researchProjects.map(([name, url, use]) => (
             <li key={name}>
@@ -927,6 +954,7 @@ export default function App() {
     } catch {
       /* Storage is optional. */
     }
+    go("simulator");
     requestAnimationFrame(() =>
       document.getElementById("main")?.focus({ preventScroll: true }),
     );
@@ -1005,6 +1033,16 @@ export default function App() {
         <Header route={route} mode={mode} onTour={startTour} />
         {route === "home" ? (
           <HomeV2
+            dataset={dataset}
+            onExperiment={(example) => {
+              setSiteId(example.siteId);
+              setAlternative(example.alternative);
+              setHeight(example.height);
+              setDate(example.date);
+              setDays(example.days);
+              setDelay(example.delay);
+              go("compare");
+            }}
             onReplayOpening={() => setOpening(true)}
             onTour={startTour}
             onStart={(m) => {

@@ -14,7 +14,7 @@ Team An0r4k’s NASA Space Apps 2026 educational prototype for [Lunar Landing Si
 - [Three-minute review](https://lunar-navigator-2026.pages.dev/#/review): question, current scenario results and executed evidence, with direct navigation to every tool.
 - Compare: editable example darkness limit, lower-bound-aware feedback and a downloadable JSON recording the same results, provenance, derived-data hashes and build identity.
 
-Data covers four published polar points, 2027-03-01 through 2027-04-28, observer heights 1/5 m. Locations are **not selected/certified landing sites**. Window comparisons use visible solar fractions, darkness intervals and direct Earth visibility. Out-of-coverage windows are not calculated.
+Data covers six points on published polar terrain (two published region centroids and four points selected by us, including two nearby fixed-offset neighbors), 2027-03-01 through 2027-04-28, observer heights 1/5 m. Locations are **not selected/certified landing sites**. Window comparisons use visible solar fractions, darkness intervals and direct Earth visibility. Out-of-coverage windows are not calculated.
 
 ## Run locally
 
@@ -66,3 +66,6 @@ AI-assisted research, code, explanatory text, documentation and verification are
 ## Limits
 
 Sunlight does not establish electrical generation or battery survival. Direct Earth visibility does not establish antenna pointing, link budget, DSN access or relay coverage. No landing-safety certification, orbital mission design or current-weather service is provided.
+
+## First interaction
+The opening leads to the moving simulator. Normal-motion entries play automatically; reduced-motion, tours and exact comparison inspections start paused. On Home, try +3/+7/+14 days to see a real two-arrival comparison immediately, then open those same settings in Compare. A nearby-point shortcut changes only the alternative location. Sun/Earth aiming follows the current direction continuously; manual dragging releases following.

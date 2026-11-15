@@ -32,11 +32,12 @@ export default function Review({ dataset, settings }) {
           <p className="section-label">30 seconds · the question</p>
           <h2>Terrain and time decide what you can see.</h2>
           <p>
-            Choose one of four points within published LOLA polar study regions
-            and an observer height of 0.5, 1, 2, 5 or 10 metres. Two points are
-            published region centroids; we selected the other two from the
-            published illumination map. Their exact coordinates and selection
-            methods are public.
+            Choose one of {dataset.manifest?.sites.length ?? 6} points within
+            published LOLA polar study regions and an observer height of 0.5, 1,
+            2, 5 or 10 metres. Two points are published region centroids; two
+            are our selections from the published illumination map, and two are
+            nearby points we selected by fixed offsets of about 1 km. Their
+            exact coordinates and selection methods are public.
           </p>
           <p>
             Move one astronomical clock in Faithful Mode, inspect the terrain

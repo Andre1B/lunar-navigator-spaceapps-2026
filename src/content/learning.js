@@ -8,7 +8,7 @@ export const intro = {
   facts: [
     {
       q: "What is it?",
-      a: "A lunar sky simulator using calculated Sun and Earth positions and published terrain. It replays the real Sun, Earth and Moon geometry over four study points near the lunar south pole.",
+      a: "A lunar sky simulator using calculated Sun and Earth positions and published terrain. It replays the real Sun, Earth and Moon geometry over six points on published terrain near the lunar south pole.",
     },
     {
       q: "Who is it for?",
@@ -177,10 +177,10 @@ export const metrics = {
 export const steps = [
   {
     title: "Pick a point",
-    body: "Choose one of four points on published south-pole terrain. Two use published study regions; two were selected by us within the study terrain. They are not NASA-selected landing sites.",
+    body: "Choose one of six points on published south-pole terrain. Two use published region centroids; four were selected by us, including two nearby points offset by about 1 km. They are not NASA-selected landing sites.",
     route: "compare",
     action: "Choose a point in Compare",
-    more: "The four points are Connecting ridge, Shackleton rim, Nobile rim 1 and Malapert massif.",
+    more: "The original points are Connecting ridge, Shackleton rim, Nobile rim 1 and Malapert massif. Two additional points are neighbors of Connecting and Shackleton, selected by fixed coordinate offsets.",
   },
   {
     title: "Choose an observer height",

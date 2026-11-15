@@ -8,7 +8,7 @@ const cameras = [
   ["overview", "Moon orbit", "Inspect the lunar globe"],
   ["earth", "Earth", "Inspect our home planet"],
   ["south", "South pole", "Look down on the region"],
-  ["sky", "Surface sky", "Horizon diagram: what blocks your view"],
+  ["sky", "Surface sky", "Follow the Sun above the real terrain"],
   ["terrain", "Local terrain", "Real 3D terrain, light and shadows"],
   ["pair", "Earth–Moon scale", "See the real separation"],
   ["system", "Solar system", "True sizes and distances"],
@@ -30,9 +30,14 @@ export default function SimulatorV2({
   tourActive = false,
 }) {
   const { manifest, sky, sites, planets } = dataset;
-  const [view, setView] = useState("overview"),
+  const [view, setView] = useState(() => inspecting ? "sky" : "overview"),
     [immersive, setImmersive] = useState(false),
-    [playing, setPlaying] = useState(false),
+    [playing, setPlaying] = useState(
+      () =>
+        !inspecting &&
+        !tourActive &&
+        !matchMedia("(prefers-reduced-motion:reduce)").matches,
+    ),
     [speed, setSpeed] = useState(1),
     [surfaceStyle, setSurfaceStyle] = useState("terrain"),
     [lightPaths, setLightPaths] = useState(false),
@@ -65,6 +70,15 @@ export default function SimulatorV2({
       ? observation
       : null;
   const atEnd = !!manifest && index >= manifest.period.sampleCount - 1;
+  const entryInitialized = useRef(false);
+  useEffect(() => {
+    if (!manifest || entryInitialized.current) return;
+    entryInitialized.current = true;
+    if (playing && index >= manifest.period.sampleCount - 1) setIndex(0);
+  }, [manifest, playing, index, setIndex]);
+  useEffect(() => {
+    if (tourActive) setPlaying(false);
+  }, [tourActive]);
   function restart(play = false) {
     clock.current = 0;
     setIndex(0);
@@ -128,13 +142,16 @@ export default function SimulatorV2({
     >
       <div className="explorer-heading">
         <div>
-          <h1>See what the lunar terrain hides.</h1>
+          <h1>What changes if a Moon landing is delayed?</h1>
           <p>
-            Press Play to move time. Does the Sun clear the hills? Can this
-            place see Earth? Change the height, then compare an arrival delay.
+            Watch the hills hide the Sun and Earth. Then compare arrival dates
+            to measure time without sunlight and time with Earth in view.
           </p>
         </div>
         <div className="explorer-actions">
+          <a className="button" href="#/compare">
+            Compare arrivals →
+          </a>
           <button className="button secondary" onClick={onTour}>
             Take a tour
           </button>
@@ -147,6 +164,25 @@ export default function SimulatorV2({
           </button>
         </div>
       </div>
+      {!immersive && !inspecting ? (
+        <div className="explorer-first-steps" aria-label="Start here">
+          <button onClick={() => setView("sky")}>
+            <span>1</span>
+            <strong>Watch sunlight</strong>
+            <small>Follow the Sun across the hills</small>
+          </button>
+          <button onClick={() => setSetupOpen(true)}>
+            <span>2</span>
+            <strong>Change place or height</strong>
+            <small>See how the view changes</small>
+          </button>
+          <a href="#/compare">
+            <span>3</span>
+            <strong>Test an arrival delay</strong>
+            <small>Get the numbers, side by side</small>
+          </a>
+        </div>
+      ) : null}
       <div className="explorer-layout">
         {inspecting ? (
           <p className="inspection-note">
@@ -561,7 +597,13 @@ export default function SimulatorV2({
                   The Sun keeps its real apparent size. Use “Look at Sun” to
                   find it.
                 </p>
-                {surfaceStyle !== "diagram" ? <p className="polar-light-note">At the pole, seeing the Sun does not mean every slope is lit. The ground facing away can stay in shadow. “See sunlit terrain” gives an elevated view of the same place and time.</p> : null}
+                {surfaceStyle !== "diagram" ? (
+                  <p className="polar-light-note">
+                    At the pole, seeing the Sun does not mean every slope is
+                    lit. The ground facing away can stay in shadow. “See sunlit
+                    terrain” gives an elevated view of the same place and time.
+                  </p>
+                ) : null}
                 {mode === "faithful" && frameObservation ? (
                   <p>
                     {observation.sun > 0
@@ -643,8 +685,9 @@ export default function SimulatorV2({
                 <>
                   <h2>Move time. Watch the light change.</h2>
                   <p>
-                    Choose Surface sky, then press Play. Can you find a moment
-                    when terrain hides the Sun but Earth is visible?
+                    Choose Surface sky and watch time move. Press Play if
+                    paused. Can you find a moment when terrain hides the Sun but
+                    Earth is visible?
                   </p>
                   <button
                     onClick={() => {

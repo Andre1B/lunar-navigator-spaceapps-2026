@@ -80,12 +80,15 @@ export default function SpaceSceneV2({
     onObservation,
   };
   const [status, setStatus] = useState("Loading lunar imagery and elevation…"),
-    [error, setError] = useState(null);
+    [error, setError] = useState(null),
+    [following, setFollowing] = useState(null);
   const labels = useRef({});
   useEffect(() => {
     const el = host.current,
-      mobile = matchMedia("(max-width:720px)").matches ||
-        (matchMedia("(pointer:coarse)").matches && !matchMedia("(hover:hover)").matches),
+      mobile =
+        matchMedia("(max-width:720px)").matches ||
+        (matchMedia("(pointer:coarse)").matches &&
+          !matchMedia("(hover:hover)").matches),
       reduced = matchMedia("(prefers-reduced-motion:reduce)").matches;
     const qaMode = new URLSearchParams(location.search).has("qa");
     let disposed = false,
@@ -421,7 +424,14 @@ export default function SpaceSceneV2({
     const planetMeshes = new Map();
     let localFrame = null,
       lookAz = 0,
-      lookEl = 0;
+      lookEl = 0,
+      skyTracking = null,
+      trackingOffsetEl = 0;
+    function releaseSkyTracking() {
+      skyTracking = null;
+      setFollowing(null);
+      latest.current.onFocusChange?.(null);
+    }
 
     readJson("/data/globe/moon-elevation.json")
       .then((meta) => {
@@ -739,8 +749,13 @@ export default function SpaceSceneV2({
         // Publish independently of recomputation: a final frame may have been
         // computed under the throttle immediately before Play stops.
         const context = site?.id + "|" + height;
-        if (currentObservation && observationKey !== lastPublishedObservationKey &&
-          (!p.playing || context !== lastPublishedContext || now-lastObservationAt >= 100)) {
+        if (
+          currentObservation &&
+          observationKey !== lastPublishedObservationKey &&
+          (!p.playing ||
+            context !== lastPublishedContext ||
+            now - lastObservationAt >= 100)
+        ) {
           latest.current.onObservation?.(currentObservation);
           lastObservationAt = now;
           lastPublishedObservationKey = observationKey;
@@ -802,7 +817,11 @@ export default function SpaceSceneV2({
             lookAz = Math.atan2(direction.dot(E), direction.dot(N));
             // Slightly lower framing includes the ground. The explicit Sun aim
             // remains exact and does not alter observer position or body scale.
-            lookEl = Math.asin(THREE.MathUtils.clamp(direction.dot(U), -1, 1)) - 0.1;
+            lookEl =
+              Math.asin(THREE.MathUtils.clamp(direction.dot(U), -1, 1)) - 0.1;
+            skyTracking = "sun";
+            trackingOffsetEl = -0.1;
+            setFollowing("sun");
             transition = null;
           } else if (local) {
             localCameraBody = bodyO
@@ -916,6 +935,27 @@ export default function SpaceSceneV2({
               .applyQuaternion(q),
           );
           camera.up.copy(U);
+          // Follow the currently presented body, including the observer's
+          // moving local frame. A one-time azimuth is not continuous tracking.
+          const followed =
+            skyTracking === "sun"
+              ? sun
+              : skyTracking === "earth"
+                ? earth
+                : planetMeshes.get(skyTracking);
+          if (followed) {
+            const direction = followed.position
+              .clone()
+              .sub(camera.position)
+              .normalize();
+            lookAz = Math.atan2(direction.dot(E), direction.dot(N));
+            lookEl = THREE.MathUtils.clamp(
+              Math.asin(THREE.MathUtils.clamp(direction.dot(U), -1, 1)) +
+                trackingOffsetEl,
+              -Math.PI / 2 + 0.001,
+              Math.PI / 2 - 0.001,
+            );
+          }
           const dir = N.clone()
             .multiplyScalar(Math.cos(lookEl) * Math.cos(lookAz))
             .addScaledVector(E, Math.cos(lookEl) * Math.sin(lookAz))
@@ -1131,8 +1171,8 @@ export default function SpaceSceneV2({
             Math.max(1, el.clientHeight),
         ),
       );
-      glare.visible = p.opticalGlare &&
-        (p.view !== "sky" || currentObservation?.sun > 0);
+      glare.visible =
+        p.opticalGlare && (p.view !== "sky" || currentObservation?.sun > 0);
       scene.position.copy(camera.position).negate();
       renderCamera.copy(camera, false);
       renderCamera.position.set(0, 0, 0);
@@ -1229,6 +1269,7 @@ export default function SpaceSceneV2({
           // One pointer owns a sky drag until it ends. A second finger must not
           // replace its origin or move the view when the first finger resumes.
           skyDrag = { pointerId: e.pointerId, x: e.clientX, y: e.clientY };
+          releaseSkyTracking();
           renderer.domElement.setPointerCapture(e.pointerId);
         }
       },
@@ -1289,6 +1330,7 @@ export default function SpaceSceneV2({
         upgradeImagery();
         transition = null;
         if (latest.current.view === "sky") {
+          releaseSkyTracking();
           lookAz += dx;
           lookEl = THREE.MathUtils.clamp(lookEl + dy, -1.4, 1.4);
         } else {
@@ -1359,6 +1401,9 @@ export default function SpaceSceneV2({
           const d = obj.position.clone().sub(camera.position).normalize();
           lookAz = Math.atan2(d.dot(localFrame.E), d.dot(localFrame.N));
           lookEl = Math.asin(THREE.MathUtils.clamp(d.dot(localFrame.U), -1, 1));
+          skyTracking = id;
+          trackingOffsetEl = 0;
+          setFollowing(id);
         } else {
           const r = id === "moon" ? 1 : obj.scale.x;
           trackedBody = id;
@@ -1384,6 +1429,10 @@ export default function SpaceSceneV2({
         }
         schedule();
       },
+      releaseTracking() {
+        releaseSkyTracking();
+        schedule();
+      },
     };
     const keyboard = (event) => {
       const actions = {
@@ -1407,6 +1456,7 @@ export default function SpaceSceneV2({
         view: latest.current.view,
         index: latest.current.index,
         trackedBody,
+        skyTracking,
         camera: {
           position: camera.position.toArray(),
           direction: camera.getWorldDirection(new THREE.Vector3()).toArray(),
@@ -1533,13 +1583,42 @@ export default function SpaceSceneV2({
       <div className="camera-controls" aria-label="Camera controls">
         {view === "sky" ? (
           <>
-            <button onClick={() => engine.current?.focus("sun")}>
+            <button
+              aria-pressed={following === "sun"}
+              title="Follow the current Sun direction as time moves"
+              onClick={() => engine.current?.focus("sun")}
+            >
               Look at Sun
             </button>
-            <button onClick={() => engine.current?.focus("earth")}>
+            <button
+              aria-pressed={following === "earth"}
+              title="Follow the current Earth direction as time moves"
+              onClick={() => engine.current?.focus("earth")}
+            >
               Look at Earth
             </button>
-            <button onClick={() => onViewChange?.("terrain")}>See sunlit terrain</button>
+            <button onClick={() => onViewChange?.("terrain")}>
+              See sunlit terrain
+            </button>
+            {following ? (
+              <button
+                className="tracking-state"
+                onClick={() => engine.current?.releaseTracking()}
+              >
+                Following{" "}
+                {following === "sun"
+                  ? "Sun"
+                  : following === "earth"
+                    ? "Earth"
+                    : (planets?.planets.find((p) => p.id === following)?.name ??
+                      following)}{" "}
+                · Stop following
+              </button>
+            ) : (
+              <span className="tracking-state">
+                Free look · choose Sun or Earth to follow
+              </span>
+            )}
           </>
         ) : null}
         <select

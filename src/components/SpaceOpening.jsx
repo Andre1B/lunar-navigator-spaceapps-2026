@@ -96,7 +96,9 @@ export default function SpaceOpening({ onClose }) {
           />
         </svg>
         <h1 id="opening-title">Lunar Navigator</h1>
-        <p id="opening-description">Follow the light. Understand the delay.</p>
+        <p id="opening-description">
+          Compare lunar places. See what a delay changes.
+        </p>
         <button ref={enter} className="opening-enter" onClick={onClose}>
           Start exploring <span aria-hidden="true">→</span>
         </button>

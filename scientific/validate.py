@@ -98,7 +98,7 @@ def v1_horizons(models):
          "newHorizonsRequests": calls},
         "pass" if p95 < 0.01 else "fail",
         "Horizons responses cached in scientific/cache/horizons/ (not versioned); serial requests with identifying User-Agent.",
-        "Agreement holds for these 40 sampled instants only, limited by the 1e-6 deg precision printed by Horizons. It is not a general proof of equality for every site, time or body.",
+        "Agreement holds only for the sampled instants and site/body pairs listed in this result, limited by the 1e-6 deg precision printed by Horizons. It is not a general proof of equality for every site, time or body.",
     )
 
 
@@ -106,7 +106,7 @@ def v1_horizons(models):
 def v2_datum(mid):
     rows = []
     worst = 0.0
-    for s in B.SITES:
+    for s in {s["pgda"]: s for s in B.SITES}.values():
         p = g.load_pgda_geotiff(os.path.join(B.CACHE, "dem", s["pgda"], f"{s['pgda']}_final_adj_5mpp_surf.tif"))
         n = 16
         a = p.data

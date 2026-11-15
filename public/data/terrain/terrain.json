@@ -122,6 +122,58 @@
    "siteTerrainHeightM": 4984.4,
    "fractionFromPgda5m": 0.794,
    "sha256": "b0712509de4d461ed0ee19a82f1a99e7cb3ca960cbc7190f5c595ef1c3178ed4"
+  },
+  {
+   "siteId": "connecting-neighbor",
+   "file": "terrain/connecting-neighbor-20km-40m.i16",
+   "width": 500,
+   "height": 500,
+   "cellSizeM": 40.0,
+   "boundsPolarStereoM": {
+    "xMin": -20102.5,
+    "xMax": -102.5,
+    "yMin": -21942.5,
+    "yMax": -1942.5
+   },
+   "siteXYM": [
+    -10102.5,
+    -11942.5
+   ],
+   "siteCellRowCol": [
+    249.5,
+    249.5
+   ],
+   "minM": -941,
+   "maxM": 1958,
+   "siteTerrainHeightM": 1905.6,
+   "fractionFromPgda5m": 0.6368,
+   "sha256": "0814ed15a3491e779658419d71babb505aab2ded1561aa4d93b47af2785e35d2"
+  },
+  {
+   "siteId": "shackleton-neighbor",
+   "file": "terrain/shackleton-neighbor-20km-40m.i16",
+   "width": 500,
+   "height": 500,
+   "cellSizeM": 40.0,
+   "boundsPolarStereoM": {
+    "xMin": -12812.5,
+    "xMax": 7187.5,
+    "yMin": -15647.5,
+    "yMax": 4352.5
+   },
+   "siteXYM": [
+    -2812.5,
+    -5647.5
+   ],
+   "siteCellRowCol": [
+    249.5,
+    249.5
+   ],
+   "minM": -2846,
+   "maxM": 1957,
+   "siteTerrainHeightM": 1698.7,
+   "fractionFromPgda5m": 0.6368,
+   "sha256": "92e1ffc44d09d476ebd1ec1d7cfa83a0efa18ac2858e7442e0a8389679071ea2"
   }
  ],
  "source": {

@@ -264,6 +264,11 @@ export const researchProjects = [
     "Evidence level, lesson and action for each winner",
   ],
   [
+    "Twenty additional global winners, 2012–2015",
+    "https://github.com/Andre1B/lunar-navigator-spaceapps-2026/blob/main/docs/WINNER-GAP-NEXT-20.md",
+    "First-interaction context, nearby comparisons and linking an answer to the relevant sky; ideas only, no code or assets copied",
+  ],
+  [
     "Cambridge Asteroids / Voxsteroid (2021)",
     "https://github.com/Laurence-Cullen/Asteroids",
     "Input-to-output experiment and explicit aiming controls; research only, no code copied",

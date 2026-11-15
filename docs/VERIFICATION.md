@@ -2,7 +2,15 @@
 
 This record distinguishes executed checks from pending release gates. It does not certify scientific precision in every geometry or competition eligibility.
 
-## Current release candidate (V2 true-scale simulator)
+## Motion and surface correction ? current gate in progress
+
+The public site still runs RC5 (`3826c92`, deployment `66055be1`). Independent 60 Hz sampling found a real playback-text/layout flicker on that release. Its earlier green interaction checks did not detect the defect. RC5 is not a complete release sign-off.
+
+The local correction is committed through `1c3c681`: retain last rendered readings with their frame UTC, stable status text, independent GPU playback with mobile 60 / desktop 120 FPS ceilings, a horizon-clipped real-terrain foreground, finite opening and tutorial animation, and event inspection. Independent bounded review closed the three evidenced lighting/publication/camera-frame findings.
+
+Executed locally: production build, data integrity 8/8, credits 163 packages / 0 missing repository URLs, and tracked-text UTF-8 / secret-pattern checks. Independent new-UI checks passed 7/7 (opening, focus, reduced motion, tutorial, exact event inspection, surface options, glare occlusion, and comparison/export without WebGL). The strengthened flicker checks, legacy-suite triage, final hardware measurement, current-source production QA and production Lighthouse are still pending. Caps are not measured FPS, and automated checks do not establish novice comprehension or absence of every possible bug.
+
+## Historical RC3 / RC4 evidence (superseded) ? V2 true-scale simulator
 
 **Release:** commit `090c45ec6c8756e07d26ef195bed372c54293b12`, tag `release-candidate-2026-11-14-3`. The tag is a candidate, not a submission.
 **Deployment:** Cloudflare Pages deployment `61c81cc1` of `lunar-navigator-2026` at 2026-11-14T19:50:26Z, built from a clean tree. The bundle reports `build.dirty = false` and the same revision.
@@ -46,7 +54,7 @@ This record distinguishes executed checks from pending release gates. It does no
 - Real-device GPU, Safari, Firefox and a full screen-reader audit were not tested.
 - The full true-scale browser matrix was not re-run in production.
 
-**Current deployment, RC4:** commit `42e12dc`, tag `release-candidate-2026-11-14-4`, deployment `52b32426` at 2026-11-14T20:00:08Z.
+**Historical deployment, RC4:** commit `42e12dc`, tag `release-candidate-2026-11-14-4`, deployment `52b32426` at 2026-11-14T20:00:08Z.
 - **Change from RC3:** only the line endings of the dataset JSON (LF) and of the generators. No data values changed.
 - **Why it was needed:** CI had failed `check:data` since `a7ab3f6`, because the integrity hashes covered Windows CRLF bytes.
 - **CI on `42e12dc`:** success.

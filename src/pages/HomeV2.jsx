@@ -1,4 +1,12 @@
-export default function HomeV2({ onStart, onTour, onReplayOpening }) {
+import DelayBriefing from "../components/DelayBriefing.jsx";
+
+export default function HomeV2({
+  dataset,
+  onExperiment,
+  onStart,
+  onTour,
+  onReplayOpening,
+}) {
   return (
     <main id="main" tabIndex={-1} className="home home-v2">
       <section className="home-intro" data-tour="purpose">
@@ -9,13 +17,16 @@ export default function HomeV2({ onStart, onTour, onReplayOpening }) {
             <span>What changes on the ground?</span>
           </h1>
           <p className="lead">
-            Compare how long a place on the Moon can see the Sun and Earth
-            before and after an arrival delay.
+            Find out how a new arrival date changes time without sunlight and
+            time with Earth in view. Compare places, then use 3D to see why.
           </p>
           <p>
             Choose a place, a date and the height of a camera or antenna above
             the ground. We show the changes. The 3D simulator helps you see why.
           </p>
+        </div>
+        <DelayBriefing dataset={dataset} onOpen={onExperiment} />
+        <div className="home-start">
           <div className="home-actions">
             <a className="button" href="#/compare">
               Compare a landing delay
@@ -40,27 +51,13 @@ export default function HomeV2({ onStart, onTour, onReplayOpening }) {
             <button onClick={onReplayOpening}>Replay the opening</button>
           </div>
           <p className="home-scope">
-            For learning and comparing lunar conditions. Four south-pole study
-            points · March–April 2027. This is not a certified landing plan.
+            For learning and comparing lunar conditions.{" "}
+            {dataset?.manifest?.sites.length ?? 6} points on published
+            south-pole terrain · March–April 2027. This is not a certified
+            landing plan.
           </p>
           <a className="quick-review" href="#/review">
             Just evaluating? Review the project in 3 minutes →
-          </a>
-        </div>
-        <div className="home-moon">
-          <div
-            className="moon-disc"
-            role="img"
-            aria-label="LROC lunar imagery from NASA’s Scientific Visualization Studio"
-          />
-          <div className="home-orbit-note">
-            <span className="sun-dot" />
-            Sunlight
-            <span className="earth-dot" />
-            Earth visibility
-          </div>
-          <a className="scene-preview-link" href="#/simulator">
-            Enter the 3D explorer →
           </a>
         </div>
       </section>
@@ -143,8 +140,8 @@ export default function HomeV2({ onStart, onTour, onReplayOpening }) {
             <div>
               <h3>Choose a place and a time</h3>
               <p>
-                Four points on published south-pole terrain, with a defined
-                study period.
+                Points on published south-pole terrain, with a defined study
+                period.
               </p>
             </div>
           </li>

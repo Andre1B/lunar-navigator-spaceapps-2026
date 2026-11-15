@@ -1,17 +1,17 @@
 {
  "schemaVersion": "1.0.0",
- "generatedAtUtc": "2026-11-14T22:33:29Z",
+ "generatedAtUtc": "2026-11-15T00:42:37Z",
  "tests": [
   {
    "id": "V1",
    "title": "Ephemeris vs JPL Horizons",
    "method": "Apparent airless az/el of Sun and Earth from each site (terrain + 1 m) at 5 UTC instants: SPICE azlcpo (LT+S, DE440s, MOON_ME) vs Horizons API (DE441, coord@301), angular separation of direction vectors.",
-   "metric": "p95 and max angular separation (deg), n = 40",
+   "metric": "p95 and max angular separation (deg), n = 60",
    "target": "p95 < 0.01 deg (max and outliers reported)",
    "result": {
     "p95Deg": 0.0,
     "maxDeg": 0.0,
-    "n": 40,
+    "n": 60,
     "perSiteBody": [
      {
       "site": "connecting-ridge",
@@ -52,13 +52,33 @@
       "site": "malapert-massif",
       "body": "EARTH",
       "maxSepDeg": 0.0
+     },
+     {
+      "site": "connecting-neighbor",
+      "body": "SUN",
+      "maxSepDeg": 0.0
+     },
+     {
+      "site": "connecting-neighbor",
+      "body": "EARTH",
+      "maxSepDeg": 0.0
+     },
+     {
+      "site": "shackleton-neighbor",
+      "body": "SUN",
+      "maxSepDeg": 0.0
+     },
+     {
+      "site": "shackleton-neighbor",
+      "body": "EARTH",
+      "maxSepDeg": 0.0
      }
     ],
-    "newHorizonsRequests": 0
+    "newHorizonsRequests": 4
    },
    "status": "pass",
    "evidence": "Horizons responses cached in scientific/cache/horizons/ (not versioned); serial requests with identifying User-Agent.",
-   "notes": "Agreement holds for these 40 sampled instants only, limited by the 1e-6 deg precision printed by Horizons. It is not a general proof of equality for every site, time or body."
+   "notes": "Agreement holds only for the sampled instants and site/body pairs listed in this result, limited by the 1e-6 deg precision printed by Horizons. It is not a general proof of equality for every site, time or body."
   },
   {
    "id": "V2",
@@ -142,6 +162,16 @@
      "site": "malapert-massif",
      "maxAbsDiffDeg": 0.0,
      "minReachKm": 332.6
+    },
+    {
+     "site": "connecting-neighbor",
+     "maxAbsDiffDeg": 0.0,
+     "minReachKm": 442.7
+    },
+    {
+     "site": "shackleton-neighbor",
+     "maxAbsDiffDeg": 0.0,
+     "minReachKm": 449.0
     }
    ],
    "status": "pass",
@@ -194,6 +224,16 @@
      "site": "malapert-massif",
      "pgda18yrAvgVisibility60m": 0.715,
      "ours2024to2026At1m": 0.654
+    },
+    {
+     "site": "connecting-neighbor",
+     "pgda18yrAvgVisibility60m": 0.423,
+     "ours2024to2026At1m": 0.49
+    },
+    {
+     "site": "shackleton-neighbor",
+     "pgda18yrAvgVisibility60m": 0.408,
+     "ours2024to2026At1m": 0.388
     }
    ],
    "status": "info",
@@ -332,6 +372,88 @@
     },
     {
      "site": "malapert-massif",
+     "adjacentHeightPairs": [
+      {
+       "lowerM": 0.5,
+       "upperM": 1,
+       "higherHorizonNotAboveLower": true,
+       "higherVisibleFractionNotBelowLower": {
+        "sun": true,
+        "earth": true
+       }
+      },
+      {
+       "lowerM": 1,
+       "upperM": 2,
+       "higherHorizonNotAboveLower": true,
+       "higherVisibleFractionNotBelowLower": {
+        "sun": true,
+        "earth": true
+       }
+      },
+      {
+       "lowerM": 2,
+       "upperM": 5,
+       "higherHorizonNotAboveLower": true,
+       "higherVisibleFractionNotBelowLower": {
+        "sun": true,
+        "earth": true
+       }
+      },
+      {
+       "lowerM": 5,
+       "upperM": 10,
+       "higherHorizonNotAboveLower": true,
+       "higherVisibleFractionNotBelowLower": {
+        "sun": true,
+        "earth": true
+       }
+      }
+     ]
+    },
+    {
+     "site": "connecting-neighbor",
+     "adjacentHeightPairs": [
+      {
+       "lowerM": 0.5,
+       "upperM": 1,
+       "higherHorizonNotAboveLower": true,
+       "higherVisibleFractionNotBelowLower": {
+        "sun": true,
+        "earth": true
+       }
+      },
+      {
+       "lowerM": 1,
+       "upperM": 2,
+       "higherHorizonNotAboveLower": true,
+       "higherVisibleFractionNotBelowLower": {
+        "sun": true,
+        "earth": true
+       }
+      },
+      {
+       "lowerM": 2,
+       "upperM": 5,
+       "higherHorizonNotAboveLower": true,
+       "higherVisibleFractionNotBelowLower": {
+        "sun": true,
+        "earth": true
+       }
+      },
+      {
+       "lowerM": 5,
+       "upperM": 10,
+       "higherHorizonNotAboveLower": true,
+       "higherVisibleFractionNotBelowLower": {
+        "sun": true,
+        "earth": true
+       }
+      }
+     ]
+    },
+    {
+     "site": "shackleton-neighbor",
      "adjacentHeightPairs": [
       {
        "lowerM": 0.5,

@@ -36,7 +36,7 @@ Projection: south polar stereographic on the 1737.4 km sphere. Longitude 0 point
 
 ## Points of interest
 
-All four sites are on the PGDA 5 m site DEMs. They are points from published LOLA studies, **not NASA-selected landing sites**.
+All six points are on the cached PGDA 5 m site DEMs. Four original points come from published LOLA study products. Two neighbors were selected by our team using fixed coordinate offsets, not by optimizing illumination. **None are NASA-selected landing sites.**
 
 | id | Coordinate source |
 | --- | --- |
@@ -44,6 +44,8 @@ All four sites are on the PGDA 5 m site DEMs. They are points from published LOL
 | shackleton-rim | Centroid of RoI 1, PGDA `Site04_ROIs` |
 | nobile-rim-1 | Highest long-term average illumination pixel (PDS `AVGVISIB_85S_060M`) inside the Site06 DEM, at least 6 km from its edges. No RoI file is published for this site. |
 | malapert-massif | Same rule, Site23 DEM |
+| connecting-neighbor | Our selection: +1000 m in polar-stereographic X from connecting-ridge; same Site01 DEM |
+| shackleton-neighbor | Our selection: +1000 m in polar-stereographic Y from shackleton-rim; same Site04 DEM |
 
 ## Validation
 
@@ -82,3 +84,5 @@ This code was written with AI coding assistants (Claude Opus 5.5, reviewed with 
 `manifest.observerHeightsM` lists `[0.5, 1, 2, 5, 10]` metres above the DEM surface. Each height has a separately calculated horizon, Sun/Earth visible fraction, events and metrics; heights are never interpolated. Shared `azDeg`, `elDeg`, `rangeKm` and `angularRadiusDeg` arrays retain the explicit 1 m reference (`manifest.conventions.geometryReferenceHeightM`), preserving the original geometry. Visibility calculations use the actual observer position at each height.
 
 A model observer at 0.5 m does not imply terrain accuracy of 0.5 m. The 5 m DEM omits boulders and subpixel relief, and low observer heights are particularly sensitive to terrain error. Zero height is omitted because the model cannot resolve surface contact and subpixel obstacles.
+
+The two neighbor offsets are defined in map axes, not local east/north. Each has independently computed horizons and observer ephemerides at every supported height, plus its own visual terrain tile. V4 remains a reproduction check only for the two original published RoI centroids; it is not extended to the neighbors. Source-DEM datum/registration checks remain at the four unique source tiles.

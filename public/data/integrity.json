@@ -1,13 +1,13 @@
 {
  "schemaVersion": "1.0.0",
  "purpose": "Identify the exact derived dataset used by the app and by downloaded comparison reports. Hashes cover the files' current bytes; input data hashes are in manifest.provenance.",
- "hashedAtUtc": "2026-11-14T22:33:38Z",
- "manifestGeneratedAtUtc": "2026-11-14T22:32:47Z",
+ "hashedAtUtc": "2026-11-15T00:42:37Z",
+ "manifestGeneratedAtUtc": "2026-11-15T00:41:33Z",
  "files": [
   {
    "file": "manifest.json",
-   "bytes": 8434,
-   "sha256": "8335d9c20eb34ddf83204ff812f5392f2bdb9ef76c11fd76192ef5a453d282db"
+   "bytes": 9899,
+   "sha256": "148243fbaa5b8e08b0271f49613c56454ff7e5288fe220a8ed9e38d5e5879368"
   },
   {
    "file": "sky.json",
@@ -21,8 +21,8 @@
   },
   {
    "file": "validation.json",
-   "bytes": 9971,
-   "sha256": "683c49930423fb796de83de5263bfaf9281b6b380468c9f4e74cec346e50be24"
+   "bytes": 12609,
+   "sha256": "81f9b98b2be381b9e48d7fbd6e07789f5a568cdca4222b5fcff4d7ec86ca6fb9"
   },
   {
    "file": "sites/connecting-ridge.json",
@@ -43,6 +43,16 @@
    "file": "sites/malapert-massif.json",
    "bytes": 180352,
    "sha256": "074f0de71f4e303406468ca9adee7e984dd58cbbd3533fa2c5e8806beb69c3be"
+  },
+  {
+   "file": "sites/connecting-neighbor.json",
+   "bytes": 179200,
+   "sha256": "2a6162cb6745de157450c79286c9ecc0336ed3bd323f8373f3b47cd1195ed12c"
+  },
+  {
+   "file": "sites/shackleton-neighbor.json",
+   "bytes": 183106,
+   "sha256": "e9e64f15f93f4ce4775484ef3b2bf25bb68f7a52b850bf46cc6afdf7a0a6a9c0"
   }
  ],
  "generator": "scientific/hash_dataset.py"
