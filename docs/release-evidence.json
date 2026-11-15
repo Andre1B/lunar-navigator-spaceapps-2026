@@ -1,207 +1,256 @@
 {
-  "recordedAtUtc": "2026-11-14T19:57:09+00:00",
+  "recordedAtUtc": "2026-11-15T01:58:01.799491+00:00",
   "site": "https://lunar-navigator-2026.pages.dev/",
-  "testedDeployment": "61c81cc1",
-  "deployedAtUtc": "2026-11-14T19:50:26Z",
-  "sourceCommit": "090c45ec6c8756e07d26ef195bed372c54293b12",
-  "releaseCandidateTag": "release-candidate-2026-11-14-3",
-  "buildDirty": false,
-  "unitTests": {
-    "pass": 128,
-    "fail": 0,
-    "todo": 0
+  "status": "current-local-release-under-verification",
+  "currentSourceCommit": "6392324f169cf4889e3e8249c4e28ca9961a1717",
+  "currentProduction": {
+    "releaseCandidate": "release-candidate-2026-11-14-5",
+    "sourceCommit": "3826c92fdc4b7abdd28d0990ab74e9c4d162f88b",
+    "deployment": "66055be1",
+    "knownFailure": "Play text/layout flicker was independently observed; this is not a current release sign-off."
   },
-  "productionBrowser": {
-    "rc1_ea3f888": {
-      "u369": "15/15",
-      "ab": "10/10",
-      "review": "12/12",
-      "v2": "21/21",
-      "truescaleMobile390": "1/1",
-      "demo": "10/10"
+  "localChecks": {
+    "datasetIntegrity": {
+      "pass": 10,
+      "fail": 0
     },
-    "rc3_090c45e": {
-      "textures": "10/10",
-      "learnAndSmoke": "pass",
-      "note": "only the texture-loading and Learn changes were rechecked; nothing else changed between rc1 and rc3"
+    "calendarAndLayout": {
+      "runner": "root native Chrome, reduced-motion paused layout checks",
+      "routeViewportStates": 14,
+      "horizontalOverflowStates": 0,
+      "consoleOrPageErrors": 0,
+      "calendar": "directed pointer, keyboard month/day navigation, coverage, invalid/empty date and Escape focus checks"
     },
-    "consoleOrNetworkErrors": 0,
-    "browser": "Chrome 157 headless (SwiftShader)"
+    "audioArrangement": {
+      "runner": "root native Chrome Web Audio, 8.1 seconds",
+      "contextsBeforeGesture": 0,
+      "runningContextsAfterGesture": 1,
+      "rms": 0.005904942704314386,
+      "maxObservedOscillatorsIncludingFourPads": 7,
+      "settledOffState": "suspended"
+    },
+    "independentReview": "Bounded source-only calendar/score review closed its invalid-date finding; no additional evidenced blocker in that scope."
   },
-  "lighthouse": [
-    {
-      "formFactor": "mobile",
-      "requestedUrl": "https://lunar-navigator-2026.pages.dev/#/simulator",
-      "fetchTime": "2026-11-14T19:50:36.874Z",
-      "lighthouseVersion": "13.6.0",
-      "scores": {
-        "performance": 98,
-        "accessibility": 99,
-        "best-practices": 100,
-        "seo": 100
-      },
-      "largestContentfulPaintMs": 771.4,
-      "totalBlockingTimeMs": 171,
-      "rawReportSha256": "a35fa1bc8ccde42fece8387ef6ace8dd56f734d5883c5fb1a5dce5b25f482ba4",
-      "runtimeError": null
-    },
-    {
-      "formFactor": "desktop",
-      "requestedUrl": "https://lunar-navigator-2026.pages.dev/#/simulator",
-      "fetchTime": "2026-11-14T19:50:49.102Z",
-      "lighthouseVersion": "13.6.0",
-      "scores": {
-        "performance": 100,
-        "accessibility": 100,
-        "best-practices": 100,
-        "seo": 100
-      },
-      "largestContentfulPaintMs": 218.4,
-      "totalBlockingTimeMs": 0,
-      "rawReportSha256": "8f11527d9a5265de07944b4c9bbfaeb8129fb1f43bdd2a4a289ef11eac79d192",
-      "runtimeError": null
-    },
-    {
-      "formFactor": "mobile",
-      "requestedUrl": "https://lunar-navigator-2026.pages.dev/#/home",
-      "fetchTime": "2026-11-14T19:51:01.517Z",
-      "lighthouseVersion": "13.6.0",
-      "scores": {
-        "performance": 100,
-        "accessibility": 100,
-        "best-practices": 100,
-        "seo": 100
-      },
-      "largestContentfulPaintMs": 764.6,
-      "totalBlockingTimeMs": 28,
-      "rawReportSha256": "af22aa405dd0700790166e20db7ebc078dfede240e6f41fbeda3943062998bc7",
-      "runtimeError": null
-    },
-    {
-      "formFactor": "mobile",
-      "requestedUrl": "https://lunar-navigator-2026.pages.dev/#/review",
-      "fetchTime": "2026-11-14T19:51:13.161Z",
-      "lighthouseVersion": "13.6.0",
-      "scores": {
-        "performance": 99,
-        "accessibility": 100,
-        "best-practices": 100,
-        "seo": 100
-      },
-      "largestContentfulPaintMs": 769.3,
-      "totalBlockingTimeMs": 115,
-      "rawReportSha256": "de7aaeb9968edfbd06bd2ae618c4f15badca8c4d75e7f8cafaffd0fd7f8ac2a9",
-      "runtimeError": null
-    },
-    {
-      "formFactor": "mobile",
-      "requestedUrl": "https://lunar-navigator-2026.pages.dev/#/compare",
-      "fetchTime": "2026-11-14T19:51:24.646Z",
-      "lighthouseVersion": "13.6.0",
-      "scores": {
-        "performance": 99,
-        "accessibility": 100,
-        "best-practices": 100,
-        "seo": 100
-      },
-      "largestContentfulPaintMs": 771.5,
-      "totalBlockingTimeMs": 0,
-      "rawReportSha256": "0a94a4792d36ebc2216e84dcafe1c3bcde3a01c946d6a06a6b302352226c3c37",
-      "runtimeError": null
-    },
-    {
-      "formFactor": "mobile",
-      "requestedUrl": "https://lunar-navigator-2026.pages.dev/#/learn",
-      "fetchTime": "2026-11-14T19:51:36.288Z",
-      "lighthouseVersion": "13.6.0",
-      "scores": {
-        "performance": 100,
-        "accessibility": 100,
-        "best-practices": 100,
-        "seo": 100
-      },
-      "largestContentfulPaintMs": 766.7,
-      "totalBlockingTimeMs": 42.5,
-      "rawReportSha256": "2f0f23d0ae07b41098c2388e458a1e12740e45d7ad5e3a0df9e38d7f4a6e75d1",
-      "runtimeError": null
-    },
-    {
-      "formFactor": "mobile",
-      "requestedUrl": "https://lunar-navigator-2026.pages.dev/#/evidence",
-      "fetchTime": "2026-11-14T19:51:48.094Z",
-      "lighthouseVersion": "13.6.0",
-      "scores": {
-        "performance": 100,
-        "accessibility": 100,
-        "best-practices": 100,
-        "seo": 100
-      },
-      "largestContentfulPaintMs": 792.8,
-      "totalBlockingTimeMs": 13.5,
-      "rawReportSha256": "73f0e92066d9275eb69346fb164a8a7a5a742ceb1d4789b3c96bbd3a547aedec",
-      "runtimeError": null
-    },
-    {
-      "formFactor": "mobile",
-      "requestedUrl": "https://lunar-navigator-2026.pages.dev/#/credits",
-      "fetchTime": "2026-11-14T19:51:59.807Z",
-      "lighthouseVersion": "13.6.0",
-      "scores": {
-        "performance": 100,
-        "accessibility": 100,
-        "best-practices": 100,
-        "seo": 100
-      },
-      "largestContentfulPaintMs": 782.4,
-      "totalBlockingTimeMs": 68,
-      "rawReportSha256": "2afb3e71d9c828a3be746c3ef7ba36876b67b52be53db12cf29f3a9b04c13fc5",
-      "runtimeError": null
-    }
+  "pending": [
+    "Independent current-source browser/audio/calendar/intro regression batch",
+    "Settled six-case playback text/layout stability",
+    "Legacy-suite triage and functional replacements",
+    "Current-source production QA",
+    "Current-source production Lighthouse >=90",
+    "Hardware/render-cadence measurement"
   ],
   "limitations": [
-    "Laboratory measurements, not field performance.",
-    "Chrome headless with SwiftShader: real GPU, Safari/Firefox and a full screen-reader audit were not tested.",
-    "The full true-scale browser matrix ran in development (21/22 plus a mobile fix rechecked); in production only the mobile subset ran.",
-    "Scientific and eligibility caveats remain in the documented evidence."
+    "Laboratory checks do not establish novice comprehension or zero possible bugs.",
+    "60/120 FPS are ceilings, not guaranteed delivered performance.",
+    "No current physical-phone, Safari/Firefox or full screen-reader audit."
   ],
-  "superseded": {
-    "testedDeployment": "254df20f",
-    "sourceCommit": "318e7d705995c2b2c3ebc414a4c63fa386c45905",
-    "note": "v1 evidence; does not certify the current version"
-  },
-  "currentDeployment": {
-    "testedDeployment": "52b32426",
-    "deployedAtUtc": "2026-11-14T20:00:08Z",
-    "sourceCommit": "42e12dc301e0b563b1d3281a5782f04bc5ce0fb2",
-    "releaseCandidateTag": "release-candidate-2026-11-14-4",
-    "buildDirty": false,
-    "change": "RC3 plus LF line endings in dataset JSON and generators (no data change); CI green on this commit; production manifest bytes match integrity.json",
-    "ci": "GitHub Actions \"Verify public source and dataset\": success",
-    "lighthouseConfirmation": [
-      {
-        "formFactor": "mobile",
-        "requestedUrl": "https://lunar-navigator-2026.pages.dev/#/simulator",
-        "fetchTime": "2026-11-14T20:00:20.326Z",
-        "scores": {
-          "performance": 99,
-          "accessibility": 99,
-          "best-practices": 100,
-          "seo": 100
-        },
-        "rawReportSha256": "3e717ec386a280cc5206c0d66e521c5626fa22563896b676ef072079e83107fa"
+  "historical": {
+    "rc3AndRc4Superseded": {
+      "recordedAtUtc": "2026-11-14T19:57:09+00:00",
+      "site": "https://lunar-navigator-2026.pages.dev/",
+      "testedDeployment": "61c81cc1",
+      "deployedAtUtc": "2026-11-14T19:50:26Z",
+      "sourceCommit": "090c45ec6c8756e07d26ef195bed372c54293b12",
+      "releaseCandidateTag": "release-candidate-2026-11-14-3",
+      "buildDirty": false,
+      "unitTests": {
+        "pass": 128,
+        "fail": 0,
+        "todo": 0
       },
-      {
-        "formFactor": "desktop",
-        "requestedUrl": "https://lunar-navigator-2026.pages.dev/#/simulator",
-        "fetchTime": "2026-11-14T20:00:32.900Z",
-        "scores": {
-          "performance": 100,
-          "accessibility": 100,
-          "best-practices": 100,
-          "seo": 100
+      "productionBrowser": {
+        "rc1_ea3f888": {
+          "u369": "15/15",
+          "ab": "10/10",
+          "review": "12/12",
+          "v2": "21/21",
+          "truescaleMobile390": "1/1",
+          "demo": "10/10"
         },
-        "rawReportSha256": "7fdf59dc598002b8fdaa883b27697db8414d781c541e6b52b6d365fff6d52d9c"
+        "rc3_090c45e": {
+          "textures": "10/10",
+          "learnAndSmoke": "pass",
+          "note": "only the texture-loading and Learn changes were rechecked; nothing else changed between rc1 and rc3"
+        },
+        "consoleOrNetworkErrors": 0,
+        "browser": "Chrome 157 headless (SwiftShader)"
+      },
+      "lighthouse": [
+        {
+          "formFactor": "mobile",
+          "requestedUrl": "https://lunar-navigator-2026.pages.dev/#/simulator",
+          "fetchTime": "2026-11-14T19:50:36.874Z",
+          "lighthouseVersion": "13.6.0",
+          "scores": {
+            "performance": 98,
+            "accessibility": 99,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "largestContentfulPaintMs": 771.4,
+          "totalBlockingTimeMs": 171,
+          "rawReportSha256": "a35fa1bc8ccde42fece8387ef6ace8dd56f734d5883c5fb1a5dce5b25f482ba4",
+          "runtimeError": null
+        },
+        {
+          "formFactor": "desktop",
+          "requestedUrl": "https://lunar-navigator-2026.pages.dev/#/simulator",
+          "fetchTime": "2026-11-14T19:50:49.102Z",
+          "lighthouseVersion": "13.6.0",
+          "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "largestContentfulPaintMs": 218.4,
+          "totalBlockingTimeMs": 0,
+          "rawReportSha256": "8f11527d9a5265de07944b4c9bbfaeb8129fb1f43bdd2a4a289ef11eac79d192",
+          "runtimeError": null
+        },
+        {
+          "formFactor": "mobile",
+          "requestedUrl": "https://lunar-navigator-2026.pages.dev/#/home",
+          "fetchTime": "2026-11-14T19:51:01.517Z",
+          "lighthouseVersion": "13.6.0",
+          "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "largestContentfulPaintMs": 764.6,
+          "totalBlockingTimeMs": 28,
+          "rawReportSha256": "af22aa405dd0700790166e20db7ebc078dfede240e6f41fbeda3943062998bc7",
+          "runtimeError": null
+        },
+        {
+          "formFactor": "mobile",
+          "requestedUrl": "https://lunar-navigator-2026.pages.dev/#/review",
+          "fetchTime": "2026-11-14T19:51:13.161Z",
+          "lighthouseVersion": "13.6.0",
+          "scores": {
+            "performance": 99,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "largestContentfulPaintMs": 769.3,
+          "totalBlockingTimeMs": 115,
+          "rawReportSha256": "de7aaeb9968edfbd06bd2ae618c4f15badca8c4d75e7f8cafaffd0fd7f8ac2a9",
+          "runtimeError": null
+        },
+        {
+          "formFactor": "mobile",
+          "requestedUrl": "https://lunar-navigator-2026.pages.dev/#/compare",
+          "fetchTime": "2026-11-14T19:51:24.646Z",
+          "lighthouseVersion": "13.6.0",
+          "scores": {
+            "performance": 99,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "largestContentfulPaintMs": 771.5,
+          "totalBlockingTimeMs": 0,
+          "rawReportSha256": "0a94a4792d36ebc2216e84dcafe1c3bcde3a01c946d6a06a6b302352226c3c37",
+          "runtimeError": null
+        },
+        {
+          "formFactor": "mobile",
+          "requestedUrl": "https://lunar-navigator-2026.pages.dev/#/learn",
+          "fetchTime": "2026-11-14T19:51:36.288Z",
+          "lighthouseVersion": "13.6.0",
+          "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "largestContentfulPaintMs": 766.7,
+          "totalBlockingTimeMs": 42.5,
+          "rawReportSha256": "2f0f23d0ae07b41098c2388e458a1e12740e45d7ad5e3a0df9e38d7f4a6e75d1",
+          "runtimeError": null
+        },
+        {
+          "formFactor": "mobile",
+          "requestedUrl": "https://lunar-navigator-2026.pages.dev/#/evidence",
+          "fetchTime": "2026-11-14T19:51:48.094Z",
+          "lighthouseVersion": "13.6.0",
+          "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "largestContentfulPaintMs": 792.8,
+          "totalBlockingTimeMs": 13.5,
+          "rawReportSha256": "73f0e92066d9275eb69346fb164a8a7a5a742ceb1d4789b3c96bbd3a547aedec",
+          "runtimeError": null
+        },
+        {
+          "formFactor": "mobile",
+          "requestedUrl": "https://lunar-navigator-2026.pages.dev/#/credits",
+          "fetchTime": "2026-11-14T19:51:59.807Z",
+          "lighthouseVersion": "13.6.0",
+          "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "largestContentfulPaintMs": 782.4,
+          "totalBlockingTimeMs": 68,
+          "rawReportSha256": "2afb3e71d9c828a3be746c3ef7ba36876b67b52be53db12cf29f3a9b04c13fc5",
+          "runtimeError": null
+        }
+      ],
+      "limitations": [
+        "Laboratory measurements, not field performance.",
+        "Chrome headless with SwiftShader: real GPU, Safari/Firefox and a full screen-reader audit were not tested.",
+        "The full true-scale browser matrix ran in development (21/22 plus a mobile fix rechecked); in production only the mobile subset ran.",
+        "Scientific and eligibility caveats remain in the documented evidence."
+      ],
+      "superseded": {
+        "testedDeployment": "254df20f",
+        "sourceCommit": "318e7d705995c2b2c3ebc414a4c63fa386c45905",
+        "note": "v1 evidence; does not certify the current version"
+      },
+      "currentDeployment": {
+        "testedDeployment": "52b32426",
+        "deployedAtUtc": "2026-11-14T20:00:08Z",
+        "sourceCommit": "42e12dc301e0b563b1d3281a5782f04bc5ce0fb2",
+        "releaseCandidateTag": "release-candidate-2026-11-14-4",
+        "buildDirty": false,
+        "change": "RC3 plus LF line endings in dataset JSON and generators (no data change); CI green on this commit; production manifest bytes match integrity.json",
+        "ci": "GitHub Actions \"Verify public source and dataset\": success",
+        "lighthouseConfirmation": [
+          {
+            "formFactor": "mobile",
+            "requestedUrl": "https://lunar-navigator-2026.pages.dev/#/simulator",
+            "fetchTime": "2026-11-14T20:00:20.326Z",
+            "scores": {
+              "performance": 99,
+              "accessibility": 99,
+              "best-practices": 100,
+              "seo": 100
+            },
+            "rawReportSha256": "3e717ec386a280cc5206c0d66e521c5626fa22563896b676ef072079e83107fa"
+          },
+          {
+            "formFactor": "desktop",
+            "requestedUrl": "https://lunar-navigator-2026.pages.dev/#/simulator",
+            "fetchTime": "2026-11-14T20:00:32.900Z",
+            "scores": {
+              "performance": 100,
+              "accessibility": 100,
+              "best-practices": 100,
+              "seo": 100
+            },
+            "rawReportSha256": "7fdf59dc598002b8fdaa883b27697db8414d781c541e6b52b6d365fff6d52d9c"
+          }
+        ]
       }
-    ]
+    }
   }
 }

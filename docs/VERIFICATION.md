@@ -10,6 +10,12 @@ The local correction is committed through `1c3c681`: retain last rendered readin
 
 Executed locally: production build, data integrity 8/8, credits 163 packages / 0 missing repository URLs, and tracked-text UTF-8 / secret-pattern checks. Independent new-UI checks passed 7/7 (opening, focus, reduced motion, tutorial, exact event inspection, surface options, glare occlusion, and comparison/export without WebGL). The strengthened flicker checks, legacy-suite triage, final hardware measurement, current-source production QA and production Lighthouse are still pending. Caps are not measured FPS, and automated checks do not establish novice comprehension or absence of every possible bug.
 
+## Calendar / arranged score checkpoint (local, not a production sign-off)
+
+Current local source `6392324` adds an original manifest-limited UTC calendar and a richer original80-bpm score. Root directed keyboard/date/coverage/invalid/empty/Escape checks passed;14 route/viewport states at1440/390 had no horizontal overflow or console/page errors. Native8.1s audio smoke created0contexts before a gesture,1after, produced nonzero RMS0.00590, observed at most7oscillators including4pads, and settledOff suspended. Source-only review closed a partial/impossible-date normalization finding by sharing strict UTC parsing with the calculation/export path. The independent full focused rerun remains pending; these are not production or novice-comprehension passes.
+
+Intro and Reset reports were withdrawn after isolating harness errors: intro was inspected after its2.4s dismissal; Reset was compared with a preset composed at a different time before Restart. Preset reconstruction matched the appropriate12h/0h world-camera positions to floating-point precision. Tests retain separate expectations for each control.
+
 ## Latest local additions (not a production sign-off)
 
 The current six-point dataset has ten integrity-checked core files; the four original site series, sky and original terrain tiles were byte-preserved. Independent browser coverage passed 420 combinations and 49 transitions before the optional edge/audio additions. The next focused checks cover those additions, repeatable opening with Home/deep-link preservation, music opt-in/lifecycle, settled text stability, touch and reset behavior. Earlier RC5 production flicker remains recorded as a real failure.
