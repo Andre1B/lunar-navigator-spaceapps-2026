@@ -415,8 +415,8 @@ function Compare({
           arrival at the same place, and a different place on the delayed date.
         </p>
       </div>
-      <DataStatus dataset={dataset} />
       <CoverageNotice manifest={manifest} />
+      <DataStatus dataset={dataset} />
       {manifest ? (
         <div className="compare-layout">
           <Setup manifest={manifest} {...settings} {...setters} />

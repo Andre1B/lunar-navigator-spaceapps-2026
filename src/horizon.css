@@ -1062,3 +1062,9 @@ input[type="range"] {
   color: var(--ink-2);
   max-width: 60ch;
 }
+
+/* Keep the footer below the first screen while a page's data loads, so it is
+   not pushed down (a layout shift) when the content arrives. */
+.app-shell > main {
+  min-height: 100vh;
+}

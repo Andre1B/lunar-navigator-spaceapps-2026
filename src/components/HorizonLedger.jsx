@@ -591,7 +591,9 @@ export default function HorizonLedger({ dataset, onOpen }) {
       <div className="hl-head">
         <h2 id="briefing-title" className="hl-kicker">
           {base?.featured ? "Featured example" : "Example"} ·{" "}
-          {settings ? `${name(settings.siteId)}, ${settings.height} m above the ground, a ${settings.days}-day stay` : "loading"}
+          {settings
+            ? `${name(settings.siteId)}, ${settings.height} m above the ground, a ${settings.days}-day stay`
+            : "loading the place, its height above the ground and the stay"}
         </h2>
         <div
           className="briefing-delays hl-delays"
@@ -611,33 +613,42 @@ export default function HorizonLedger({ dataset, onOpen }) {
         </div>
       </div>
       <div className="briefing-results hl-readout" aria-live="polite" aria-atomic="true">
-        {ready ? (
-          [0, 1].map((n) => (
-            <article key={n} className={n ? "late" : "ontime"}>
-              <h3>
-                {n ? `Arrive ${delay} days later` : `Arrive ${d0}`}
-                <span className="hl-scenario">
-                  {n ? `${d1} · same place` : "original plan"} ·{" "}
-                  {settings.height} m · {settings.days}-day stay
-                </span>
-              </h3>
-              <p className="hl-label">Longest stretch without direct sunlight</p>
-              <p className="hl-num">{fmt(rows[n])}</p>
-              <dl className="hl-facts">
-                <div>
-                  <dt>Hours with some of the Sun in view</dt>
-                  <dd>{percent(rows[n].summary.sunlitFraction)} of the stay</dd>
-                </div>
-                <div>
-                  <dt>Hours with some of Earth in view</dt>
-                  <dd>{percent(rows[n].summary.earthFraction)} of the stay</dd>
-                </div>
-              </dl>
-            </article>
-          ))
-        ) : (
-          <p>Loading the real lunar comparison…</p>
-        )}
+        {/* While loading, the same two cards hold their place with dashes, so
+            the page does not jump when the numbers arrive. */}
+        {[0, 1].map((n) => (
+          <article key={n} className={n ? "late" : "ontime"}>
+            <h3>
+              {n
+                ? `Arrive ${delay} days later`
+                : ready
+                  ? `Arrive ${d0}`
+                  : "Arrive as planned"}
+              <span className="hl-scenario">
+                {ready
+                  ? `${n ? `${d1} · same place` : "original plan"} · ${settings.height} m · ${settings.days}-day stay`
+                  : "Loading the real lunar comparison…"}
+              </span>
+            </h3>
+            <p className="hl-label">Longest stretch without direct sunlight</p>
+            <p className="hl-num">{fmt(rows[n])}</p>
+            <dl className="hl-facts">
+              <div>
+                <dt>Hours with some of the Sun in view</dt>
+                <dd>
+                  {ready ? percent(rows[n].summary.sunlitFraction) : "–"} of
+                  the stay
+                </dd>
+              </div>
+              <div>
+                <dt>Hours with some of Earth in view</dt>
+                <dd>
+                  {ready ? percent(rows[n].summary.earthFraction) : "–"} of the
+                  stay
+                </dd>
+              </div>
+            </dl>
+          </article>
+        ))}
       </div>
       <div className="hl-actions">
         <button
