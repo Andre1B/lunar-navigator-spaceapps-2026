@@ -151,6 +151,7 @@ function HorizonPanel({ site, height, rows, period, compact }) {
   }
   const pct = (v) => (v * 100).toFixed(1) + "%";
   const utc = (i) => timeAt(period, i).slice(0, 16).replace("T", " ") + " UTC";
+  const utcShort = (i) => timeAt(period, i).slice(5, 16).replace("T", " ");
   const startLabel = (pts, cls, text) => {
     const x = X(unwrap(site.sun.azDeg[pts[0]])),
       y = Y(site.sun.elDeg[pts[0]]);
@@ -223,16 +224,49 @@ function HorizonPanel({ site, height, rows, period, compact }) {
             </g>
           );
         })}
-        {compact ? null : startLabel(tracks[0], "ontime", `arrive ${d0}`)}
-        {compact ? null : startLabel(tracks[1], "late", `arrive ${d1}`)}
+        {tracks.map((pts, t) => {
+          // Start (ring) and end (bar) of each stay, its letter, UTC and the
+          // direction the Sun moves, from one sample to the next.
+          const cls = t ? "late" : "ontime",
+            first = pts[0],
+            last = pts[pts.length - 1],
+            [x0, y0] = at(first),
+            [x1, y1] = at(last),
+            [xa, ya] = at(pts[Math.floor(pts.length / 2)]),
+            [xb, yb] = at(pts[Math.floor(pts.length / 2) + 1]),
+            ang = (Math.atan2(yb - ya, xb - xa) * 180) / Math.PI,
+            dy = t ? 26 : -14;
+          return (
+            <g key={"m" + t} className={`hl-marks ${cls}`}>
+              <circle className="hl-startmark" cx={x0.toFixed(1)} cy={y0.toFixed(1)} r="6" />
+              <rect className="hl-endmark" x={(x1 - 1.5).toFixed(1)} y={(y1 - 7).toFixed(1)} width="3" height="14" />
+              <path
+                className="hl-arrow"
+                d="M-6,-4 L2,0 L-6,4"
+                transform={`translate(${xa.toFixed(1)} ${(ya - 9).toFixed(1)}) rotate(${ang.toFixed(1)})`}
+              />
+              {compact ? null : (
+                <>
+                  <text className={`hl-start ${cls}`} x={x0.toFixed(1)} y={(y0 + dy).toFixed(1)} textAnchor={x0 > W * 0.6 ? "end" : "start"}>
+                    {t ? "B" : "A"} start {utcShort(first)}
+                  </text>
+                  <text className={`hl-start ${cls}`} x={x1.toFixed(1)} y={(y1 + dy).toFixed(1)} textAnchor={x1 > W * 0.6 ? "end" : "start"}>
+                    {t ? "B" : "A"} end {utcShort(last)}
+                  </text>
+                </>
+              )}
+            </g>
+          );
+        })}
       </svg>
       <figcaption className="hl-legend">
         <span>
-          <i className="hl-key ontime" /> stay arriving {d0}
+          <i className="hl-key ontime" /> A · stay arriving {d0}
         </span>
         <span>
-          <i className="hl-key late" /> stay arriving {d1}
+          <i className="hl-key late" /> B · stay arriving {d1}
         </span>
+        <span>ring = start · bar = end · arrow = direction the Sun moves · times UTC</span>
         {crossings.length ? (
           <span>
             <i className="hl-key cross" /> both paths meet in this drawing
@@ -396,6 +430,87 @@ function Ledger({ dataset, rows, height, names }) {
   );
 }
 
+// How far the Sun's centre is above (+) or below (-) the computed terrain
+// horizon in its direction, hour by hour, for each scenario on a common
+// elapsed-time axis. Same site files and horizon as every other figure.
+function ClearanceChart({ dataset, rows, height, names }) {
+  const compact = useCompact();
+  const key = String(height),
+    W = compact ? 400 : 1360,
+    H = compact ? 200 : 240,
+    pad = { l: compact ? 34 : 56, r: 10, t: 14, b: 30 };
+  const series = rows.map((r) => {
+    const site = dataset.sites[r.id];
+    const prof = site.horizon.elevationDeg[key];
+    const out = [];
+    for (let i = r.bounds.start; i <= r.bounds.end; i++)
+      out.push(site.sun.elDeg[i] - horizonAt(prof, site.sun.azDeg[i]));
+    return out;
+  });
+  const all = series.flat(),
+    lo = Math.floor(Math.min(...all, -0.5)),
+    hi = Math.ceil(Math.max(...all, 0.5)),
+    n = series[0].length - 1;
+  const X = (k) => pad.l + (k / n) * (W - pad.l - pad.r),
+    Y = (v) => pad.t + ((hi - v) / (hi - lo)) * (H - pad.t - pad.b);
+  const cls = ["ontime", "late", "alt"];
+  const summary = series.map((sr, j) => {
+    const above = sr.filter((v) => v > 0).length;
+    return `${"ABC"[j]} ${names[j]}: Sun centre above the horizon in ${((above / sr.length) * 100).toFixed(0)}% of hours; lowest ${Math.min(...sr).toFixed(2)} deg, highest ${Math.max(...sr).toFixed(2)} deg.`;
+  });
+  const ticks = [];
+  for (let e = lo; e <= hi; e++) ticks.push(e);
+  return (
+    <figure className="hl-clearance">
+      <h3 className="hl-kicker">
+        How high is the Sun above the ridge? Sun centre minus the terrain
+        horizon in its direction, each hour (degrees)
+      </h3>
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={summary.join(" ")}>
+        {ticks.map((e) => (
+          <g key={e}>
+            <line className={e === 0 ? "hl-zero" : "hl-grid"} x1={pad.l} x2={W - pad.r} y1={Y(e)} y2={Y(e)} />
+            <text className="hl-axis" x={pad.l - 6} y={Y(e) + 4} textAnchor="end">
+              {e > 0 ? "+" : e < 0 ? "−" : ""}
+              {Math.abs(e)}°
+            </text>
+          </g>
+        ))}
+        {Array.from({ length: Math.round(n / 24) + 1 }, (_, d) => (
+          <text key={d} className="hl-axis" x={X(d * 24)} y={H - 8} textAnchor={d === 0 ? "start" : d * 24 >= n ? "end" : "middle"}>
+            {compact ? d : `day ${d}`}
+          </text>
+        ))}
+        {series.map((sr, j) => (
+          <path
+            key={j}
+            className={`hl-curve ${cls[j]}`}
+            d={sr.map((v, k) => `${k ? "L" : "M"}${X(k).toFixed(1)},${Y(v).toFixed(1)}`).join("")}
+          />
+        ))}
+        <text className="hl-axis" x={W - pad.r} y={Y(0) - 6} textAnchor="end">
+          horizon (0°)
+        </text>
+      </svg>
+      <figcaption className="hl-legend">
+        <span><i className="hl-key line ontime" /> A · {names[0]}</span>
+        <span><i className="hl-key line late" /> B · {names[1]}</span>
+        <span><i className="hl-key line alt" /> C · {names[2]}</span>
+        <span>
+          Above 0° the Sun&apos;s centre clears the ridge; the Sun is a 0.53°
+          disc, so near 0° it can be partly visible. Elapsed time from each
+          arrival.
+        </span>
+      </figcaption>
+      <ul className="sr-only">
+        {summary.map((t) => (
+          <li key={t}>{t}</li>
+        ))}
+      </ul>
+    </figure>
+  );
+}
+
 // The same two figures for any comparison (used by Compare).
 export function LedgerFigures({ dataset, rows, height }) {
   const compact = useCompact();
@@ -421,6 +536,7 @@ export function LedgerFigures({ dataset, rows, height }) {
         compact={compact}
       />
       <Ledger dataset={dataset} rows={rows} height={height} names={names} />
+      <ClearanceChart dataset={dataset} rows={rows} height={height} names={names} />
     </section>
   );
 }

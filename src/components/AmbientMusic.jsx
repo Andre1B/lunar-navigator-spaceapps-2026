@@ -10,6 +10,19 @@ function musicEnabled() {
   }
 }
 
+const volumeKey = "lunar-music-volume-v1";
+// Default 50%; a volume the visitor chose before is kept.
+function savedVolume() {
+  try {
+    const v = Number(localStorage.getItem(volumeKey));
+    return localStorage.getItem(volumeKey) !== null && v >= 0 && v <= 100
+      ? v
+      : 50;
+  } catch {
+    return 50;
+  }
+}
+
 export default function AmbientMusic() {
   const [enabled, setEnabled] = useState(musicEnabled);
   const engine = useRef(null),
@@ -19,9 +32,9 @@ export default function AmbientMusic() {
     mounted = useRef(false),
     active = useRef(false),
     wanted = useRef(enabled),
-    volumeRef = useRef(20);
+    volumeRef = useRef(savedVolume());
   const [playing, setPlaying] = useState(false),
-    [volume, setVolume] = useState(20),
+    [volume, setVolume] = useState(volumeRef.current),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
 
@@ -223,7 +236,11 @@ export default function AmbientMusic() {
               setVolume(v);
               volumeRef.current = v;
               engine.current?.setVolume(v);
-              volumeRef.current = v;
+              try {
+                localStorage.setItem(volumeKey, String(v));
+              } catch {
+                // Storage can be unavailable; the volume still applies now.
+              }
             }}
           />
           <p>

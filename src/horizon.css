@@ -987,3 +987,65 @@ input[type="range"] {
     transform: translateX(300px);
   }
 }
+
+.hl-startmark {
+  fill: none;
+  stroke-width: 2;
+}
+.hl-marks.ontime .hl-startmark,
+.hl-marks.ontime .hl-arrow {
+  stroke: var(--ink);
+}
+.hl-marks.late .hl-startmark,
+.hl-marks.late .hl-arrow {
+  stroke: var(--sun);
+}
+.hl-marks.ontime .hl-endmark {
+  fill: var(--ink);
+}
+.hl-marks.late .hl-endmark {
+  fill: var(--sun);
+}
+.hl-arrow {
+  fill: none;
+  stroke-width: 2;
+}
+.hl-clearance {
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+.hl-clearance svg {
+  width: 100%;
+  height: auto;
+}
+.hl-curve {
+  fill: none;
+  stroke-width: 2;
+}
+.hl-curve.ontime {
+  stroke: var(--ink);
+}
+.hl-curve.late {
+  stroke: var(--sun);
+  stroke-dasharray: 7 4;
+}
+.hl-curve.alt {
+  stroke: #9a958a;
+  stroke-dasharray: 2 4;
+}
+.hl-key.line {
+  width: 22px;
+  height: 0;
+  border-radius: 0;
+  background: none;
+  border-top: 2px solid var(--ink);
+  vertical-align: 3px;
+}
+.hl-key.line.late {
+  border-top: 2px dashed var(--sun);
+  transform: none;
+}
+.hl-key.line.alt {
+  border-top: 2px dotted #9a958a;
+}
