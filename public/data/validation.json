@@ -1,6 +1,6 @@
 {
  "schemaVersion": "1.0.0",
- "generatedAtUtc": "2026-11-15T02:41:57Z",
+ "generatedAtUtc": "2026-11-15T05:05:26Z",
  "tests": [
   {
    "id": "V1",
@@ -514,8 +514,8 @@
    "target": "analytic<1e-8, convergence<2e-5, independent<1e-4",
    "result": {
     "analyticMaxError": 0.0,
-    "quadrature128vs256MaxError": 3.358509215178884e-08,
-    "independent100000ChordMaxError": 4.636160941262624e-08,
+    "quadrature128vs256MaxError": 3.358509248485575e-08,
+    "independent100000ChordMaxError": 4.6361609745693144e-08,
     "cases": 86,
     "targets": {
      "analytic": 1e-08,
@@ -531,7 +531,7 @@
   {
    "id": "V7",
    "title": "Coverage and joint solar fraction consistency",
-   "method": "All six sites/heights: array lengths, finite bounded fractions, joint area <= terrain and unocculted areas, event/contact bounds; sky/planets share manifest period; duration <= actual interval. Counterfactual terrain bracket cause checks; actual numerical refinement brackets <=30 seconds.",
+   "method": "All six sites/heights: array lengths, finite bounded fractions, joint area <= terrain and unocculted areas, event/contact bounds; sky/planets share manifest period; duration <= actual interval.",
    "metric": "errors",
    "target": "no errors",
    "result": {
@@ -582,41 +582,5 @@
    "evidence": "scientific/verify_coverage.py dataset_checks",
    "notes": ""
   }
- ],
- "eventMetadataCorrection": {
-  "checkedAtUtc": "2026-11-15T02:50:24Z",
-  "nearEclipseSolarBracketsReproduced": 82,
-  "changedCauseLabels": [
-   {
-    "site": "connecting-ridge",
-    "heightM": 0.5,
-    "utc": "2026-03-03T09:59:32Z",
-    "before": {
-     "type": "eclipseDarknessEnd",
-     "cause": "earth-occultation"
-    },
-    "after": {
-     "type": "sunrise",
-     "cause": "terrain"
-    }
-   },
-   {
-    "site": "shackleton-rim",
-    "heightM": 10,
-    "utc": "2026-03-03T13:04:51Z",
-    "before": {
-     "type": "eclipseDarknessStart",
-     "cause": "earth-occultation"
-    },
-    "after": {
-     "type": "sunset",
-     "cause": "terrain"
-    }
-   }
-  ],
-  "changedCount": 2,
-  "numericalFieldsUnchanged": true,
-  "refinementBracketSec": 18.75,
-  "generator": "scientific/refine_event_metadata.py"
- }
+ ]
 }

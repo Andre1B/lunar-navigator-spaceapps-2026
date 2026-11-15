@@ -1,6 +1,6 @@
 {
  "schemaVersion": "1.0.0",
- "generatedAtUtc": "2026-11-15T02:38:45Z",
+ "generatedAtUtc": "2026-11-15T05:04:58Z",
  "period": {
   "startUtc": "2025-11-15T00:00:00Z",
   "endUtc": "2027-11-15T00:00:00Z",
@@ -218,7 +218,7 @@
   "code": "scientific/",
   "generator": "scientific/build_scenes.py",
   "generationEnvironment": {
-   "python": "3.12.10",
+   "python": "3.12.16",
    "numpy": "2.5.3",
    "spiceypy": "8.4.0",
    "sourceLockFile": "scientific/source-lock.json",
@@ -244,42 +244,6 @@
     "validate.py": "1be1b01dfbcb151792285bfa9cd45ca75e1e5fd8a6b1de5580d499dcdaaaa55c",
     "verify_coverage.py": "77506e71547f9770c28fdef38afe511c695060028376ab27181a9c268e9de3c3"
    }
-  },
-  "eventMetadataCorrection": {
-   "checkedAtUtc": "2026-11-15T02:50:24Z",
-   "nearEclipseSolarBracketsReproduced": 82,
-   "changedCauseLabels": [
-    {
-     "site": "connecting-ridge",
-     "heightM": 0.5,
-     "utc": "2026-03-03T09:59:32Z",
-     "before": {
-      "type": "eclipseDarknessEnd",
-      "cause": "earth-occultation"
-     },
-     "after": {
-      "type": "sunrise",
-      "cause": "terrain"
-     }
-    },
-    {
-     "site": "shackleton-rim",
-     "heightM": 10,
-     "utc": "2026-03-03T13:04:51Z",
-     "before": {
-      "type": "eclipseDarknessStart",
-      "cause": "earth-occultation"
-     },
-     "after": {
-      "type": "sunset",
-      "cause": "terrain"
-     }
-    }
-   ],
-   "changedCount": 2,
-   "numericalFieldsUnchanged": true,
-   "refinementBracketSec": 18.75,
-   "generator": "scientific/refine_event_metadata.py"
   }
  },
  "validation": {

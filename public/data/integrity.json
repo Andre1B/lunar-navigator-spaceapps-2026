@@ -1,13 +1,13 @@
 {
  "schemaVersion": "1.0.0",
  "purpose": "Identify the exact derived dataset used by the app and by downloaded comparison reports. Hashes cover the files' current bytes; input data hashes are in manifest.provenance.",
- "hashedAtUtc": "2026-11-15T02:50:24Z",
- "manifestGeneratedAtUtc": "2026-11-15T02:38:45Z",
+ "hashedAtUtc": "2026-11-15T05:05:26Z",
+ "manifestGeneratedAtUtc": "2026-11-15T05:04:58Z",
  "files": [
   {
    "file": "manifest.json",
-   "bytes": 14529,
-   "sha256": "64b97daef05fe84191a3b6f2dc7d75df85bf9e41dccd8d904aa85f774cfe453f"
+   "bytes": 13684,
+   "sha256": "e61ece5bacbea4ff27a43610fc1057570d0afb79030745f6f79ecb4d9e55d886"
   },
   {
    "file": "sky.json",
@@ -21,38 +21,38 @@
   },
   {
    "file": "validation.json",
-   "bytes": 16129,
-   "sha256": "0f3e6f04879d1a03825cd6937f0b1b03635a469b0c5144383deb56181b29e628"
+   "bytes": 15224,
+   "sha256": "1a6890faff6ec6d6ab82e3518f13530ee3edddec5aeacb85c07b1690aae41cf4"
   },
   {
    "file": "sites/connecting-ridge.json",
    "bytes": 2700266,
-   "sha256": "f8d0d5cc17c96a44e8ec0e8ccfc73188cfc9b1334af06812551fbd3fc05d56bc"
+   "sha256": "c4c8c3e0e71b827dd3d97f55a30b01ca8a2e2cd03895ec598c0e0d3726bb2504"
   },
   {
    "file": "sites/shackleton-rim.json",
    "bytes": 2735127,
-   "sha256": "ef3f95d0d5728b3a5f2474ed2f08078bed7947f759d80ffbe00fbbfe1b31b140"
+   "sha256": "776d33cd9263e6019d14815c558ae5f98153c1bf6f0010a19ec653e8ce6534d9"
   },
   {
    "file": "sites/nobile-rim-1.json",
    "bytes": 2668367,
-   "sha256": "98c30bdbe53f14b55d9f18159de03c7f30b6948c493bb0b46e1c7e0b23d84dbf"
+   "sha256": "1fc5b8875f96946358fa6d9e4d6f0bbe209310c0132e29b6105475b25db5e20d"
   },
   {
    "file": "sites/malapert-massif.json",
    "bytes": 2685596,
-   "sha256": "8bf0dcb471fc11524adf3996344dfd2c809c6450b891a612fcda41b566987b61"
+   "sha256": "6ef6f108b39f17fe21d48ea1ffa7905a4cd6f0e2f282e04d6b160c7096b88830"
   },
   {
    "file": "sites/connecting-neighbor.json",
    "bytes": 2677072,
-   "sha256": "73cf4a4bbbb688ff67315ae03c429f40336298b6ebb1b7c04d8ec540f119b455"
+   "sha256": "7b62f49a1627952abe083ef61416c30a6acb5e61ae663bbe6d3fb4808f0b2bd7"
   },
   {
    "file": "sites/shackleton-neighbor.json",
    "bytes": 2715799,
-   "sha256": "dfb535b4bf1e6eae69738830c643349f0f3e500c116d4c742071ab56d610ede8"
+   "sha256": "ed7b326d815c6523e1fb9091a5d819aa231dbaacbb0779ae3a9e143ac15f5d04"
   }
  ],
  "generator": "scientific/hash_dataset.py"
