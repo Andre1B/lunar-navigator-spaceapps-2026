@@ -4,14 +4,16 @@ import { comparisonReport, comparisonRows } from "./comparisonReport.mjs";
 import { arrivalSeries } from "./arrivalSeries.mjs";
 import { percent, timeAt } from "./analysis.mjs";
 
+// Lunacline identity: warm black, orange accent, warm neutrals. Earth uses a
+// light neutral and is always named in its label, never told apart by hue.
 const C = {
-  background: [7, 12, 24],
-  panel: [15, 30, 48],
-  ink: [245, 247, 250],
-  muted: [184, 202, 220],
-  line: [54, 76, 101],
-  gold: [246, 195, 111],
-  cyan: [114, 199, 235],
+  background: [7, 8, 10],
+  panel: [22, 21, 18],
+  ink: [236, 231, 220],
+  muted: [184, 177, 162],
+  line: [62, 58, 51],
+  gold: [242, 181, 68],
+  cyan: [216, 209, 194],
   red: [255, 175, 161],
 };
 const clean = (value) =>
@@ -114,8 +116,24 @@ export async function createComparisonPdf(
     if (page++) doc.addPage();
     doc.setFillColor(...C.background);
     doc.rect(0, 0, W, H, "F");
+    // Vector mark: the Moon's outline, a ridge and the orange Sun behind it.
+    const mx = M + 9,
+      my = 22;
+    doc.setFillColor(...C.gold);
+    doc.circle(mx + 1.6, my + 0.8, 2.6, "F");
+    doc.setFillColor(42, 40, 36);
+    doc.triangle(mx - 8, my + 6.5, mx + 1, my - 0.5, mx + 8.6, my + 6.5, "F");
+    doc.rect(mx - 8.2, my + 2.6, 16.4, 4.6, "F");
+    doc.setDrawColor(...C.background);
+    doc.setLineWidth(1.6);
+    doc.circle(mx, my, 10.4, "S");
+    doc.setDrawColor(...C.ink);
+    doc.setLineWidth(1);
+    doc.circle(mx, my, 9, "S");
     set(10, C.ink, true);
-    doc.text("LUNAR NAVIGATOR", M, 26);
+    doc.text("LUNACLINE", M + 24, 26, { charSpace: 1.6 });
+    set(9, C.muted);
+    doc.text("Lunar arrival comparison", M + 24 + doc.getTextWidth("LUNACLINE") + 34, 26);
     set(8, C.muted);
     doc.text("SITE + DATE + HEIGHT  /  SUN + EARTH + TERRAIN", W - M, 26, {
       align: "right",
@@ -241,7 +259,7 @@ export async function createComparisonPdf(
       10,
       C.muted,
     );
-    write("Longest stretch without sunlight", x + 14, cardY + 88, 10, C.muted);
+    write("Longest stretch without direct sunlight", x + 14, cardY + 88, 10, C.muted);
     write(
       duration(row.summary?.dark),
       x + 14,
@@ -252,8 +270,8 @@ export async function createComparisonPdf(
       cardWidth - 28,
     );
     [
-      ["Sun visible - % of stay", row.summary?.sunlitFraction, C.gold],
-      ["Earth visible - % of stay", row.summary?.earthFraction, C.cyan],
+      ["Sun visible - % of stay (any part)", row.summary?.sunlitFraction, C.gold],
+      ["Earth visible - % of stay (any part)", row.summary?.earthFraction, C.cyan],
     ].forEach(([label, fraction, color], k) => {
       const top = cardY + 145 + k * 37;
       write(label, x + 14, top, 9.5, C.muted, false, cardWidth - 98);
@@ -269,7 +287,7 @@ export async function createComparisonPdf(
       }
     });
     write(
-      "At arrival - unblocked part of each disc",
+      "At the arrival instant only - share of each disc unblocked",
       x + 14,
       cardY + 220,
       9,
@@ -333,7 +351,7 @@ export async function createComparisonPdf(
 
   newPage("The sky at each arrival");
   paragraph(
-    "Each chart is one arrival instant, not an average. Gold: Sun. Cyan: Earth. Grey line: computed terrain horizon. Discs are enlarged markers, not angular-size drawings.",
+    "Each chart is one arrival instant, not an average. Filled orange disc: Sun. Outlined light disc: Earth. Each is labelled. Grey line: computed terrain horizon. Discs are enlarged markers, not angular-size drawings.",
   );
   const chartTop = y + 10;
   rows.forEach((row, k) => {
@@ -372,8 +390,17 @@ export async function createComparisonPdf(
     ].forEach(([name, body, color], n) => {
       const xx = px(body.azDeg[idx]),
         yy = py(body.elDeg[idx]);
-      doc.setFillColor(...color);
-      doc.circle(xx, yy, 3, "F");
+      // Shape and a name, not only colour: Sun filled, Earth outlined.
+      if (n) {
+        doc.setDrawColor(...color);
+        doc.setLineWidth(1.2);
+        doc.circle(xx, yy, 3.2, "S");
+      } else {
+        doc.setFillColor(...color);
+        doc.circle(xx, yy, 3, "F");
+      }
+      set(7.5, color, true);
+      doc.text(name, xx + 5, yy - 4);
       write(
         `${name} disc ${percent(n ? row.arrival.earthVisibleDiscFraction : row.arrival.sunVisibleDiscFraction)}`,
         x + 2,
@@ -596,10 +623,10 @@ export async function createComparisonPdf(
     doc.text(`${n} / ${total}`, W - M, H - 17, { align: "right" });
   }
   doc.setProperties({
-    title: "Lunar Navigator - arrival comparison",
+    title: "Lunacline - lunar arrival comparison",
     subject: "Faithful Sun/Earth visibility comparison",
     author: "Team An0r4k",
-    creator: "Lunar Navigator / jsPDF",
+    creator: "Lunacline (formerly Lunar Navigator) / jsPDF",
   });
   return doc;
 }
