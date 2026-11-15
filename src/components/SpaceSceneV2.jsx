@@ -24,6 +24,18 @@ import {
   sampleGrid,
 } from "../lib/sceneGeometry.mjs";
 
+// Short facts shown while a planet is inspected. Moons are listed only:
+// their positions are not part of the computed dataset and are not drawn.
+const PLANET_NOTES = {
+  jupiter:
+    "Jupiter: banded cloud tops, the Great Red Spot. Its four large moons, Io, Europa, Ganymede and Callisto, are not drawn here because their positions are not in this dataset (NASA: science.nasa.gov/jupiter/jupiter-moons).",
+  saturn:
+    "Saturn: main rings drawn from 1.24 to 2.27 Saturn radii in its equatorial plane; the ring tilt shown is illustrative.",
+  sun: "Sun: surface texture is illustrative; rotation uses the 25.4-day sidereal period.",
+  earth:
+    "Earth: daytime imagery with an illustrative, slowly drifting cloud layer, not current weather.",
+};
+
 export default function SpaceSceneV2({
   sky,
   planets,
@@ -209,7 +221,9 @@ export default function SpaceSceneV2({
       } else if (
         fastFrames >= 90 &&
         renderScale < 1 &&
-        (renderScale * 1.2 < failedScale || now - failedScaleAt > 10000)
+        // A scale that was too slow is never retried in this session:
+        // retrying flashed and stalled the canvas on weaker GPUs.
+        renderScale * 1.2 < failedScale
       )
         next = Math.min(1, renderScale * 1.2);
       if (next !== renderScale) {
@@ -410,11 +424,36 @@ export default function SpaceSceneV2({
       }),
     );
     scene.add(atmosphere);
+    // Appearance textures (Solar System Scope, CC BY 4.0) load on their own
+    // loader so they never delay the scene; positions and sizes are unchanged.
+    const appearance = new THREE.TextureLoader();
+    const skin = (name) => {
+      const t = appearance.load(`/assets/planets/${name}.jpg`);
+      t.colorSpace = THREE.SRGBColorSpace;
+      t.anisotropy = 4;
+      return t;
+    };
     const sun = new THREE.Mesh(
-      new THREE.SphereGeometry(1, 24, 16),
-      new THREE.MeshBasicMaterial({ color: "#fff0bd", toneMapped: false }),
+      new THREE.SphereGeometry(1, 48, 24),
+      new THREE.MeshBasicMaterial({
+        color: "#fff0bd",
+        map: skin("sun"),
+        toneMapped: false,
+      }),
     );
     scene.add(sun);
+    // Sidereal rotation periods in hours (IAU WGCCRE; negative = retrograde).
+    // Rotation follows simulation time; the spin axis is illustrative.
+    const ROTATION_H = {
+      sun: 609.12,
+      mercury: 1407.6,
+      venus: -5832.5,
+      mars: 24.623,
+      jupiter: 9.925,
+      saturn: 10.656,
+      uranus: -17.24,
+      neptune: 16.11,
+    };
     // One inexpensive glare sprite, not ray tracing or visible beams through vacuum.
     const glareCanvas = document.createElement("canvas");
     glareCanvas.width = glareCanvas.height = 256;
@@ -936,6 +975,9 @@ export default function SpaceSceneV2({
         earth.scale.setScalar(sky.radiiKm.earth / sky.radiiKm.moon);
         clouds.position.copy(earth.position);
         clouds.quaternion.copy(eq);
+        // Illustrative cloud drift (one turn per 20 days relative to Earth),
+        // not weather; still with reduced motion.
+        if (!reduced) clouds.rotateY((2 * Math.PI * i) / (24 * 20));
         clouds.scale.setScalar((sky.radiiKm.earth + 10) / sky.radiiKm.moon);
         atmosphere.position.copy(earth.position);
         atmosphere.quaternion.copy(eq);
@@ -947,6 +989,7 @@ export default function SpaceSceneV2({
         );
         sun.position.copy(s).divideScalar(sky.radiiKm.moon);
         sun.scale.setScalar(sky.radiiKm.sun / sky.radiiKm.moon);
+        sun.rotation.y = (2 * Math.PI * i) / ROTATION_H.sun;
         solarLight.position.copy(sun.position);
         solarLight.visible = !local;
         sunlight.visible = local || exact;
@@ -954,12 +997,39 @@ export default function SpaceSceneV2({
         for (const [order, b] of (p.planets?.planets ?? []).entries()) {
           if (!planetMeshes.has(b.id)) {
             const mesh = new THREE.Mesh(
-              new THREE.SphereGeometry(1, 24, 16),
+              new THREE.SphereGeometry(1, 48, 24),
               new THREE.MeshStandardMaterial({
-                color: b.color,
+                color: ROTATION_H[b.id] ? "#ffffff" : b.color,
+                map: ROTATION_H[b.id] ? skin(b.id) : null,
                 roughness: 0.9,
               }),
             );
+            if (b.id === "saturn") {
+              // Main rings, 1.24-2.27 Saturn radii, in the equatorial plane.
+              const inner = 1.24,
+                outer = 2.27,
+                ring = new THREE.RingGeometry(inner, outer, 128, 1);
+              const pos = ring.attributes.position,
+                uv = ring.attributes.uv;
+              for (let k = 0; k < pos.count; k++) {
+                const r = Math.hypot(pos.getX(k), pos.getY(k));
+                uv.setXY(k, (r - inner) / (outer - inner), 0.5);
+              }
+              const ringMap = appearance.load("/assets/planets/saturn-ring.png");
+              ringMap.colorSpace = THREE.SRGBColorSpace;
+              const rings = new THREE.Mesh(
+                ring,
+                new THREE.MeshStandardMaterial({
+                  map: ringMap,
+                  transparent: true,
+                  side: THREE.DoubleSide,
+                  roughness: 1,
+                  depthWrite: false,
+                }),
+              );
+              rings.rotation.x = -Math.PI / 2;
+              mesh.add(rings);
+            }
             planetMeshes.set(b.id, mesh);
             scene.add(mesh);
           }
@@ -970,6 +1040,8 @@ export default function SpaceSceneV2({
             );
           m.position.copy(position).divideScalar(sky.radiiKm.moon);
           m.scale.setScalar(b.radiusKm / sky.radiiKm.moon);
+          if (ROTATION_H[b.id])
+            m.rotation.y = (2 * Math.PI * i) / ROTATION_H[b.id];
           m.visible = !local;
         }
         const lat = ((site?.latitudeDeg ?? -89) * Math.PI) / 180,
@@ -1082,7 +1154,16 @@ export default function SpaceSceneV2({
             (Math.tan(Math.asin(1 / d)) /
               Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) *
             (el.clientHeight / 2);
-          const want = px > 900 ? globeDetail : globeFar;
+          // Hysteresis: switch up above 1000 px and down below 800 px, so a
+          // radius near the threshold cannot alternate meshes every frame.
+          const want =
+            moon.geometry === globeDetail
+              ? px < 800
+                ? globeFar
+                : globeDetail
+              : px > 1000
+                ? globeDetail
+                : globeFar;
           if (moon.geometry !== want) moon.geometry = want;
         }
         moonOutline.geometry = moon.geometry;
@@ -2007,8 +2088,11 @@ export default function SpaceSceneV2({
             ) : null}
           </>
         ) : null}
+        <span className="inspect-label" aria-hidden="true">
+          Inspect individual planets
+        </span>
         <select
-          aria-label="Focus a celestial body"
+          aria-label="Inspect individual planets: focus a celestial body"
           defaultValue=""
           onChange={(e) => {
             engine.current?.focus(e.target.value);
@@ -2028,6 +2112,9 @@ export default function SpaceSceneV2({
           ))}
         </select>
         <button onClick={() => engine.current?.reset()}>Reset view</button>
+        {PLANET_NOTES[following] ? (
+          <p className="planet-note">{PLANET_NOTES[following]}</p>
+        ) : null}
         <details className="manual-camera-controls">
           <summary>Navigation</summary>
           <div>

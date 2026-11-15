@@ -1,0 +1,76 @@
+{
+ "purpose": "Illustrative planet surface textures for the optional 3D view. Positions, sizes and distances come from planets.json; textures are appearance only.",
+ "license": "CC BY 4.0, https://creativecommons.org/licenses/by/4.0/",
+ "author": "Solar System Scope (INOVE), based on NASA imagery; https://www.solarsystemscope.com/textures/",
+ "retrievedUtc": "2026-11-15",
+ "notes": [
+  "Venus uses the cloud-top (atmosphere) texture.",
+  "Rotation rates follow IAU sidereal periods; axis orientation is illustrative.",
+  "Not live imagery or weather."
+ ],
+ "files": [
+  {
+   "file": "assets/planets/sun.jpg",
+   "source": "https://www.solarsystemscope.com/textures/download/2k_sun.jpg",
+   "sourceSha256": "ff0f076ba65e03b5ab518451bc96699325be38e3ccbdd5869ee1c00f3a0c8816",
+   "sha256": "c8a73bace6f01d2aed8f615747b9867d57cc33cc0a87f201c55b7c521e5bcb5f",
+   "change": "resized to 1024x512, JPEG quality 82"
+  },
+  {
+   "file": "assets/planets/mercury.jpg",
+   "source": "https://www.solarsystemscope.com/textures/download/2k_mercury.jpg",
+   "sourceSha256": "5a5c80607f643496bac9a631e71957def35ed788895f18b678ac849c2b38e48a",
+   "sha256": "b1eac0bf781d97512b513cf53af509618780c37b3c1451c7b9cdcbafad94e880",
+   "change": "resized to 1024x512, JPEG quality 82"
+  },
+  {
+   "file": "assets/planets/venus.jpg",
+   "source": "https://www.solarsystemscope.com/textures/download/2k_venus_atmosphere.jpg",
+   "sourceSha256": "225012ad4911730605c4e189ca2a3bf674fce50cc48aab4102b936b47d6991ac",
+   "sha256": "9fb68a46d600c3aaf8cf6f844e08cfa7b45c4808c39634a427d000bada111209",
+   "change": "resized to 1024x512, JPEG quality 82"
+  },
+  {
+   "file": "assets/planets/mars.jpg",
+   "source": "https://www.solarsystemscope.com/textures/download/2k_mars.jpg",
+   "sourceSha256": "2d187f3e77a98eaa8cea5f4cc722f633c122ef170b9e94ace6b5fb6cbc3f8e01",
+   "sha256": "0f65683b37e8d26d99407ecfe14b332ae69f271b68bc4f1f2fa54c9b13d0942a",
+   "change": "resized to 1024x512, JPEG quality 82"
+  },
+  {
+   "file": "assets/planets/jupiter.jpg",
+   "source": "https://www.solarsystemscope.com/textures/download/2k_jupiter.jpg",
+   "sourceSha256": "b0f04d005350252636b0e3396fc592548cbd9e9126b269d32d5c6abd4b0e4f2b",
+   "sha256": "6debdbfcd8f00be61d9173ad4b0e11eef87fe350050f0d29cdb06606bfe4dc95",
+   "change": "resized to 1024x512, JPEG quality 82"
+  },
+  {
+   "file": "assets/planets/saturn.jpg",
+   "source": "https://www.solarsystemscope.com/textures/download/2k_saturn.jpg",
+   "sourceSha256": "54a900ca9bf7ab62e70f862852759abdf342e6d6436a95a2fe9ebdb6bcd3bbac",
+   "sha256": "57d8c612a3b8295832ce196f16d14295d1f6e7a23ba189e5512880d82b156539",
+   "change": "resized to 1024x512, JPEG quality 82"
+  },
+  {
+   "file": "assets/planets/uranus.jpg",
+   "source": "https://www.solarsystemscope.com/textures/download/2k_uranus.jpg",
+   "sourceSha256": "d15239d46f82d3ea13d2b260b5b29b2a382f42f2916dae0694d0387b1204a09d",
+   "sha256": "1a16d8453203c90a9d3a3691141fdcac7b95e54b0c1d7f746524926c3163e9a9",
+   "change": "resized to 1024x512, JPEG quality 82"
+  },
+  {
+   "file": "assets/planets/neptune.jpg",
+   "source": "https://www.solarsystemscope.com/textures/download/2k_neptune.jpg",
+   "sourceSha256": "cb42ea82709741d28b0af44d8b283cbc6dbd0c521a7f0e1e1e010ade00977df6",
+   "sha256": "e6a7ad9033a7b80b73e7d8beafa0d5dd261b4723f0ee4324cd113ea2fb28d5f1",
+   "change": "resized to 1024x512, JPEG quality 82"
+  },
+  {
+   "file": "assets/planets/saturn-ring.png",
+   "source": "https://www.solarsystemscope.com/textures/download/2k_saturn_ring_alpha.png",
+   "sourceSha256": "4b0644b2f3ef259fd0bfaedd9dc52f9e7d9738f65f50363e8c4dd19f650d7334",
+   "sha256": "acfda2902f212c7d3f3fb8cee5ca19322fd86f18f0cd6ae069ad6ef422b02a23",
+   "change": "re-saved PNG, unchanged pixels"
+  }
+ ]
+}

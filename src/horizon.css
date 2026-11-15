@@ -1049,3 +1049,16 @@ input[type="range"] {
 .hl-key.line.alt {
   border-top: 2px dotted #9a958a;
 }
+
+.inspect-label {
+  font: 12px var(--mono);
+  color: var(--ink-2);
+  align-self: center;
+}
+.planet-note {
+  flex-basis: 100%;
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--ink-2);
+  max-width: 60ch;
+}
