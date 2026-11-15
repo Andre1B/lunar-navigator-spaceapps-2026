@@ -36,13 +36,25 @@ export function surfaceMaterial({ role = "far", shared = null } = {}) {
     roughness: 1,
     metalness: 0,
   });
+  // The camera in this mesh's own coordinates, set before each draw in double
+  // precision. Vertices are Moon-centred (~1 radius), so modelViewMatrix * position
+  // cancels two large float32 numbers; its rounding changed every frame as the view
+  // turned (Surface sky following), making sub-pixel ridges at the crest flicker.
+  // position - eyeLocal is exact in float32 for nearby points, and only a rotation follows.
+  const eye = new THREE.Vector3();
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms);
     shader.uniforms.ownAlignment = { value: own };
+    shader.uniforms.eyeLocal = { value: eye };
     shader.vertexShader =
-      `uniform vec3 surfaceObserver; uniform vec3 ownAlignment;
+      `uniform vec3 surfaceObserver; uniform vec3 ownAlignment; uniform vec3 eyeLocal;
       varying vec3 surfaceRay; varying vec3 surfacePosition;\n` +
       shader.vertexShader;
+    shader.vertexShader = shader.vertexShader.replace(
+      "#include <project_vertex>",
+      `vec4 mvPosition = vec4(mat3(modelViewMatrix) * (transformed - eyeLocal), 1.0);
+      gl_Position = projectionMatrix * mvPosition;`,
+    );
     shader.vertexShader = shader.vertexShader.replace(
       "#include <begin_vertex>",
       `#include <begin_vertex>
@@ -80,8 +92,8 @@ export function surfaceMaterial({ role = "far", shared = null } = {}) {
     );
   };
   material.customProgramCacheKey = () =>
-    "numerical-horizon-clipped-regolith-v2-" + role;
-  return { material, horizon, uniforms, alignment: own };
+    "numerical-horizon-clipped-regolith-v3-" + role;
+  return { material, horizon, uniforms, alignment: own, eye };
 }
 
 // Align the actual rendered triangle under the observer, rather than a nearest

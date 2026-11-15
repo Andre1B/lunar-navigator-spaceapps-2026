@@ -547,6 +547,14 @@ export default function SpaceSceneV2({
     nearTerrain.castShadow = nearTerrain.receiveShadow = true;
     nearTerrain.visible = false;
     scene.add(nearTerrain);
+    // Camera in each foreground mesh's own coordinates, in double precision,
+    // for the eye-relative projection in surfaceMaterial.
+    for (const [mesh, owner] of [
+      [surfaceTerrain, surface],
+      [nearTerrain, nearSurface],
+    ])
+      mesh.onBeforeRender = (_r, _s, cam) =>
+        mesh.worldToLocal(owner.eye.setFromMatrixPosition(cam.matrixWorld));
     let nearSite = "",
       nearLoading = "",
       nearAnchorSite = "",
