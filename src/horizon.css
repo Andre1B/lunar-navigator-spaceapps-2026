@@ -9,7 +9,7 @@
   --ink: #ece7dc;
   --ink-2: #b4ae9f;
   --sun: #f2b544;
-  --earth: #74c6e2;
+  --earth: #d8d1c2;
   --rule: #2c2a26;
   --surface: #0e0f12;
   --line: #2c2a26;
@@ -370,7 +370,7 @@ button[aria-pressed="true"],
   width: 14px;
   height: 4px;
   vertical-align: 2px;
-  background: var(--earth);
+  background: repeating-linear-gradient(90deg, var(--earth) 0 3px, transparent 3px 5px);
 }
 .hl-cell {
   fill: var(--sun);
@@ -380,6 +380,7 @@ button[aria-pressed="true"],
 }
 .hl-earth {
   fill: var(--earth);
+  opacity: 0.7;
 }
 .hl-row {
   fill: var(--ink-2);
@@ -595,7 +596,7 @@ input[type="range"] {
   color: var(--sun);
   margin: 0;
 }
-/* Earth keeps its cyan wherever a value describes Earth */
+/* Earth: a light neutral, told apart from the Sun by shape and label */
 .next-events-earthrise .next-events-name,
 .next-events-earthset .next-events-name,
 .arrival-series-earth {

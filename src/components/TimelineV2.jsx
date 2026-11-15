@@ -24,7 +24,7 @@ const Track = memo(function Track({ label, values }) {
           label + " timeline; brighter means more of the disc visible"
         }
       >
-        <rect width={bins.length} height="28" fill="#192335" />
+        <rect width={bins.length} height="28" fill="#1c1b18" />
         {bins.map((v, i) =>
           v > 0 ? (
             <rect
@@ -32,7 +32,7 @@ const Track = memo(function Track({ label, values }) {
               x={i}
               width="1.1"
               height="28"
-              fill={label === "Sunlight" ? "#f6c36f" : "#65d3e6"}
+              fill={label === "Sunlight" ? "#f6c36f" : "#d8d1c2"}
               opacity={Math.max(0.12, v)}
             />
           ) : null,

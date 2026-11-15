@@ -361,7 +361,7 @@ export default function SpaceSceneV2({
     const moonOutline = new THREE.Mesh(
       moon.geometry,
       new THREE.MeshBasicMaterial({
-        color: "#a1d9ff",
+        color: "#f2b544",
         side: THREE.BackSide,
         transparent: true,
         opacity: 0.8,
@@ -468,7 +468,7 @@ export default function SpaceSceneV2({
     const horizonOutline = new THREE.LineLoop(
       new THREE.BufferGeometry(),
       new THREE.LineBasicMaterial({
-        color: "#a1d9ff",
+        color: "#f2b544",
         depthTest: false,
         depthWrite: false,
         toneMapped: false,
@@ -480,7 +480,7 @@ export default function SpaceSceneV2({
     const terrainOutline = new THREE.LineLoop(
       new THREE.BufferGeometry(),
       new THREE.LineBasicMaterial({
-        color: "#a1d9ff",
+        color: "#f2b544",
         depthTest: false,
         depthWrite: false,
         toneMapped: false,

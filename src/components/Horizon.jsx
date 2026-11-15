@@ -18,7 +18,7 @@ export default function Horizon({ data, index, height }) {
     .join(" ");
   const bodies = [
     ["Sun", data.sun, "#ffc978"],
-    ["Earth", data.earth, "#62b6ff"],
+    ["Earth", data.earth, "#d8d1c2"],
   ];
   return (
     <div className="horizon-chart">
@@ -29,18 +29,18 @@ export default function Horizon({ data, index, height }) {
       >
         {[0, 90, 180, 270, 360].map((a) => (
           <g key={a}>
-            <path d={`M${x(a)} 20V190`} stroke="#29374e" />
+            <path d={`M${x(a)} 20V190`} stroke="#2e2c28" />
             <text x={x(a)} y="215" textAnchor="middle">
               {["N", "E", "S", "W", "N"][a / 90]} · {a}°
             </text>
           </g>
         ))}
-        <path d={`M45 ${y(0)}H855`} stroke="#61718a" strokeDasharray="4 5" />
+        <path d={`M45 ${y(0)}H855`} stroke="#7a7469" strokeDasharray="4 5" />
         <text x="45" y="15">
           Elevation relative to local horizontal
         </text>
-        <path d={`${path}L855 190H45Z`} fill="#263347" />
-        <path d={path} stroke="#b4c1d1" strokeWidth="2" fill="none" />
+        <path d={`${path}L855 190H45Z`} fill="#2a2824" />
+        <path d={path} stroke="#c4beb2" strokeWidth="2" fill="none" />
         {bodies.map(([name, body, color]) => {
           const a = body.azDeg[index],
             e = body.elDeg[index];

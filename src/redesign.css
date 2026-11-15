@@ -400,7 +400,7 @@
   flex-shrink: 0;
 }
 .earth-dot {
-  background: #65d3e6;
+  background: #b4aa97;
   margin-left: 12px;
 }
 .scene-preview-link {
@@ -440,7 +440,7 @@
   display: inline-flex;
 }
 .earth-symbol {
-  color: #65d3e6;
+  color: #b4aa97;
 }
 .delay-symbol {
   color: #d5cfc4;
@@ -1146,7 +1146,7 @@
   stroke-width: 1;
 }
 .learn-earth {
-  fill: #65b8df;
+  fill: #b1a793;
 }
 .learn-dial {
   stroke: #cbc4b7;
@@ -1264,7 +1264,7 @@
   background: #f6c36f;
 }
 .learn-key.earth {
-  background: #65d3e6;
+  background: #b4aa97;
 }
 .learn-stats {
   display: flex;
@@ -2201,7 +2201,7 @@
   font-weight: 600;
 }
 .answer-scenario dl > div:nth-child(3) dd {
-  color: #80d6e8;
+  color: #c0b8a8;
 }
 .answer-inspect {
   font-size: 13px;
@@ -3479,7 +3479,7 @@ button.tracking-state {
   fill: #edc371;
 }
 .briefing-earth {
-  fill: #72c7eb;
+  fill: #bbb3a2;
 }
 .briefing-meaning {
   font-size: 13px;
@@ -3840,7 +3840,7 @@ button.tracking-state {
   color: #f6c36f;
 }
 .answer-earth-percent {
-  color: #72c7eb;
+  color: #bbb3a2;
 }
 .answer-arrival {
   border-top: 1px solid #55524c;
@@ -3947,7 +3947,7 @@ button.tracking-state {
   margin-top: 4px;
 }
 
-.home-story-kicker { font: 600 12px/1.5 Overpass, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #79c9e8; }
+.home-story-kicker { font: 600 12px/1.5 Overpass, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #bdb5a4; }
 .home-problem-story { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; padding: 48px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .home-problem-story h2 { font-size: clamp(28px, 3vw, 42px); line-height: 1.15; margin: 10px 0 24px; }
 .home-story-visual { background: #131210; border: 1px solid var(--line); padding: 16px; }
