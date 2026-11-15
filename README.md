@@ -1,13 +1,17 @@
-# Lunar Navigator
+# Lunacline — lunar arrival comparison
+
+*(formerly Lunar Navigator; the URLs and repository name are unchanged)*
 
 **If a lunar landing is delayed, does the original location still offer useful sunlight and direct Earth visibility?**
+
+Comparing arrival times is the product: the original arrival, the same place later, and another study point on the delayed date, with the same stay and observer height. The 3D view is an optional visualization of those results.
 
 Team An0r4k’s NASA Space Apps 2026 educational prototype for [Lunar Landing Site Navigator](https://www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator/). A guided investigation and an unrestricted workspace connect a clear decision to the source data and its limitations.
 
 ## Use the project
 
 - Guided analysis: approximately ten minutes, with freely accessible chapters.
-- Open Workspace: Home, Simulator, Compare, Evidence and Credits are separate screens, never locked behind mission progress.
+- Open Workspace: Home, Compare, 3D view, Evidence and Credits are separate screens, never locked behind mission progress.
 - Faithful Mode: shared astronomical time.
 - Free Mode: independently freeze selected body positions/orientations; experimental configurations never supply mission recommendations.
 - Explore space: hide the surrounding interface; return with the visible control or Escape.
