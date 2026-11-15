@@ -16,14 +16,19 @@ const dataset={manifest,sites,validation,integrity};
 const settings={siteId:'connecting-ridge',alternative:'shackleton-rim',height:1,date:'2027-03-01',days:7,delay:7};
 const close=(a,b,eps,m='')=>assert.ok(Math.abs(a-b)<=eps,`${m} got ${a} expected ${b}`);
 const trapezoid=(a)=>a.slice(0,-1).reduce((s,v,i)=>s+(v+a[i+1])/2,0)/(a.length-1);
+const addDays=(date,n)=>new Date(Date.parse(date+'T00:00:00Z')+n*86400000).toISOString().slice(0,10);
+const coverageEndDate=manifest.period.endUtc.slice(0,10);
+const outOfCoverageDate=addDays(coverageEndDate,-5);
+const nearCoverageEnd=addDays(coverageEndDate,-20);
 
 test('comparisonRows: three scenarios, same height and window length, delay and alternative applied',()=>{
   const rows=comparisonRows(dataset,settings);
   assert.deepEqual(rows.map(r=>r.label),['Original arrival','Delayed arrival','Alternative point']);
   assert.deepEqual(rows.map(r=>r.id),['connecting-ridge','connecting-ridge','shackleton-rim']);
   assert.deepEqual(rows.map(r=>r.offset),[0,7,7]);
-  // 7-day windows on an hourly grid starting 2027-03-01: [0,168], [168,336], [168,336]
-  assert.deepEqual(rows.map(r=>r.bounds),[{start:0,end:168},{start:168,end:336},{start:168,end:336}]);
+  const start=(Date.parse(settings.date+'T00:00:00Z')-Date.parse(manifest.period.startUtc))/3600000;
+  // Delay shifts both windows by seven UTC days; all lengths derive from the selected settings.
+  assert.deepEqual(rows.map(r=>r.bounds),[{start,end:start+168},{start:start+168,end:start+336},{start:start+168,end:start+336}]);
   for(const r of rows){assert.ok(r.summary,r.label);assert.equal(r.bounds.end-r.bounds.start,7*24);}
 });
 
@@ -46,15 +51,38 @@ test('comparisonRows: summary numbers are faithful to the data (independent trap
 });
 
 test('comparisonRows: windows outside coverage or with invalid input are not calculated (no invented numbers)',()=>{
-  for(const bad of [{date:'2027-04-27'},{date:'2027-02-28'},{date:''},{date:'garbage'},{days:0},{days:NaN},{delay:29,date:'2027-04-10',days:14}]){
+  for(const bad of [{date:outOfCoverageDate},{date:addDays(manifest.period.startUtc.slice(0,10),-1)},{date:''},{date:'garbage'},{date:'2027-02-31'},{date:'2027-03-32'},{date:'03/01/2027'},{date:'2027-03'},{date:'2027-03-01T00:00:00Z'},{days:0},{days:NaN},{delay:29,date:nearCoverageEnd,days:14}]){
     const rows=comparisonRows(dataset,{...settings,...bad});
     for(const r of rows.filter(r=>!r.bounds))assert.equal(r.summary,null,JSON.stringify(bad));
     assert.ok(rows.some(r=>!r.bounds),'at least one row outside coverage for '+JSON.stringify(bad));
   }
   // delay pushes only the delayed rows out of coverage; the original stays calculated
-  const rows=comparisonRows(dataset,{...settings,date:'2027-04-15',days:7,delay:14});
+  const rows=comparisonRows(dataset,{...settings,date:nearCoverageEnd,days:7,delay:14});
   assert.ok(rows[0].summary);assert.equal(rows[1].summary,null);assert.equal(rows[2].summary,null);
   assert.deepEqual(comparisonRows({manifest:null},settings),[]);
+});
+
+test('comparisonRows and exported report reject impossible, partial, timestamp and alternate-format arrival dates',()=>{
+  for(const date of ['2027-02-31','2027-03-32','03/01/2027','2027-03','2027-03-01T00:00:00Z','']){
+    const rows=comparisonRows(dataset,{...settings,date});
+    assert.equal(rows.length,3);
+    assert.ok(rows.every(r=>r.bounds===null&&r.summary===null),`${date}: rows ${JSON.stringify(rows)}`);
+    const report=comparisonReport(dataset,{...settings,date},72);
+    assert.deepEqual(report.scenarios.map(s=>s.status),['not-calculated','not-calculated','not-calculated'],date);
+    assert.ok(report.scenarios.every(s=>s.startUtc===null&&s.endUtc===null&&s.summary===null),date);
+  }
+  assert.equal(comparisonRows(dataset,{...settings,date:'2027-03-01'}).every(r=>r.summary!==null),true,'valid ISO arrival remains calculated');
+});
+
+test('rolling coverage includes its first and last complete UTC stay, then fails closed one day later',()=>{
+  const first=manifest.period.startUtc.slice(0,10);
+  const last=addDays(manifest.period.endUtc.slice(0,10),-settings.days);
+  const atStart=comparisonRows(dataset,{...settings,date:first,delay:0});
+  const atLast=comparisonRows(dataset,{...settings,date:last,delay:0});
+  assert.ok(atStart.every(r=>r.summary),`first coverage day: ${first}`);
+  assert.ok(atLast.every(r=>r.summary),`last full stay: ${last}`);
+  const outside=comparisonRows(dataset,{...settings,date:addDays(last,1),delay:0});
+  assert.ok(outside.every(r=>r.bounds===null&&r.summary===null),`outside final full stay: ${addDays(last,1)}`);
 });
 
 test('assessDarkness: hand-built cases (uncensored/censored, above/below limit, boundaries, invalid)',()=>{
@@ -114,7 +142,7 @@ test('comparisonReport: three scenarios mirror the rows (same windows, height, m
     assert.deepEqual(s.summary.longestDarkness,rows[i].summary.dark);
     assert.ok(['exceeds','undetermined','within'].includes(s.exampleDarknessAssessment.status));
   });
-  // exact window instants: start = 2027-03-01 + offset days, end = start + 7 days
+  // exact UTC windows for the selected 2027-03-01 arrival and seven-day delay.
   assert.deepEqual(rep.scenarios.map(s=>[s.startUtc,s.endUtc]),[
     ['2027-03-01T00:00:00.000Z','2027-03-08T00:00:00.000Z'],
     ['2027-03-08T00:00:00.000Z','2027-03-15T00:00:00.000Z'],
@@ -122,12 +150,12 @@ test('comparisonReport: three scenarios mirror the rows (same windows, height, m
 });
 
 test('comparisonReport: invalid coverage is "not-calculated" with null window and summary, never extrapolated',()=>{
-  const rep=comparisonReport(dataset,{...settings,date:'2027-04-27'},72);
+  const rep=comparisonReport(dataset,{...settings,date:outOfCoverageDate},72);
   for(const s of rep.scenarios){
     assert.equal(s.status,'not-calculated');assert.equal(s.summary,null);assert.equal(s.startUtc,null);assert.equal(s.endUtc,null);
     assert.equal(s.exampleDarknessAssessment.status,'not-calculated');
   }
-  const partial=comparisonReport(dataset,{...settings,date:'2027-04-15',days:7,delay:14},72);
+  const partial=comparisonReport(dataset,{...settings,date:nearCoverageEnd,days:7,delay:14},72);
   assert.deepEqual(partial.scenarios.map(s=>s.status),['calculated','not-calculated','not-calculated']);
   // zero / NaN / negative limits
   for(const limit of [NaN,-5]){

@@ -9,7 +9,7 @@ import {dirname,join} from 'node:path';
 const DATA=join(dirname(fileURLToPath(import.meta.url)),'..','public','data');
 const load=(f)=>JSON.parse(readFileSync(join(DATA,f),'utf8'));
 const planets=load('planets.json'),manifest=load('manifest.json'),sky=load('sky.json'),validation=load('validation.json');
-const N=1393;
+const N=manifest.period.sampleCount;
 const EXPECTED=['mercury','venus','mars','jupiter','saturn','uranus','neptune'];
 // Loose geocentric-distance envelopes (km) from orbital geometry (perihelion/aphelion of both bodies, with margin).
 const RANGE={mercury:[5e7,2.4e8],venus:[3.5e7,2.7e8],mars:[5e7,4.1e8],jupiter:[5.5e8,1.0e9],saturn:[1.1e9,1.8e9],uranus:[2.5e9,3.3e9],neptune:[4.2e9,4.8e9]};
@@ -39,7 +39,7 @@ test('planets.json: radii are positive and within 2% of published mean radii',()
   }
 });
 
-test('planets.json: 1393 finite 3-vectors per planet at plausible Moon-centred distances',()=>{
+test('planets.json: one finite 3-vector per published hourly instant at plausible Moon-centred distances',()=>{
   for(const p of planets.planets){
     assert.equal(p.posKm.length,N,`${p.id} sample count`);
     const [lo,hi]=RANGE[p.id];
@@ -64,7 +64,7 @@ test('planets.json: positions are continuous (direction changes < 0.2 deg per ho
 });
 
 test('planets.json: a planet is never at the Sun or Earth position (independent of sky.json)',()=>{
-  for(const i of [0,700,1392])for(const p of planets.planets){
+  for(const i of [0,Math.floor(N/2),N-1])for(const p of planets.planets){
     const sep=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);
     assert.ok(sep(p.posKm[i],sky.sunPosKm[i])>1e6,`${p.id} coincides with Sun`);
     assert.ok(sep(p.posKm[i],sky.earthPosKm[i])>1e6,`${p.id} coincides with Earth`);

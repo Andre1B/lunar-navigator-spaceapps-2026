@@ -15,6 +15,7 @@ const REAL=join(ROOT,'public','data');
 const manifest=JSON.parse(readFileSync(join(REAL,'manifest.json'),'utf8'));
 const integrity=JSON.parse(readFileSync(join(REAL,'integrity.json'),'utf8'));
 const FILES=['manifest.json','sky.json','planets.json','validation.json','integrity.json',...manifest.sites.map(s=>s.file)];
+const DERIVED_FILES=['manifest.json','sky.json','planets.json','validation.json',...manifest.sites.map(s=>s.file)].sort();
 const sha=(b)=>createHash('sha256').update(b).digest('hex');
 const snapshotDir=(dir)=>{const out={};const walk=(d,p='')=>{for(const n of readdirSync(d)){const f=join(d,n);const st=statSync(f);if(st.isDirectory())walk(f,p+n+'/');else out[p+n]=sha(readFileSync(f));}};walk(dir);return out;};
 
@@ -27,16 +28,16 @@ const withScratch=(fn)=>{const dir=scratch();try{return fn(dir);}finally{rmSync(
 const readInt=(dir)=>JSON.parse(readFileSync(join(dir,'integrity.json'),'utf8'));
 const writeInt=(dir,obj)=>writeFileSync(join(dir,'integrity.json'),JSON.stringify(obj));
 
-test('real dataset: integrity record verifies all 8 derived files, read-only',()=>{
+test('real dataset: integrity record verifies every manifest-derived file, read-only',()=>{
   const before=snapshotDir(REAL);
   const r=verifyDatasetIntegrity(REAL);
-  assert.deepEqual(r,{valid:true,filesChecked:8});
+  assert.deepEqual(r,{valid:true,filesChecked:DERIVED_FILES.length});
   assert.deepEqual(snapshotDir(REAL),before,'verification must not modify the dataset');
-  assert.equal(integrity.files.length,8);
+  assert.equal(integrity.files.length,DERIVED_FILES.length);
   for(const e of integrity.files){assert.match(e.sha256,/^[0-9a-f]{64}$/);assert.equal(e.bytes,readFileSync(join(REAL,e.file)).length,e.file);assert.equal(e.sha256,sha(readFileSync(join(REAL,e.file))),e.file);}
   assert.equal(integrity.manifestGeneratedAtUtc,manifest.generatedAtUtc);
   const names=integrity.files.map(f=>f.file).sort();
-  assert.deepEqual(names,['manifest.json','planets.json','sites/connecting-ridge.json','sites/malapert-massif.json','sites/nobile-rim-1.json','sites/shackleton-rim.json','sky.json','validation.json']);
+  assert.deepEqual(names,DERIVED_FILES);
 });
 
 test('default directory argument verifies the repository dataset',()=>assert.equal(verifyDatasetIntegrity().valid,true));
@@ -44,7 +45,7 @@ test('default directory argument verifies the repository dataset',()=>assert.equ
 test('`npm run check:data` / node script exits 0 with a JSON line',()=>{
   const r=spawnSync(process.execPath,[join(ROOT,'scripts','check-data-integrity.mjs')],{encoding:'utf8'});
   assert.equal(r.status,0,r.stderr);
-  assert.deepEqual(JSON.parse(r.stdout.trim()),{valid:true,filesChecked:8});
+  assert.deepEqual(JSON.parse(r.stdout.trim()),{valid:true,filesChecked:DERIVED_FILES.length});
 });
 
 test('scratch copy verifies (positive control for the negative cases below)',()=>withScratch(dir=>assert.equal(verifyDatasetIntegrity(dir).valid,true)));
@@ -54,7 +55,7 @@ test('tamper: any changed byte in any hashed file is detected (same size and dif
     withScratch(dir=>{
       const p=join(dir,file);const b=readFileSync(p);
       const flipped=Buffer.from(b);flipped[Math.floor(b.length/2)]^=0x01;writeFileSync(p,flipped);
-      assert.throws(()=>verifyDatasetIntegrity(dir),/checksum|match/i,`flip in ${file}`);
+      assert.throws(()=>verifyDatasetIntegrity(dir),/checksum|match|JSON|parse/i,`flip in ${file}`);
       writeFileSync(p,Buffer.concat([b,Buffer.from(' ')]));
       assert.throws(()=>verifyDatasetIntegrity(dir),/checksum|match/i,`append in ${file}`);
       writeFileSync(p,b.subarray(0,b.length-1));

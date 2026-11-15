@@ -45,9 +45,11 @@ function track(page,tag){
 }
 const errCount=()=>issues.console.length+issues.pageerror.length;
 const fresh=(from)=>[...issues.console,...issues.pageerror].slice(from);
+async function settleOpening(page){const dialog=page.getByRole('dialog',{name:'Lunar Navigator'});if(await dialog.count())await dialog.waitFor({state:'hidden',timeout:4500});}
 async function simPage(ctx,tag,qs='?qa=1'){
   const page=await ctx.newPage();const net=track(page,tag);
   await page.goto(`${BASE}/${qs}#/simulator`,{waitUntil:'networkidle'});
+  await settleOpening(page);
   await page.getByRole('button',{name:/Step \+1 h/}).waitFor({timeout:30000});
   await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot,null,{timeout:30000});
   await page.waitForTimeout(3000);
@@ -70,6 +72,7 @@ const browser=await launch();
 console.log('browser',browser.version(),'base',BASE);
 const desktop=await browser.newContext({viewport:{width:1440,height:900}});
 const mobile=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2});
+const landscapeTouch=await browser.newContext({viewport:{width:844,height:390},isMobile:true,hasTouch:true,deviceScaleFactor:2});
 
 await check('desktop 1440: loading the simulator without interaction requests the 2k textures and NO 4k file',async()=>{
   const from=errCount();
@@ -161,12 +164,26 @@ await check('mobile 390: never loads 4k (nor 2k): 1k textures only, even after i
   expect(fresh(from).length===0,'console errors: '+JSON.stringify(fresh(from).slice(0,2)));
   await page.close();
 });
+await check('landscape touch 844x390 is mobile: 60 fps cap and 1k textures, never 2k/4k',async()=>{
+  const from=errCount();
+  const {page,net}=await simPage(landscapeTouch,'tex-landscape-touch');
+  const environment=await page.evaluate(()=>({touch:navigator.maxTouchPoints>0,coarse:matchMedia('(pointer:coarse)').matches,noHover:matchMedia('(hover:none)').matches}));
+  const rendered=await page.evaluate(()=>document.querySelector('canvas')?.lunarSnapshot?.().rendered);
+  expect(environment.touch&&environment.coarse&&environment.noHover,`landscape touch emulation not active: ${JSON.stringify(environment)}`);
+  expect(rendered?.fpsLimit===60,`landscape touch renderer cap is ${rendered?.fpsLimit}, expected 60`);
+  expect(net.count(K1)>=3&&net.count(K2)===0&&net.count(K4)===0,`expected 1k textures only: ${JSON.stringify({oneK:net.names(K1),twoK:net.names(K2),fourK:net.names(K4)})}`);
+  await page.locator('canvas').first().focus();await page.keyboard.press('ArrowRight');await page.waitForTimeout(700);
+  expect(net.count(K2)===0&&net.count(K4)===0,'desktop texture sizes loaded after landscape touch input');
+  expect(fresh(from).length===0,'console errors: '+JSON.stringify(fresh(from).slice(0,2)));
+  await page.close();return `${JSON.stringify(environment)}; fpsLimit=${rendered.fpsLimit}; ${net.names(K1).join(',')}`;
+});
 
 // ================= Learn loaded eagerly
 await check('Learn: opens directly and through navigation; worked example visible; no lazy Learn chunk; no console errors',async()=>{
   const from=errCount();
   const direct=await desktop.newPage();const n1=track(direct,'learn-direct');
   await direct.goto(`${BASE}/#/learn`,{waitUntil:'networkidle'});
+  await settleOpening(direct);
   await direct.locator('.learn-worked').waitFor({timeout:15000});
   expect(/Real data · not a cartoon/.test(await direct.locator('.learn-worked').innerText()),'worked example badge');
   expect(await direct.locator('h1').first().innerText().then(t=>/How Lunar Navigator works/.test(t)),'Learn h1');
@@ -174,6 +191,7 @@ await check('Learn: opens directly and through navigation; worked example visibl
   await direct.close();
   const nav=await desktop.newPage();const n2=track(nav,'learn-nav');
   await nav.goto(`${BASE}/#/home`,{waitUntil:'networkidle'});
+  await settleOpening(nav);
   const before=n2.req.length;
   await nav.locator('header').getByRole('link',{name:'How it works'}).click();
   await nav.waitForFunction(()=>location.hash==='#/learn');
@@ -189,8 +207,8 @@ await check('Learn 390: opens directly and via navigation, worked example visibl
   const from=errCount();
   for(const via of ['direct','nav']){
     const page=await mobile.newPage();track(page,'learn-mobile-'+via);
-    if(via==='direct')await page.goto(`${BASE}/#/learn`,{waitUntil:'networkidle'});
-    else{await page.goto(`${BASE}/#/home`,{waitUntil:'networkidle'});await page.evaluate(()=>{location.hash='#/learn';});}
+    if(via==='direct'){await page.goto(`${BASE}/#/learn`,{waitUntil:'networkidle'});await settleOpening(page);}
+    else{await page.goto(`${BASE}/#/home`,{waitUntil:'networkidle'});await settleOpening(page);await page.evaluate(()=>{location.hash='#/learn';});}
     await page.locator('.learn-worked').waitFor({timeout:15000});
     const o=await page.evaluate(()=>{const vw=document.documentElement.clientWidth;const skip=e=>e.closest('.table-wrap,pre,nav,svg,canvas');return {sw:document.documentElement.scrollWidth,vw,off:[...document.querySelectorAll('main *')].filter(e=>{const b=e.getBoundingClientRect();return b.width>0&&(b.right>vw+1||b.left<-1)&&!skip(e);}).slice(0,3).map(e=>e.tagName+'.'+String(e.className?.baseVal??e.className).slice(0,25))};});
     expect(o.sw<=o.vw+1&&o.off.length===0,`${via}: overflow ${JSON.stringify(o)}`);
@@ -204,7 +222,7 @@ await check('smoke: Home, Compare and Review open without console or network err
   const from=errCount();const bad=[];
   for(const [label,ctx] of [['desktop',desktop],['mobile',mobile]])for(const route of ['home','compare','review']){
     const page=await ctx.newPage();track(page,`smoke-${label}-${route}`);
-    await page.goto(`${BASE}/#/${route}`,{waitUntil:'networkidle'});await page.locator('#main').waitFor({timeout:20000});
+    await page.goto(`${BASE}/#/${route}`,{waitUntil:'networkidle'});await settleOpening(page);await page.locator('#main').waitFor({timeout:20000});
     if(route==='compare')await page.locator('table tbody tr').first().waitFor({timeout:20000});
     await page.waitForTimeout(600);
     const o=await page.evaluate(()=>({h1:document.querySelector('h1')?.textContent.trim().slice(0,40)||'',sw:document.documentElement.scrollWidth,vw:document.documentElement.clientWidth,nan:/NaN|undefined/.test(document.querySelector('main').innerText)}));
@@ -221,6 +239,7 @@ await check('no failed requests and no console errors across the whole run',asyn
 });
 
 await browser.close();
+await Promise.all([desktop.close(),mobile.close(),landscapeTouch.close()].map(p=>p.catch(()=>{})));
 const failed=results.filter(r=>!r.ok).length;
 writeFileSync(join(OUT,'results.json'),JSON.stringify({base:BASE,at:new Date().toISOString(),passed:results.length-failed,failed,results,issues},null,1));
 console.log(`\n${results.length-failed}/${results.length} passed. Output: ${OUT}`);

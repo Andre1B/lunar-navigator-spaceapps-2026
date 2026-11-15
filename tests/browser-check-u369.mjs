@@ -48,10 +48,12 @@ function watch(page,tag,ignore){
 }
 const errCount=()=>issues.console.length+issues.pageerror.length;
 const fresh=(from)=>[...issues.console,...issues.pageerror].slice(from);
+async function settleOpening(page){const d=page.getByRole('dialog',{name:'Lunar Navigator'});if(await d.count())await d.waitFor({state:'hidden',timeout:4500});}
 const shot=(page,name)=>page.screenshot({path:join(OUT,name+'.png')}).catch(()=>{}); // viewport shot: very tall pages break fullPage captures
 async function compare(ctx,tag){
   const page=await ctx.newPage();watch(page,tag);
   await page.goto(`${BASE}/#/compare`,{waitUntil:'networkidle'});
+  await settleOpening(page);
   await page.locator('table tbody tr').first().waitFor({timeout:20000});
   await page.locator('.arrival-series').waitFor({timeout:10000});
   return page;
@@ -59,6 +61,7 @@ async function compare(ctx,tag){
 async function explore(ctx,tag){
   const page=await ctx.newPage();watch(page,tag);
   await page.goto(`${BASE}/?qa=1#/simulator`,{waitUntil:'networkidle'});
+  await settleOpening(page);
   await page.getByRole('button',{name:/Step \+1 h/}).waitFor({timeout:30000});
   await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot,null,{timeout:30000});
   await page.locator('.sky-description').waitFor({timeout:10000});
@@ -180,6 +183,7 @@ await check('U6: worked example shows the real Malapert metrics (1 m vs 5 m) fro
   const from=errCount();
   const page=await browser.newContext({viewport:{width:1440,height:900}}).then(c=>c.newPage());watch(page,'u6');
   await page.goto(`${BASE}/#/learn`,{waitUntil:'networkidle'});
+  await settleOpening(page);
   const w=page.locator('.learn-worked');await w.waitFor({timeout:15000});
   expect(/Real data · not a cartoon/.test(await w.innerText()),'real-data badge');
   expect(await page.evaluate(()=>{const w=document.querySelector('.learn-worked');const c=document.querySelector('.learn-svg');return !c||!!(c.compareDocumentPosition(w)&Node.DOCUMENT_POSITION_FOLLOWING);}),'worked example follows the cartoon');
@@ -204,7 +208,7 @@ await check('U6: without the Malapert file the example waits politely (status, n
   const ctx=await browser.newContext({viewport:{width:1440,height:900}});const page=await ctx.newPage();
   const local=[];page.on('pageerror',e=>local.push('PE '+String(e).slice(0,150)));
   await page.route(/data\/sites\/malapert-massif\.json/,r=>r.abort());
-  await page.goto(`${BASE}/#/learn`,{waitUntil:'load'});await page.waitForTimeout(3500);
+  await page.goto(`${BASE}/#/learn`,{waitUntil:'load'});await settleOpening(page);await page.waitForTimeout(3500);
   expect(await page.locator('h1').first().innerText().then(t=>t.length>0),'Learn renders');
   const worked=await page.locator('.learn-worked').count();
   const status=await page.locator('main [role=status]').allInnerTexts();
@@ -216,7 +220,7 @@ await check('U6: without the Malapert file the example waits politely (status, n
 });
 await check('U6: worked example readable on mobile 390 (table scrolls inside its wrapper, no page overflow)',async()=>{
   const page=await mobile.newPage();watch(page,'u6-mobile');
-  await page.goto(`${BASE}/#/learn`,{waitUntil:'networkidle'});await page.locator('.learn-worked').waitFor({timeout:15000});
+  await page.goto(`${BASE}/#/learn`,{waitUntil:'networkidle'});await settleOpening(page);await page.locator('.learn-worked').waitFor({timeout:15000});
   await page.locator('.learn-worked').scrollIntoViewIfNeeded();
   const o=await page.evaluate(()=>{const vw=document.documentElement.clientWidth;const w=document.querySelector('.learn-worked');return {sw:document.documentElement.scrollWidth,vw,ww:w.getBoundingClientRect().width,off:[...w.querySelectorAll('*')].filter(e=>{const b=e.getBoundingClientRect();return b.width>0&&(b.right>vw+1||b.left<-1)&&!e.closest('.table-wrap');}).length,fs:parseFloat(getComputedStyle(w.querySelector('td')).fontSize)};});
   expect(o.sw<=o.vw+1&&o.off===0&&o.ww<=o.vw,'mobile overflow '+JSON.stringify(o));
@@ -269,7 +273,8 @@ await check('U9: follows point, observer height and fractional time (807.49 at M
   expect(text.startsWith(utcAt(s.index).slice(0,16).replace('T',' ')+' UTC, Malapert'),'lead: '+text.slice(0,70));
   expect(Math.abs(s.observation.sun-0.348)<0.02,'observation sun '+s.observation.sun);
   expect(text.includes('35% of the disc above the terrain horizon'),'Sun phrase: '+text);
-  expect(/Sun disc\s*34\.\d%/.test(await page.locator('.world-reading').innerText()),'HUD agrees');
+  const hud=(await page.locator('.world-reading span').allInnerTexts()).map(t=>t.replace(/\s+/g,' ').trim()).join(' | ');
+  expect(hud.includes(`Sun in view ${percent(s.observation.sun)}`),`HUD agrees with current fraction ${s.observation.sun}: ${hud}`);
   await page.selectOption('#explorer-height','5');
   await page.waitForFunction(()=>/observer 5 m/.test(document.querySelector('.sky-description p[aria-live]').textContent),null,{timeout:8000});
   expect(/observer 5 m above the ground/.test(await desc(page)),'height follows');

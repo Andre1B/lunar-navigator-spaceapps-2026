@@ -19,7 +19,7 @@ const UI={
   slider:'#time-slider',site:'#explorer-site',height:'#explorer-height',
   presetButtons:'.camera-presets button',canvas:'canvas',
 };
-const results=[],issues={console:[],page:[],http:[],requestfailed:[]};
+const results=[],textTraces=[],issues={console:[],page:[],http:[],requestfailed:[]};
 const fail=(message)=>{throw new Error(message);};
 const snapshot=(page)=>page.evaluate(()=>document.querySelector('canvas')?.lunarSnapshot?.());
 const setIndex=(page,index)=>page.evaluate((i)=>{
@@ -43,7 +43,7 @@ const waitRendered=async(page,{view,siteId,height,index,afterSerial=0,timeout=15
 
 async function launch(){
   const exe='C:/Program Files/Google/Chrome/Application/chrome.exe';
-  const options={headless:!process.env.QA_HEADED,args:['--use-gl=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist']};
+  const options={headless:!process.env.QA_HEADED,args:process.env.QA_GPU==='hardware'?[]:['--use-gl=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist']};
   for(const browser of [{...options,channel:'chrome'},...(existsSync(exe)?[{...options,executablePath:exe}]:[]),options]){
     try{return await chromium.launch(browser);}catch{}
   }
@@ -57,10 +57,17 @@ function watch(page,tag){
 }
 async function openSimulator(browser,tag,motion='no-preference'){
   const context=await browser.newContext({viewport:{width:1440,height:900},reducedMotion:motion});
+  await context.addInitScript(()=>sessionStorage.setItem('lunar-opening-v1','seen'));
   const page=await context.newPage();watch(page,tag);
   await page.goto(`${BASE}/?qa=1#/simulator`,{waitUntil:'networkidle',timeout:60000});
+  const opening=page.getByRole('dialog',{name:'Lunar Navigator'});
+  if(await opening.count())await opening.waitFor({state:'hidden',timeout:4500});
   await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot,null,{timeout:30000});
   await page.locator(UI.slider).waitFor({timeout:20000});
+  // Keep the interaction checks deterministic; autoplay itself is asserted by
+  // the dedicated entry-contract check below.
+  if(await visible(page,UI.pause))await page.getByRole('button',{name:UI.pause,exact:true}).click();
+  if(await visible(page,UI.restart))await page.getByRole('button',{name:UI.restart,exact:true}).click();
   return {context,page};
 }
 async function check(name,fn){
@@ -100,6 +107,65 @@ await check('Play at the period end replays from zero; Restart is always availab
   if(Math.abs(restarted.index)>1e-6)fail(`Restart did not return to zero: ${restarted.index}`);
   if(await visible(page,UI.play)!==true||await visible(page,UI.pause))fail('Restart should leave playback paused');
   await context.close();return `max=${max}; replay=${replay.index.toFixed(3)}; restart=${restarted.index}`;
+});
+
+await check('Loop computed period wraps to the first sample; disabling it pauses at the terminal sample',async()=>{
+  const {context,page}=await openSimulator(browser,'period-loop');
+  const loop=page.getByLabel('Loop computed period'),max=Number(await page.locator(UI.slider).getAttribute('max'));
+  if(!await loop.isChecked())fail('Loop computed period should be enabled by default');
+  await page.getByLabel('Speed').selectOption('24');
+  await setIndex(page,max-0.05);
+  await page.getByRole('button',{name:UI.play,exact:true}).click();
+  await page.waitForFunction(m=>{
+    const s=document.querySelector('canvas')?.lunarSnapshot?.(),status=document.querySelector('.playback-status')?.textContent??'';
+    return status.startsWith('Playing')&&s?.index>=0&&s.index<3;
+  },max,{timeout:12000}).catch(async e=>{const s=await snapshot(page),status=await page.locator('.playback-status').innerText();throw new Error(`loop did not wrap from max ${max}: index=${s?.index}, status=${status}; ${e.message.split('\n')[0]}`);});
+  const wrapped=await snapshot(page);
+  if(wrapped.index>=3||!await visible(page,UI.pause))fail(`loop did not continue from the first samples: ${wrapped.index}`);
+  await page.getByRole('button',{name:UI.pause,exact:true}).click();
+  await loop.setChecked(false);
+  if(await loop.isChecked())fail('Loop computed period did not turn off');
+  await page.getByRole('button',{name:UI.restart,exact:true}).click();
+  await setIndex(page,max-0.05);
+  await page.getByRole('button',{name:UI.play,exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('.playback-status')?.textContent.includes('End of the calculated period'),null,{timeout:12000});
+  const ended=await snapshot(page);
+  if(Math.abs(ended.index-max)>1e-6||await visible(page,UI.pause)||!await visible(page,UI.replay))fail(`loop-off playback did not stop at terminal sample: ${JSON.stringify({index:ended.index,max,pause:await visible(page,UI.pause),replay:await visible(page,UI.replay)})}`);
+  await context.close();return `loop-on wrapped and remained Playing at index ${wrapped.index.toFixed(3)}; loop-off paused at ${ended.index}/${max} with Replay available`;
+});
+
+await check('fast playback publishes the exact terminal HUD; re-entry from the period end restarts at zero',async()=>{
+  const {context,page}=await openSimulator(browser,'terminal-frame');
+  const max=Number(await page.locator(UI.slider).getAttribute('max'));
+  const expected=new Date(Date.parse(manifest.period.startUtc)+max*manifest.period.stepMinutes*60000).toISOString();
+  await page.locator('.camera-presets button').nth(PRESETS.indexOf('sky')).click();
+  await page.getByLabel('Speed').selectOption('24');
+  await setIndex(page,max-0.05);
+  await page.waitForFunction(m=>Math.abs(document.querySelector('canvas')?.lunarSnapshot?.().index-m)<0.01,max-0.05,{timeout:10000}).catch(async e=>{const d=await page.evaluate(()=>({slider:document.querySelector('#time-slider')?.value,index:document.querySelector('canvas')?.lunarSnapshot?.().index,rendered:document.querySelector('canvas')?.lunarSnapshot?.().rendered}));throw new Error(`pre-end scrub timeout for ${max-0.05}: ${JSON.stringify(d)}; ${e.message.split('\n')[0]}`);});
+  await page.getByRole('button',{name:UI.play,exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('.playback-status')?.textContent.includes('End of the calculated period'),null,{timeout:10000}).catch(async e=>{const d=await page.evaluate(()=>({status:document.querySelector('.playback-status')?.textContent,index:document.querySelector('canvas')?.lunarSnapshot?.().index}));throw new Error(`end-state timeout: ${JSON.stringify(d)}; ${e.message.split('\n')[0]}`);});
+  const hud=page.locator('.world-reading small');
+  await page.waitForFunction(t=>new RegExp(`frame ${t.slice(11,19)} UTC`).test(document.querySelector('.world-reading small')?.textContent??''),expected,{timeout:10000}).catch(async e=>{const d=await page.evaluate(()=>({hud:document.querySelector('.world-reading small')?.textContent,index:document.querySelector('canvas')?.lunarSnapshot?.().index,rendered:document.querySelector('canvas')?.lunarSnapshot?.().rendered}));throw new Error(`terminal HUD timeout: wanted ${expected}, got ${JSON.stringify(d)}; ${e.message.split('\n')[0]}`);});
+  await page.locator('.sky-description-details').locator('summary').click();
+  await page.waitForFunction(t=>{
+    const p=document.querySelector('.sky-description-details p')?.textContent??'';
+    return p.startsWith(`${t.slice(0,16).replace('T',' ')} UTC,`)&&!p.includes('Waiting for the sky geometry');
+  },expected,{timeout:10000}).catch(async e=>{const d=await page.evaluate(()=>document.querySelector('.sky-description-details p')?.textContent);throw new Error(`terminal description timeout: wanted ${expected}, got ${d}; ${e.message.split('\n')[0]}`);});
+  const end=await snapshot(page);
+  if(Math.abs(end.index-max)>1e-6||Math.abs(end.rendered?.presentedIndex-max)>0.02)fail(`last rendered frame did not reach the last sample: ${JSON.stringify({index:end.index,presented:end.rendered?.presentedIndex,max})}`);
+  await page.evaluate(()=>{location.hash='#/home'});await page.locator('#main').waitFor();
+  await page.evaluate(()=>{location.hash='#/simulator'});await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot,null,{timeout:30000});
+  await page.locator('.camera-presets button').nth(PRESETS.indexOf('sky')).click();
+  await page.waitForFunction(v=>{
+    const s=document.querySelector('canvas')?.lunarSnapshot?.();
+    return s?.rendered?.view==='sky'&&s.index<1&&s.rendered?.ready===true;
+  },max,{timeout:30000});
+  const remountStart=await snapshot(page);
+  await page.waitForFunction(i=>document.querySelector('canvas')?.lunarSnapshot?.().index>i,remountStart.index,{timeout:5000});
+  const remountHud=await page.locator('.world-reading small').innerText();
+  if(remountHud.includes(`frame ${expected.slice(11,19)} UTC`))fail(`remounted HUD retained the old terminal frame: ${remountHud}`);
+  if(!await visible(page,UI.pause))fail('normal-motion route re-entry did not autoplay after resetting the terminal time');
+  await context.close();return `end index ${end.index}; terminal HUD/details at ${expected}; route re-entry starts at ${remountStart.index.toFixed(3)} and advances`;
 });
 
 await check('site, height and view changes keep the live playback clock monotonic',async()=>{
@@ -193,16 +259,24 @@ await check('all 49 ordered camera preset transitions end at the requested view'
   return `${count} ordered transitions`;
 });
 
-await check('reduced-motion normal and reduce both start paused and permit manual Play/Pause',async()=>{
+await check('normal-motion Simulator entry autoplays; reduced-motion entry stays paused but allows manual playback',async()=>{
   const out=[];
   for(const motion of ['no-preference','reduce']){
-    const {context,page}=await openSimulator(browser,`motion-${motion}`,motion);
+    const context=await browser.newContext({viewport:{width:1440,height:900},reducedMotion:motion});
+    await context.addInitScript(()=>sessionStorage.setItem('lunar-opening-v1','seen'));
+    const page=await context.newPage();watch(page,`motion-${motion}`);
+    await page.goto(`${BASE}/?qa=1#/simulator`,{waitUntil:'networkidle',timeout:60000});
+    await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot,null,{timeout:30000});
+    await page.locator(UI.slider).waitFor({timeout:20000});
     const start=await snapshot(page);await page.waitForTimeout(600);const idle=await snapshot(page);
-    if(Math.abs(idle.index-start.index)>1e-9)fail(`${motion}: autoplay on load`);
-    if(await visible(page,UI.play)!==true)fail(`${motion}: not initially paused`);
-    await page.getByRole('button',{name:UI.play,exact:true}).click();
+    if(motion==='no-preference'){
+      if(idle.index<=start.index||await visible(page,UI.pause)!==true)fail('normal motion Simulator entry did not autoplay');
+    }else{
+      if(Math.abs(idle.index-start.index)>1e-9||await visible(page,UI.play)!==true)fail('reduced-motion Simulator entry should remain paused');
+      await page.getByRole('button',{name:UI.play,exact:true}).click();
+    }
     await page.waitForTimeout(600);const playing=await snapshot(page);
-    if(playing.index<=idle.index)fail(`${motion}: Play failed to advance`);
+    if(playing.index<=idle.index)fail(`${motion}: playback failed to advance after user action`);
     await page.getByRole('button',{name:UI.pause,exact:true}).click();
     const paused=await snapshot(page);await page.waitForTimeout(200);
     if(Math.abs((await snapshot(page)).index-paused.index)>1e-9)fail(`${motion}: Pause failed to hold`);
@@ -211,12 +285,40 @@ await check('reduced-motion normal and reduce both start paused and permit manua
   return out.join(', ');
 });
 
+await check('Guided tour and Compare inspection enter the simulator paused',async()=>{
+  const outcomes=[];
+  const tour=await browser.newContext({viewport:{width:1440,height:900}});
+  await tour.addInitScript(()=>sessionStorage.setItem('lunar-opening-v1','seen'));
+  const tp=await tour.newPage();watch(tp,'tour-entry-pause');
+  await tp.goto(`${BASE}/#/home`,{waitUntil:'networkidle',timeout:60000});
+  await tp.getByRole('button',{name:/Show me how.*interactive tour/}).click();
+  const card=tp.getByRole('dialog');await card.waitFor();
+  await card.getByRole('button',{name:'Next',exact:true}).click();
+  await tp.waitForFunction(()=>location.hash==='#/simulator',null,{timeout:10000}).catch(async e=>{throw new Error(`tour did not navigate from its home step: ${JSON.stringify(await tp.evaluate(()=>({hash:location.hash,card:document.querySelector('[role=dialog]')?.innerText,step:document.querySelector('.tour-counter')?.textContent})))}; ${e.message.split('\n')[0]}`);});
+  await tp.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot?.().rendered?.ready===true,null,{timeout:30000}).catch(async e=>{throw new Error(`tour simulator did not reach a rendered ready frame: ${JSON.stringify(await tp.evaluate(()=>({hash:location.hash,scene:document.querySelector('canvas')?.lunarSnapshot?.(),error:document.querySelector('.scene-error')?.textContent})))}; ${e.message.split('\n')[0]}`);});
+  if(!await tp.getByRole('button',{name:UI.play,exact:true}).isVisible()||await visible(tp,UI.pause))fail('tour entry should be paused');
+  const ti=await snapshot(tp);await tp.waitForTimeout(600);if(Math.abs((await snapshot(tp)).index-ti.index)>1e-9)fail('tour clock advanced while it should start paused');
+  outcomes.push('tour');await tour.close();
+
+  const inspect=await browser.newContext({viewport:{width:1440,height:900}});
+  await inspect.addInitScript(()=>sessionStorage.setItem('lunar-opening-v1','seen'));
+  const ip=await inspect.newPage();watch(ip,'compare-inspection-entry-pause');
+  await ip.goto(`${BASE}/#/compare`,{waitUntil:'networkidle',timeout:60000});
+  const inspectButton=ip.getByRole('button',{name:'See this arrival in 3D',exact:true}).first();await inspectButton.waitFor({timeout:30000});await inspectButton.click();
+  await ip.waitForFunction(()=>location.hash==='#/simulator'&&document.querySelector('canvas')?.lunarSnapshot?.().rendered?.ready===true,null,{timeout:30000});
+  const ins=await snapshot(ip);
+  if(ins.view!=='sky'||!await ip.getByRole('button',{name:UI.play,exact:true}).isVisible()||await visible(ip,UI.pause))fail(`Compare inspection should open Surface sky paused, got ${JSON.stringify({view:ins.view,index:ins.index})}`);
+  await ip.waitForTimeout(600);if(Math.abs((await snapshot(ip)).index-ins.index)>1e-9)fail('inspection clock advanced while paused');
+  outcomes.push('inspection/sky');await inspect.close();return outcomes.join(', ');
+});
+
 await check('Surface sky navigation guidance does not cover camera controls at 390 or 768 px',async()=>{
   const outcomes=[];
   for(const width of [390,768]){
     const context=await browser.newContext({viewport:{width,height:900},isMobile:width===390,hasTouch:width===390,deviceScaleFactor:width===390?2:1});
     const page=await context.newPage();watch(page,`sky-guidance-${width}`);
     await page.goto(`${BASE}/?qa=1#/simulator`,{waitUntil:'networkidle',timeout:60000});
+    const opening=page.getByRole('dialog',{name:'Lunar Navigator'});if(await opening.count())await opening.waitFor({state:'hidden',timeout:4500});
     await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot,null,{timeout:30000});
     if(width===390){if(!await page.locator('#explorer-view').isVisible())await page.locator('.setup-toggle').click();await page.selectOption('#explorer-view','sky');}
     else await page.locator(UI.presetButtons).nth(PRESETS.indexOf('sky')).click();
@@ -238,10 +340,13 @@ await check('a tiny first-finger move does not jump Surface sky after a second t
   const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2});
   const page=await context.newPage();watch(page,'sky-two-touch');
   await page.goto(`${BASE}/?qa=1#/simulator`,{waitUntil:'networkidle',timeout:60000});
+  const opening=page.getByRole('dialog',{name:'Lunar Navigator'});
+  if(await opening.count())await opening.waitFor({state:'hidden',timeout:4500});
   await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot,null,{timeout:30000});
   if(!await page.locator('#explorer-view').isVisible())await page.locator('.setup-toggle').click();
   await page.selectOption('#explorer-view','sky');
   await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot?.().view==='sky',null,{timeout:10000});
+  if(await visible(page,UI.pause))await page.getByRole('button',{name:UI.pause,exact:true}).click();
   const canvas=page.locator(UI.canvas).first();await canvas.scrollIntoViewIfNeeded();
   const box=await canvas.boundingBox();if(!box)fail('sky canvas has no visible bounds');
   const x=Math.round(box.x+box.width/2),y=Math.round(box.y+box.height/2);
@@ -282,7 +387,7 @@ await check('a tiny first-finger move does not jump Surface sky after a second t
   const cancelLog=await page.evaluate(()=>window.__qaPointerLog);
   await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]}).catch(()=>{});
   await context.close();
-  if(oneFingerAngle<0.0005)fail(`positive control: a one-pixel single-finger drag changed direction by only ${(oneFingerAngle*180/Math.PI).toFixed(3)} degrees`);
+  if(oneFingerAngle<0.0005)fail(`positive control: a one-pixel single-finger drag changed direction by only ${(oneFingerAngle*180/Math.PI).toFixed(3)} degrees; before=${JSON.stringify(before.camera.direction)} after=${JSON.stringify(oneFinger.camera.direction)} tracking=${before.skyTracking}->${oneFinger.skyTracking} pointerEvents=${JSON.stringify(pointerLog.slice(0,8))}`);
   if(angularDelta>0.01)fail(`one-pixel primary touch moved the camera by about ${(angularDelta*180/Math.PI).toFixed(2)} degrees`);
   if(cancelAngle>0.0002)fail(`camera kept moving after pointer cancellation (${(cancelAngle*180/Math.PI).toFixed(3)} degrees)`);
   if(restartAngle<0.0005)fail(`drag did not restart after cancellation (${(restartAngle*180/Math.PI).toFixed(3)} degrees)`);
@@ -290,19 +395,112 @@ await check('a tiny first-finger move does not jump Surface sky after a second t
   return `${pointerLog.length} pointer events; single finger ${(oneFingerAngle*180/Math.PI).toFixed(3)}°, two-finger primary ${(angularDelta*180/Math.PI).toFixed(3)}°, canceled ${(cancelAngle*180/Math.PI).toFixed(3)}°, restarted ${(restartAngle*180/Math.PI).toFixed(3)}°`;
 });
 
-await check('keyboard navigation and Reset view return the camera to its preset',async()=>{
+await check('Play keeps Surface sky and Local terrain text mounted and readable at desktop and mobile',async()=>{
+  const reports=[],failures=[];
+  const viewportCases=[[1440,900,false],[390,844,true],[844,390,true]].filter(([w])=>!process.env.QA_WIDTH||w===Number(process.env.QA_WIDTH));
+  const textViews=['sky','terrain'].filter(view=>!process.env.QA_VIEW||view===process.env.QA_VIEW);
+  for(const [width,height,mobile] of viewportCases)for(const view of textViews){
+    const context=await browser.newContext({viewport:{width,height},isMobile:mobile,hasTouch:mobile,deviceScaleFactor:mobile?2:1,reducedMotion:'no-preference'});
+    const page=await context.newPage();watch(page,`play-text-${width}-${view}`);
+    await page.goto(`${BASE}/?qa=1#/simulator`,{waitUntil:'networkidle',timeout:60000});
+    // The focused target is steady text during playback; intro timing is
+    // covered separately. Explicitly dismiss it so the setup cannot time out
+    // on a device/emulation whose motion preference disables auto-close.
+    const opening=page.getByRole('dialog',{name:'Lunar Navigator'});if(await opening.isVisible().catch(()=>false))await page.keyboard.press('Escape');
+    await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot,null,{timeout:30000});
+    if(!await visible(page,UI.pause))fail(`${width}x${height}: normal-motion Simulator entry did not autoplay`);
+    await page.getByRole('button',{name:UI.pause,exact:true}).click();
+    if(width<=720&&!await page.locator('#explorer-view').isVisible())await page.locator('.setup-toggle').click({timeout:8000}).catch(e=>{throw new Error(`${width}x${height} cannot open mobile settings: ${e.message.split('\n')[0]}`);});
+    const beforeView=await snapshot(page);
+    if(width<=720)await page.selectOption('#explorer-view',view).catch(e=>{throw new Error(`${width}x${height} cannot select ${view} via the mobile view picker: ${e.message.split('\n')[0]}`);});
+    else await page.locator(UI.presetButtons).nth(PRESETS.indexOf(view)).click({timeout:8000}).catch(e=>{throw new Error(`${width}x${height} cannot select ${view} preset: ${e.message.split('\n')[0]}`);});
+    await page.waitForFunction(v=>document.querySelector('canvas')?.lunarSnapshot?.().view===v,view,{timeout:10000});
+    let s=await snapshot(page);await waitRendered(page,{view,siteId:s.rendered?.siteId,height:s.rendered?.height,index:s.index,afterSerial:beforeView.rendered?.serial??0});
+    for(const selector of ['.world-reading','.scene-navigation-help','.sky-description','.sky-description-plain span','.sky-description-context','.sky-description-details summary','.sky-description p[aria-live]',view==='sky'?'.sky-view-guide':'.view-explainer'])try{await page.locator(selector).first().waitFor({timeout:10000});}catch(e){throw new Error(`${width}x${height} ${view}: missing ${selector} after render-ready: ${e.message.split('\n')[0]}`);}
+    // Settle first-load terrain/ephemeris messages before measuring playback stability.
+    await page.waitForFunction(()=>{
+      const live=document.querySelector('.sky-description p[aria-live]');
+      return live&&!live.textContent.includes('Waiting for the sky geometry')&&document.querySelector('canvas')?.lunarSnapshot?.().rendered?.ready===true;
+    },null,{timeout:20000});
+    await page.waitForTimeout(900);
+    await page.evaluate(()=>{
+      const stable=['.world-reading','.scene-navigation-help','.sky-description','.sky-description-plain','.sky-description-context','.sky-description-details','.sky-description-details p','.sr-only[aria-live]','.sky-view-guide','.view-explainer'];
+      const root=document.querySelector('#main'),trace={frames:0,rafTimes:[],renderedFrames:[],missing:Object.fromEntries(stable.map(x=>[x,0])),blank:Object.fromEntries(stable.map(x=>[x,0])),plainSpanCounts:[],placeholders:0,liveTexts:[],removed:[],layout:{},maxDirectionDeg:0,notReady:0};
+      window.__playTextTrace=trace;
+      const observer=new MutationObserver(records=>{for(const r of records)for(const node of r.removedNodes){if(node.nodeType!==1)continue;for(const sel of stable)if(node.matches?.(sel)||node.querySelector?.(sel))trace.removed.push(sel);}});
+      observer.observe(root,{childList:true,subtree:true});
+      const initial=document.querySelector('canvas')?.lunarSnapshot?.()?.camera?.direction;
+      const sample=()=>{
+        trace.frames++;const at=performance.now();trace.rafTimes.push(at);const snap=document.querySelector('canvas')?.lunarSnapshot?.();
+        const rendered=snap?.rendered,last=trace.renderedFrames.at(-1);
+        if(rendered?.frameTimeMs!==last?.frameTimeMs){const playbackStatus=document.querySelector('.playback-status')?.textContent?.trim()??'';trace.renderedFrames.push({sampleTime:at,frameTimeMs:rendered?.frameTimeMs,clockIndex:snap?.index,renderedIndex:rendered?.index,presentedIndex:rendered?.presentedIndex,playing:/^Playing\b/.test(playbackStatus),playbackStatus,view:rendered?.view,siteId:rendered?.siteId,height:rendered?.height,fpsLimit:rendered?.fpsLimit,serial:rendered?.serial});}
+        trace.plainSpanCounts.push(document.querySelectorAll('.sky-description-plain span').length);
+        if(snap?.rendered?.ready!==true)trace.notReady++;
+        if(initial&&snap?.camera?.direction){const dot=Math.max(-1,Math.min(1,initial.reduce((a,v,i)=>a+v*snap.camera.direction[i],0)));trace.maxDirectionDeg=Math.max(trace.maxDirectionDeg,Math.acos(dot)*180/Math.PI);}
+        for(const sel of stable){const e=document.querySelector(sel);if(!e){trace.missing[sel]++;continue;}const t=e.textContent.trim();if(!t)trace.blank[sel]++;if((sel==='.world-reading')&&/Not calculated|NaN/.test(t))trace.placeholders++;if(sel==='.sr-only[aria-live]'&&!trace.liveTexts.includes(t))trace.liveTexts.push(t);if(['.world-reading','.scene-navigation-help','.sky-description','.sky-description-plain','.sky-view-guide','.view-explainer'].includes(sel)){const r=e.getBoundingClientRect(),v=trace.layout[sel]??={min:r.height,max:r.height};v.min=Math.min(v.min,r.height);v.max=Math.max(v.max,r.height);}}
+        window.__playTextRaf=requestAnimationFrame(sample);
+      };window.__playTextRaf=requestAnimationFrame(sample);
+    });
+    if(await visible(page,UI.play))await page.getByRole('button',{name:UI.play,exact:true}).click();
+    await page.getByRole('button',{name:UI.pause,exact:true}).waitFor({timeout:5000});
+    await page.evaluate(()=>{if(window.__playTextTrace)window.__playTextTrace.liveTexts=[];});await page.waitForTimeout(3000);
+    if(await visible(page,UI.pause))await page.getByRole('button',{name:UI.pause,exact:true}).click({timeout:8000}).catch(e=>{throw new Error(`${width}x${height} ${view} cannot Pause after sample: ${e.message.split('\n')[0]}`);});
+    const trace=await page.evaluate(()=>{cancelAnimationFrame(window.__playTextRaf);return window.__playTextTrace;});
+    const intervals=trace.rafTimes.slice(1).map((t,i)=>t-trace.rafTimes[i]).sort((a,b)=>a-b),renderedIntervals=trace.renderedFrames.slice(1).map((f,i)=>f.frameTimeMs-trace.renderedFrames[i].frameTimeMs).filter(Number.isFinite).sort((a,b)=>a-b);
+    const median=(xs)=>xs.length?+xs[Math.floor(xs.length/2)].toFixed(2):null;
+    const framePairs=trace.renderedFrames.slice(1).map((frame,i)=>({before:trace.renderedFrames[i],after:frame})).filter(pair=>pair.before.playing&&pair.after.playing&&pair.before.view===pair.after.view&&pair.before.siteId===pair.after.siteId&&String(pair.before.height)===String(pair.after.height));
+    const baseBackslideEvents=framePairs.filter(({before,after})=>Number.isFinite(before.clockIndex)&&Number.isFinite(after.clockIndex)&&after.clockIndex<before.clockIndex-1e-8);
+    const presentationBackslideEvents=framePairs.filter(({before,after})=>Number.isFinite(before.presentedIndex)&&Number.isFinite(after.presentedIndex)&&after.presentedIndex<before.presentedIndex-1e-8&&after.clockIndex>=before.clockIndex-1e-8);
+    const backslides=baseBackslideEvents.length+presentationBackslideEvents.length;
+    trace.cadence={rafFrames:trace.frames,rafMedianIntervalMs:median(intervals),rafMaxIntervalMs:intervals.at(-1)??null,renderedFrames:trace.renderedFrames.length,renderMedianIntervalMs:median(renderedIntervals),renderMaxIntervalMs:renderedIntervals.at(-1)??null,fpsLimit:trace.renderedFrames.at(-1)?.fpsLimit??null,firstBaseIndex:trace.renderedFrames[0]?.clockIndex??null,lastBaseIndex:trace.renderedFrames.at(-1)?.clockIndex??null,firstPresentedIndex:trace.renderedFrames[0]?.presentedIndex??null,lastPresentedIndex:trace.renderedFrames.at(-1)?.presentedIndex??null,baseIndexBackslides:baseBackslideEvents.length,presentedIndexBackslides:presentationBackslideEvents.length};
+    console.log('PLAY-CADENCE',width,view,JSON.stringify(trace.cadence));
+    const required=['.world-reading','.scene-navigation-help','.sky-description','.sky-description-plain','.sky-description-context','.sky-description-details','.sky-description-details p','.sr-only[aria-live]',view==='sky'?'.sky-view-guide':'.view-explainer'];
+    const badMissing=required.filter(sel=>trace.missing[sel]||trace.blank[sel]||trace.removed.includes(sel));
+    const layoutDrift=Object.fromEntries(Object.entries(trace.layout).map(([k,v])=>[k,+((v.max-v.min).toFixed(2))]));
+    textTraces.push({width,height,view,frames:trace.renderedFrames,cadence:trace.cadence,missing:trace.missing,blank:trace.blank,removed:trace.removed,placeholders:trace.placeholders,notReady:trace.notReady,layoutDrift,liveTexts:trace.liveTexts});
+    const badDrift=Object.entries(layoutDrift).filter(([k,v])=>required.includes(k)&&v>3);
+    const report=`${width}px ${view}: ${trace.frames} frames, missing/blank/unmounted=${badMissing.join(',')||'none'}, placeholders=${trace.placeholders}, unready=${trace.notReady}, layout drift=${JSON.stringify(layoutDrift)}, live=${trace.liveTexts.join('|')}, max camera drift=${trace.maxDirectionDeg.toFixed(3)}°`;
+    if(badMissing.length||trace.placeholders||trace.notReady>Math.max(2,trace.frames*0.05)||badDrift.length||!trace.liveTexts.some(t=>t.startsWith('Paused description:'))||trace.liveTexts.some(t=>/UTC, /.test(t)))failures.push(report);
+    reports.push(`${report}; cadence=${JSON.stringify(trace.cadence)}`);
+    if(process.env.QA_GPU==='hardware'&&trace.cadence.rafMedianIntervalMs>20)failures.push(`${width}px ${view}: test sampler median interval ${trace.cadence.rafMedianIntervalMs}ms is slower than a 50 Hz text-stability sample`);
+    if(backslides>0)failures.push(`${width}px ${view}: base/presented clock moved backwards ${backslides} times: ${JSON.stringify({base:baseBackslideEvents.slice(0,3),presented:presentationBackslideEvents.slice(0,3)})}`);
+    if(width===844&&trace.cadence.fpsLimit!==60)failures.push(`${width}x${height} touch viewport expected a 60 fps renderer cap, got ${trace.cadence.fpsLimit}`);
+    if(trace.plainSpanCounts.some(count=>count!==2))failures.push(`${width}px ${view}: expected two stable visible Sun/Earth text spans; counts ${[...new Set(trace.plainSpanCounts)].join(',')}`);
+    await context.close();
+  }
+  if(failures.length)fail(failures.join(' || '));
+  return reports.join('; ');
+});
+
+await check('Reset uses the preset at the paused index; Restart changes time without resetting camera orientation',async()=>{
   const {context,page}=await openSimulator(browser,'camera-reset');
-  await page.locator(UI.presetButtons).nth(0).click();
+  const buttons=page.locator(UI.presetButtons);
+  await buttons.nth(2).click();
+  await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot?.().rendered?.ready===true&&document.querySelector('canvas')?.lunarSnapshot?.().rendered?.view==='south',null,{timeout:10000});
+  const beforeOverview=await snapshot(page);
+  await buttons.nth(0).click();
   const canvas=page.locator(UI.canvas).first();await canvas.focus();
-  const read=()=>page.evaluate(()=>document.querySelector('canvas')?.lunarSnapshot?.().camera.position);
-  const before=await read();await page.keyboard.press('ArrowRight');await page.waitForTimeout(150);
-  const moved=await read();if(moved.every((v,i)=>Math.abs(v-before[i])<1e-7))fail('ArrowRight did not move the camera');
-  await page.getByRole('button',{name:'Reset view',exact:true}).click();await page.waitForTimeout(250);
-  const reset=await read();if(Math.hypot(...reset.map((v,i)=>v-before[i]))>1e-5)fail('Reset view did not restore the preset camera');
+  await waitRendered(page,{view:'overview',siteId:beforeOverview.rendered.siteId,height:beforeOverview.rendered.height,index:beforeOverview.index,afterSerial:beforeOverview.rendered.serial});
+  await page.waitForFunction(()=>{const q=document.querySelector('canvas')?.lunarSnapshot?.()?.camera?.quaternion;if(!q)return false;const old=window.__qaResetStableQ,count=(window.__qaResetStableCount??0)+1;window.__qaResetStableCount=old&&Math.max(...q.map((v,i)=>Math.abs(v-old[i])))<1e-8?count:0;window.__qaResetStableQ=q;return window.__qaResetStableCount>=4;},null,{timeout:5000});
+  const read=()=>page.evaluate(()=>document.querySelector('canvas')?.lunarSnapshot?.());
+  const before=await read(),q0=before.camera.quaternion;await page.keyboard.press('ArrowRight');
+  await page.waitForFunction(q=>{const s=document.querySelector('canvas')?.lunarSnapshot?.();return s?.rendered?.serial>q.serial&&s?.camera?.quaternion.some((v,i)=>Math.abs(v-q.q[i])>1e-5);},{serial:before.rendered.serial,q:q0},{timeout:5000});
+  await page.getByRole('button',{name:'Reset view',exact:true}).click();
+  await page.waitForFunction(q=>{const s=document.querySelector('canvas')?.lunarSnapshot?.();if(!s?.rendered?.ready||s.rendered.view!=='overview'||Math.abs(s.index-q.index)>1e-6)return false;const dot=Math.abs(s.camera.quaternion.reduce((a,v,i)=>a+v*q.q[i],0));return 2*Math.acos(Math.min(1,dot))<0.01;},{index:before.index,q:q0},{timeout:10000}).catch(async e=>{const d=await read();throw new Error(`Reset view did not restore orientation at the same rendered time: ${JSON.stringify({before:{index:before.index,rendered:before.rendered,quaternion:q0},after:{index:d.index,rendered:d.rendered,quaternion:d.camera.quaternion},dot:Math.abs(d.camera.quaternion.reduce((a,v,i)=>a+v*q0[i],0))})}; ${e.message.split('\n')[0]}`);});
+  await setIndex(page,12);
+  await page.waitForFunction(()=>Math.abs((document.querySelector('canvas')?.lunarSnapshot?.().index??NaN)-12)<1e-8,null,{timeout:5000});
+  let at12=await snapshot(page);
+  await waitRendered(page,{view:'overview',siteId:at12.rendered.siteId,height:at12.rendered.height,index:12,afterSerial:at12.rendered.serial});
+  at12=await read();await canvas.focus();await page.keyboard.press('ArrowDown');
+  await page.waitForFunction(q=>{const s=document.querySelector('canvas')?.lunarSnapshot?.();return s?.camera?.quaternion.some((v,i)=>Math.abs(v-q[i])>1e-5);},at12.camera.quaternion,{timeout:5000});
+  const beforeRestart=await read();await page.getByRole('button',{name:UI.restart,exact:true}).click();
+  await page.waitForFunction(q=>{const s=document.querySelector('canvas')?.lunarSnapshot?.();return s?.rendered?.ready&&Math.abs(s.index)<1e-6&&s.rendered.serial>q.serial;},{serial:beforeRestart.rendered.serial},{timeout:10000});
+  const afterRestart=await read(),restartDot=Math.abs(afterRestart.camera.quaternion.reduce((a,v,i)=>a+v*beforeRestart.camera.quaternion[i],0));
+  if(2*Math.acos(Math.min(1,restartDot))>=0.01)fail(`Restart unexpectedly reset the world camera while changing time: ${JSON.stringify({before:beforeRestart.camera.quaternion,after:afterRestart.camera.quaternion,dot:restartDot,index:afterRestart.index})}`);
   await page.evaluate(()=>{location.hash='#/home'});await page.locator('#main').waitFor();
   await page.evaluate(()=>{location.hash='#/simulator'});await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot,null,{timeout:30000});
   if(!finiteScene(await snapshot(page)))fail('simulator did not remount after route navigation');
-  await context.close();return 'keyboard, camera reset, route remount';
+  await context.close();return 'preset reset is evaluated at the paused index; Restart-to-zero preserves current world quaternion; route remount';
 });
 
 await check('capture Home, Compare, Surface sky and Local terrain at desktop and 390 px',async()=>{
@@ -312,6 +510,11 @@ await check('capture Home, Compare, Surface sky and Local terrain at desktop and
     const page=await context.newPage();watch(page,`capture-${label}`);
     for(const [route,name] of [['home','home'],['compare','compare']]){
       await page.goto(`${BASE}/#/${route}`,{waitUntil:'networkidle',timeout:60000});
+      const opening=page.getByRole('dialog',{name:'Lunar Navigator'});
+      if(await opening.count())await opening.waitFor({state:'hidden',timeout:4500});
+      if(route==='home'&&await page.evaluate(()=>location.hash)!=='#/home'){
+        await page.evaluate(()=>{location.hash='#/home';});await page.waitForFunction(()=>location.hash==='#/home');
+      }
       await page.locator('#main').waitFor({timeout:20000});
       await page.evaluate(()=>document.fonts?.ready);
       const file=join(OUT,`${label}-${name}.png`);await page.screenshot({path:file,fullPage:mobile&&name==='compare'});captures.push(file);
@@ -332,7 +535,7 @@ await check('capture Home, Compare, Surface sky and Local terrain at desktop and
   return captures.join(', ');
 });
 
-const report={base:BASE,browser:browser.version(),generatedAt:new Date().toISOString(),results,issues};
+const report={base:BASE,browser:browser.version(),generatedAt:new Date().toISOString(),results,textTraces,issues};
 mkdirSync(OUT,{recursive:true});writeFileSync(join(OUT,'results.json'),JSON.stringify(report,null,2));
 console.log(`\n${results.filter(r=>r.ok).length}/${results.length} checks passed; results ${join(OUT,'results.json')}`);
 await browser.close();

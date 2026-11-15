@@ -2,10 +2,17 @@
 // (analytic geometry / small hand-built series), not by re-implementing the functions.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {timeAt,indexAt,windowBounds,runs,summarize,eventSummary,visibleDiskFraction,horizonAt,percent,hours} from '../src/lib/analysis.mjs';
+import {timeAt,indexAt,windowBounds,parseUtcDay,runs,summarize,eventSummary,visibleDiskFraction,horizonAt,percent,hours} from '../src/lib/analysis.mjs';
 
 const close=(a,b,eps=1e-9,msg='')=>assert.ok(Math.abs(a-b)<=eps,`${msg} expected ${b}, got ${a}`);
 const period={startUtc:'2027-03-01T00:00:00Z',stepMinutes:60,sampleCount:1393};
+
+test('parseUtcDay accepts only real ISO UTC calendar dates',()=>{
+  assert.equal(parseUtcDay('2027-03-01'),Date.parse('2027-03-01T00:00:00Z'));
+  assert.equal(parseUtcDay('2027-04-28'),Date.parse('2027-04-28T00:00:00Z'));
+  for(const invalid of ['2027-02-31','2027-03-32','2027-02-29','03/01/2027','2027-03','2027-03-01T00:00:00Z','',null,undefined,20270301])
+    assert.equal(parseUtcDay(invalid),null,JSON.stringify(invalid));
+});
 
 test('timeAt/indexAt are inverse and use UTC minutes',()=>{
   assert.equal(timeAt(period,0),'2027-03-01T00:00:00.000Z');

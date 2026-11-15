@@ -40,6 +40,8 @@ const shot=(page,name)=>page.screenshot({path:join(OUT,name+'.png'),fullPage:tru
 async function open(ctx,route,tag){
   const page=await ctx.newPage();watch(page,tag);
   await page.goto(`${BASE}/#/${route}`,{waitUntil:'networkidle'});
+  const opening=page.getByRole('dialog',{name:'Lunar Navigator'});
+  if(await opening.count())await opening.waitFor({state:'hidden',timeout:4500});
   await page.locator('#main').waitFor();
   return page;
 }

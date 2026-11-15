@@ -44,7 +44,7 @@ async function openCompare(context){
 const settingsOf=async(page)=>Object.fromEntries(await Promise.all(Object.entries(UI).map(async([key,selector])=>[key,await page.locator(selector).inputValue()])));
 const cardsOf=async(page)=>page.locator('.answer-scenario').allInnerTexts();
 async function download(page){
-  const [item]=await Promise.all([page.waitForEvent('download',{timeout:15000}),page.getByRole('button',{name:/Download comparison/}).click()]);
+  const [item]=await Promise.all([page.waitForEvent('download',{timeout:15000}),page.getByRole('button',{name:/Download comparison.*JSON/}).click()]);
   const value=JSON.parse(readFileSync(await item.path(),'utf8'));delete value.generatedAtUtc;return value;
 }
 async function detailedRows(page){

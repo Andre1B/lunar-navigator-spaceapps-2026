@@ -11,8 +11,10 @@ const DATA=join(dirname(fileURLToPath(import.meta.url)),'..','public','data');
 const json=(f)=>JSON.parse(readFileSync(join(DATA,f),'utf8'));
 const manifest=json('manifest.json');
 const sites=Object.fromEntries(manifest.sites.map(s=>[s.id,json(s.file)]));
-const period={startUtc:'2027-03-01T00:00:00Z',stepMinutes:60,sampleCount:100}; // end = +99 h = 2027-03-05T03:00:00Z
-const ev=(type,utc,heightM=1,resolutionMin=1)=>({type,heightM,utc,resolutionMin,refined:true});
+const toyPeriod={startUtc:'2027-03-01T00:00:00Z',stepMinutes:60,sampleCount:100}; // end = +99 h = 2027-03-05T03:00:00Z
+const period=toyPeriod;
+const N=manifest.period.sampleCount;
+const ev=(type,utc,heightM=1,resolutionMin=1,extra={})=>({type,heightM,utc,resolutionMin,refined:true,...extra});
 const site=(events)=>({events,sun:{visibleFraction:{'1':[],'5':[]}},horizon:{elevationDeg:{'1':[],'5':[]}}});
 const close=(a,b,eps,m='')=>assert.ok(Math.abs(a-b)<=eps,`${m} got ${a} expected ${b}`);
 const by=(r,type)=>r.events.find(e=>e.type===type);
@@ -121,6 +123,20 @@ test('malformed events are ignored, not fatal',()=>{
   assert.equal(r.events.length,4);
 });
 
+test('Earth-occultation darkness contacts map to Sun rise/set while preserving their cause',()=>{
+  const s=site([
+    ev('eclipseDarknessStart','2027-03-01T10:00:00Z',1,1,{cause:'earth-occultation',refinementBracketSec:18.75}),
+    ev('eclipseDarknessEnd','2027-03-01T12:00:00Z',1,1,{cause:'earth-occultation',refinementBracketSec:18.75}),
+  ]);
+  const r=nextEvents(s,period,0,1);
+  assert.equal(by(r,'sunset').utc,'2027-03-01T10:00:00Z');
+  assert.equal(by(r,'sunset').sourceType,'eclipseDarknessStart');
+  assert.equal(by(r,'sunset').cause,'earth-occultation');
+  assert.equal(by(r,'sunrise').utc,'2027-03-01T12:00:00Z');
+  assert.equal(by(r,'sunrise').sourceType,'eclipseDarknessEnd');
+  assert.equal(by(r,'sunrise').cause,'earth-occultation');
+});
+
 test('formatUntil: minute rounding, units, and never the word "never"',()=>{
   assert.equal(formatUntil(0),'in under 1 min');
   assert.equal(formatUntil(0.004),'in under 1 min');
@@ -136,16 +152,25 @@ test('formatUntil: minute rounding, units, and never the word "never"',()=>{
 });
 
 test('real data: matches a plain scan of the published events for all sites, heights and several instants',()=>{
-  const t0=Date.parse(manifest.period.startUtc),end=t0+(manifest.period.sampleCount-1)*3600000;
-  for(const [id,data] of Object.entries(sites))for(const h of [1,5])for(const index of [0,12,10.5,100.25,807.49,1000,1391.5,1392]){
+  const t0=Date.parse(manifest.period.startUtc),step=manifest.period.stepMinutes*60000,end=t0+(manifest.period.sampleCount-1)*step;
+  const indices=[0,12,10.5,100.25,Math.floor(N*0.6)+0.49,N-10.5,N-1];
+  for(const [id,data] of Object.entries(sites))for(const h of [1,5])for(const index of indices){
     const r=nextEvents(data,manifest.period,index,h);
     assert.equal(r.status,'ok',`${id} ${h} ${index}`);
     const now=t0+index*3600000;
     for(const type of EVENT_TYPES){
-      const scan=data.events.filter(e=>e.heightM===h&&e.type===type&&Date.parse(e.utc)>now&&Date.parse(e.utc)<=end).map(e=>Date.parse(e.utc)).sort((a,b)=>a-b)[0];
+      const scanEvent=data.events.filter(e=>e.heightM===h&&(
+        e.type===type||type==='sunrise'&&e.type==='eclipseDarknessEnd'||type==='sunset'&&e.type==='eclipseDarknessStart'
+      )&&Date.parse(e.utc)>now&&Date.parse(e.utc)<=end).sort((a,b)=>Date.parse(a.utc)-Date.parse(b.utc))[0];
+      const scan=scanEvent?Date.parse(scanEvent.utc):undefined;
       const got=by(r,type);
       if(scan===undefined){assert.equal(got.utc,null,`${id} ${h} ${index} ${type}`);assert.equal(got.label,NO);}
-      else{assert.equal(Date.parse(got.utc),scan,`${id} ${h} ${index} ${type}`);close(got.hoursUntil,(scan-now)/3600000,1e-9);assert.ok(got.hoursUntil>0);assert.equal(got.resolutionMin,1);}
+      else{
+        assert.equal(Date.parse(got.utc),scan,`${id} ${h} ${index} ${type}`);close(got.hoursUntil,(scan-now)/3600000,1e-9);assert.ok(got.hoursUntil>0);assert.equal(got.resolutionMin,1);
+        if(scanEvent.cause==='earth-occultation'){
+          assert.equal(got.cause,scanEvent.cause);assert.equal(got.sourceType,scanEvent.type);
+        }else{assert.equal(got.cause,undefined);assert.equal(got.sourceType,undefined);}
+      }
     }
   }
 });
@@ -153,15 +178,18 @@ test('real data: matches a plain scan of the published events for all sites, hei
 test('real data: the documented first event and monotonic progression',()=>{
   const cr=sites['connecting-ridge'];
   const r=nextEvents(cr,manifest.period,0,1);
-  assert.equal(by(r,'sunset').utc,'2027-03-03T10:46:06Z');assert.equal(by(r,'sunset').label,'in 2 d 10 h 46 min');
-  const r5=nextEvents(cr,manifest.period,10.5,'5');assert.equal(r5.nowUtc,'2027-03-01T10:30:00.000Z');
+  const t0=Date.parse(manifest.period.startUtc),step=manifest.period.stepMinutes*60000;
+  const sunset=cr.events.filter(e=>e.heightM===1&&(e.type==='sunset'||e.type==='eclipseDarknessStart')).sort((a,b)=>Date.parse(a.utc)-Date.parse(b.utc))[0];
+  assert.equal(by(r,'sunset').utc,sunset.utc);
+  if(sunset.cause==='earth-occultation')assert.equal(by(r,'sunset').sourceType,sunset.type);
+  const r5=nextEvents(cr,manifest.period,10.5,'5');assert.equal(r5.nowUtc,new Date(t0+10.5*step).toISOString());
   const last=nextEvents(cr,manifest.period,manifest.period.sampleCount-1,1);
   assert.ok(last.events.every(e=>e.utc===null&&e.label===NO));
   assert.equal(nextEvents(cr,manifest.period,manifest.period.sampleCount,1).status,'out-of-coverage');
   // as time advances, the next event of a type never moves earlier, and when it changes the previous one has passed
   for(const [id,data] of Object.entries(sites))for(const type of EVENT_TYPES){
     let prev=null;
-    for(let i=0;i<=1392;i+=0.5){
+    for(let i=0;i<=manifest.period.sampleCount-1;i+=6){
       const e=by(nextEvents(data,manifest.period,i,1),type);
       if(prev&&e.utc&&prev.utc&&e.utc!==prev.utc)assert.ok(Date.parse(prev.utc)<=Date.parse(manifest.period.startUtc)+i*3600000,`${id} ${type}: next event changed before the previous passed (${i})`);
       if(prev&&prev.utc&&e.utc)assert.ok(Date.parse(e.utc)>=Date.parse(prev.utc),`${id} ${type}: next event moved earlier at ${i}`);

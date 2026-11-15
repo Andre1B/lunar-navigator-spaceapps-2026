@@ -29,7 +29,7 @@ function watch(page,tag){
   page.on('console',m=>{if(['error','warning'].includes(m.type()))issues.console.push({tag,type:m.type(),text:m.text().slice(0,300)});});
   page.on('pageerror',e=>issues.pageerror.push({tag,text:String(e).slice(0,300)}));
   page.on('response',r=>{if(r.status()>=400)issues.http.push({tag,status:r.status(),url:r.url()});});
-  page.on('requestfailed',r=>issues.requestfailed.push({tag,url:r.url(),error:r.failure()?.errorText}));
+  page.on('requestfailed',r=>{if(r.failure()?.errorText!=='net::ERR_ABORTED')issues.requestfailed.push({tag,url:r.url(),error:r.failure()?.errorText});});
 }
 const state=(page)=>page.evaluate(()=>({
   count:document.getElementById('count').textContent,

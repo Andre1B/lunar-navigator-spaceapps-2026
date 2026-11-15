@@ -41,13 +41,23 @@ const fresh=(from)=>[...issues.console,...issues.pageerror].slice(from);
 const shot=(page,name)=>page.screenshot({path:join(OUT,name+'.png'),fullPage:true});
 async function open(ctx,route,tag,wait=600){
   const page=await ctx.newPage();watch(page,tag);
-  await page.goto(`${BASE}/#/${route}`,{waitUntil:'networkidle'});
+  await load(page,`${BASE}/#/${route}`);
   await page.locator('#main').waitFor({timeout:20000});await page.waitForTimeout(wait);return page;
 }
+async function load(page,url){
+  await page.goto(url,{waitUntil:'networkidle'});
+  const opening=page.getByRole('dialog',{name:'Lunar Navigator'});
+  if(await opening.count())await opening.waitFor({state:'hidden',timeout:4500});
+}
 async function download(page){
-  const [dl]=await Promise.all([page.waitForEvent('download',{timeout:15000}),page.getByRole('button',{name:/Download comparison/}).click()]);
+  const [dl]=await Promise.all([page.waitForEvent('download',{timeout:15000}),page.getByRole('button',{name:/Download comparison.*JSON/}).click()]);
   const path=await dl.path();const text=readFileSync(path,'utf8');
   return {name:dl.suggestedFilename(),text,json:JSON.parse(text)};
+}
+async function downloadPdf(page){
+  const [dl]=await Promise.all([page.waitForEvent('download',{timeout:30000}),page.locator('.comparison-export').getByRole('button',{name:/Download comparison.*PDF/}).click()]);
+  const path=await dl.path(),bytes=readFileSync(path);
+  return {name:dl.suggestedFilename(),bytes};
 }
 const setLimit=(page,v)=>page.fill('#dark-limit',String(v));
 async function compareReady(ctx,tag){const page=await open(ctx,'compare',tag);const detail=page.locator('details.comparison-details').first();if(await detail.getAttribute('open')===null)await detail.locator('summary').click();await detail.locator('table tbody tr').first().waitFor({timeout:20000});return page;}
@@ -56,6 +66,25 @@ const browser=await launch();
 console.log('browser',browser.version(),'base',BASE);
 const desktop=await browser.newContext({viewport:{width:1440,height:900},acceptDownloads:true});
 const mobile=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,acceptDownloads:true});
+
+await check('Compare presents a real PDF as its primary export and preserves the advanced JSON record',async()=>{
+  const page=await open(desktop,'compare','pdf-primary',500);
+  const order=await page.evaluate(()=>{
+    const pdf=document.querySelector('.comparison-export'),advanced=document.querySelector('.comparison-details');
+    return{pdf:!!pdf,advanced:!!advanced,primaryBeforeAdvanced:!!(pdf&&advanced&&(pdf.compareDocumentPosition(advanced)&Node.DOCUMENT_POSITION_FOLLOWING)),pdfLabel:pdf?.querySelector('button')?.innerText.trim(),jsonLabel:advanced?.querySelector('button')?.innerText.trim()};
+  });
+  expect(order.pdf&&order.advanced&&order.primaryBeforeAdvanced,'PDF must appear before the advanced JSON disclosure: '+JSON.stringify(order));
+  expect(/Download comparison.*PDF/.test(order.pdfLabel)&&/Download comparison.*JSON/.test(order.jsonLabel),'both export labels must name their file format: '+JSON.stringify(order));
+  await shot(page,'compare-pdf-primary');
+  const pdf=await downloadPdf(page),pdfPath=join(OUT,pdf.name);writeFileSync(pdfPath,pdf.bytes);
+  expect(/\.pdf$/i.test(pdf.name),'primary export filename: '+pdf.name);
+  expect(pdf.bytes.subarray(0,5).toString('ascii')==='%PDF-','download is not a PDF byte stream');
+  expect(pdf.bytes.length>50000&&pdf.bytes.length<2_000_000,'unexpected PDF size '+pdf.bytes.length);
+  const detail=page.locator('details.comparison-details').first();if(await detail.getAttribute('open')===null)await detail.locator('summary').click();
+  const json=await download(page);
+  expect(/\.json$/i.test(json.name)&&json.json.reportType==='faithful-comparison','advanced JSON download remains available: '+json.name);
+  await page.close();return `PDF ${pdf.name} (${pdf.bytes.length} bytes), valid %PDF header; advanced JSON ${json.name} still downloads`;
+});
 
 for(const [label,ctx] of [['desktop-1440',desktop],['mobile-390',mobile]])
 await check(`review ${label}: readable, three scenarios, no overflow, no console errors, header does not overlap`,async()=>{
@@ -92,12 +121,12 @@ await check('review: every link/CTA works (Compare, Simulator, Evidence, Learn, 
   const hrefs=await page.$$eval('main a[href^="#"]',a=>[...new Set(a.map(x=>x.getAttribute('href')))]);
   expect(hrefs.length>=4,'links on Review: '+hrefs.join(','));
   for(const h of hrefs){
-    await page.goto(`${BASE}/#/review`);await page.locator('#main').waitFor();
+    await load(page,`${BASE}/#/review`);await page.locator('#main').waitFor();
     await page.locator(`main a[href="${h}"]`).first().click();
     await page.waitForFunction(x=>location.hash===x,h,{timeout:5000});
     await page.locator('#main').waitFor();expect((await page.locator('h1').first().innerText()).length>0,`${h} renders an h1`);
   }
-  await page.goto(`${BASE}/#/review`);await page.locator('#main').waitFor();
+  await load(page,`${BASE}/#/review`);await page.locator('#main').waitFor();
   await page.getByRole('link',{name:/Change the inputs/}).click();
   await page.waitForFunction(()=>location.hash==='#/compare');
   await page.close();return hrefs.join(' ');
@@ -239,7 +268,9 @@ await check('Free Mode never changes the exported comparison or the Review',asyn
   await sim.getByLabel(/Earth.s position/).check();
   await sim.getByRole('button',{name:/Step \+1 h/}).click();await sim.getByRole('button',{name:/Step \+1 h/}).click();
   await sim.evaluate(()=>{location.hash='#/compare';});
-  await sim.locator('table').first().locator('tbody tr').first().waitFor({timeout:20000});
+  const detail=sim.locator('details.comparison-details').first();
+  if(await detail.getAttribute('open')===null)await detail.locator('summary').click();
+  await detail.locator('table tbody tr').first().waitFor({timeout:20000});
   const after=(await download(sim)).json;
   const strip=(r)=>{const c=JSON.parse(JSON.stringify(r));delete c.generatedAtUtc;return c;};
   expect(JSON.stringify(strip(after))===JSON.stringify(strip(before)),'exported record changed after Free Mode experiments');
@@ -258,9 +289,12 @@ await check('method links open the specific explanation for each metric (solar, 
     await page.locator('#main').waitFor();await page.waitForTimeout(500);
     texts.push(await page.locator('main').innerText());
     expect(await page.locator('main h1').count()>0,m+': no heading');
-    await page.goto(`${BASE}/#/compare`);await page.locator('table').first().locator('tbody tr').first().waitFor();
+    await load(page,`${BASE}/#/compare`);
+    const detail=page.locator('details.comparison-details').first();
+    if(await detail.getAttribute('open')===null)await detail.locator('summary').click();
+    await detail.locator('table tbody tr').first().waitFor();
   }
-  const focus=await Promise.all(['solar','darkness','earth','earth-gap'].map(async m=>{await page.goto(`${BASE}/#/evidence?metric=${m}`);await page.waitForTimeout(500);return page.evaluate(()=>(document.querySelector('[aria-current],[data-metric],.metric-explainer,.metric-focus')?.textContent||'').trim());}));
+  const focus=await Promise.all(['solar','darkness','earth','earth-gap'].map(async m=>{await load(page,`${BASE}/#/evidence?metric=${m}`);await page.waitForTimeout(500);return page.evaluate(()=>(document.querySelector('[aria-current],[data-metric],.metric-explainer,.metric-focus')?.textContent||'').trim());}));
   expect(new Set(focus.filter(Boolean)).size>=3||new Set(texts).size===4,'metric deep links do not show distinct explanations');
   expect(fresh(from).length===0,'console errors: '+JSON.stringify(fresh(from).slice(0,2)));
   await page.close();
@@ -268,7 +302,7 @@ await check('method links open the specific explanation for each metric (solar, 
 
 await check('mobile 390: Compare download button and Review CTA are usable (>= 36 px) and keyboard-activatable',async()=>{
   const page=await compareReady(mobile,'mobile-dl');
-  const b=page.getByRole('button',{name:/Download comparison/});
+  const b=page.getByRole('button',{name:/Download comparison.*JSON/});
   const box=await b.boundingBox();expect(box.height>=36,`download button ${Math.round(box.height)} px high`);
   await b.focus();
   const [dl]=await Promise.all([page.waitForEvent('download',{timeout:15000}),page.keyboard.press('Enter')]);
