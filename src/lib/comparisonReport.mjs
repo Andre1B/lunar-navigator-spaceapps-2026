@@ -1,4 +1,9 @@
-import { eventSummary, timeAt, windowBounds } from "./analysis.mjs";
+import {
+  eventSummary,
+  timeAt,
+  windowBounds,
+  parseUtcDay,
+} from "./analysis.mjs";
 
 // One calculation path serves the table, short review and downloaded record.
 export function comparisonRows(dataset, settings) {
@@ -10,7 +15,7 @@ export function comparisonRows(dataset, settings) {
   ].map(([label, id, offset]) => {
     const bounds = windowBounds(
       dataset.manifest.period,
-      settings.date,
+      parseUtcDay(settings.date) === null ? "" : settings.date,
       settings.days,
       offset,
     );

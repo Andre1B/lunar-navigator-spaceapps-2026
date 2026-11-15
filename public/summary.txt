@@ -70,3 +70,5 @@ Keep following Sun can be switched on or off. Enhanced vision optionally outline
 
 OPTIONAL AMBIENT MUSIC
 An original synthesized ambient score can be enabled from Music in the header, with volume and pause controls. It starts off and uses no external recordings, samples or audio downloads. It continues across in-app navigation. The opening ends on Home; the simulator still starts playing when opened (except reduced-motion, tours and exact comparison inspections).
+
+Arrival calendar: select a UTC day with keyboard or pointer, or type YYYY-MM-DD. Selectable days are limited to the computed period; operating windows outside it are not calculated. Optional original music adds bass pulses and arpeggios, starts off, and has volume/pause controls.

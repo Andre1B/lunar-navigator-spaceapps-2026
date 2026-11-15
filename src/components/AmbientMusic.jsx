@@ -120,8 +120,9 @@ export default function AmbientMusic() {
             }}
           />
           <p>
-            Original ambient score, synthesized here. No external audio or
-            scientific sonification.
+            Original space score: warm chords, a soft bass pulse and answering
+            arpeggios. Synthesized here; no external audio or scientific
+            sonification.
           </p>
           <a href="#/credits">Music credits</a>
         </div>

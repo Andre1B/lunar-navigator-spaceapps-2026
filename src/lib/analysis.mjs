@@ -1,5 +1,16 @@
 // AI-assisted code. Numeric operations on published/precomputed data, not LLM predictions.
 export const DAY_MS = 86400000;
+// Date.parse normalizes impossible days (e.g. February 31). Arrival text must
+// identify an actual UTC calendar day rather than silently selecting March.
+export function parseUtcDay(value) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value))
+    return null;
+  const ms = Date.parse(value + "T00:00:00Z");
+  return Number.isFinite(ms) &&
+    new Date(ms).toISOString().slice(0, 10) === value
+    ? ms
+    : null;
+}
 export function timeAt(period, index) {
   return new Date(
     Date.parse(period.startUtc) + index * period.stepMinutes * 60000,

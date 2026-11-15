@@ -3624,3 +3624,215 @@ button.tracking-state {
     animation: none !important;
   }
 }
+.arrival-calendar {
+  position: relative;
+  min-width: 0;
+  z-index: 8;
+}
+.calendar-input-row {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+.setup .calendar-input-row input {
+  flex: 1;
+  width: 0;
+  min-width: 0;
+  margin: 0;
+  font:
+    13px/1.5 "Fira Code",
+    monospace;
+}
+.calendar-trigger {
+  flex: 0 0 42px;
+  display: grid;
+  place-items: center;
+  padding: 8px;
+  color: #a2d4ff;
+}
+.calendar-trigger[aria-expanded="true"] {
+  background: #183e62;
+  border-color: #78bfff;
+}
+.calendar-hint {
+  display: block;
+  color: #acbcd0;
+  font-size: 12px;
+  line-height: 1.6;
+  margin-top: 7px;
+}
+.calendar-hint.invalid {
+  color: #ffb7ad;
+}
+.calendar-popover {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  width: 316px;
+  max-width: calc(100vw - 40px);
+  padding: 16px;
+  background: #101e30;
+  border: 1px solid #5b7a98;
+  border-radius: 8px;
+  box-shadow: 0 18px 45px #0009;
+  animation: calendar-arrive 180ms ease-out;
+}
+.calendar-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.calendar-heading h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+.calendar-heading button {
+  padding: 6px;
+  width: 36px;
+  min-height: 36px;
+}
+.calendar-coverage,
+.calendar-keys {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #b5c8da;
+  margin: 12px 0;
+}
+.calendar-popover table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+}
+.calendar-popover th {
+  padding: 8px 0;
+  color: #a9bed2;
+  font-size: 12px;
+  font-weight: 400;
+  text-align: center;
+}
+.calendar-popover abbr {
+  text-decoration: none;
+}
+.calendar-popover td {
+  padding: 1px;
+  border: 0;
+  text-align: center;
+}
+.calendar-popover td button {
+  width: 100%;
+  min-height: 36px;
+  padding: 5px 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  font-size: 14px;
+}
+.calendar-popover td button:not(:disabled):hover {
+  background: #233e59;
+  border-color: #81b1db;
+}
+.calendar-popover td button.selected {
+  color: #071321;
+  background: #9cd5ff;
+  font-weight: 700;
+}
+.calendar-popover td button:disabled {
+  color: #718298;
+  opacity: 0.5;
+}
+.calendar-popover td button.adjacent {
+  color: #90a2b7;
+}
+.calendar-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  border-top: 1px solid #38516b;
+  padding-top: 12px;
+}
+.calendar-footer button {
+  font-size: 13px;
+  min-height: 36px;
+  padding: 6px 12px;
+}
+@keyframes calendar-arrive {
+  from {
+    transform: translateY(-7px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+/* Reading order and width belong to the layout, never to animated text offsets. */
+.setup,
+.page-heading,
+.learn-section,
+.review-layout > section,
+.answer-scenario {
+  min-width: 0;
+}
+.page-heading p,
+.learn-section p,
+.answer-scenario p,
+.review-layout p {
+  overflow-wrap: break-word;
+}
+@media (max-width: 720px) {
+  .calendar-popover {
+    position: fixed;
+    inset: auto 16px 16px;
+    width: auto;
+    max-width: none;
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+  }
+  .setup .calendar-input-row input {
+    margin: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .calendar-popover {
+    animation: none;
+  }
+}
+.calendar-popover {
+  position: fixed;
+  top: var(--calendar-top, 16px);
+  left: var(--calendar-left, 16px);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+@media (max-width: 720px) {
+  .calendar-popover {
+    inset: auto 16px 16px;
+  }
+}
+.music-toggle[aria-pressed="true"] {
+  border-color: #8bb8db;
+  background: #17364f;
+}
+.music-toggle[aria-pressed="true"] svg {
+  transform-origin: center;
+  animation: music-breathe 750ms ease-in-out infinite alternate;
+}
+@keyframes music-breathe {
+  from {
+    transform: scaleY(0.55);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@media (max-width: 720px) {
+  .setup > label {
+    align-self: start;
+    margin-top: 14px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-toggle svg {
+    animation: none !important;
+  }
+}

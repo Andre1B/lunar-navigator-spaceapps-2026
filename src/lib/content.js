@@ -184,6 +184,16 @@ export const scientificSoftware = [
 ];
 export const researchProjects = [
   [
+    "Greetings from Earth!! / Ocean Gardens (2023)",
+    "https://github.com/OceanGardens/oceangardens.github.io",
+    "Guided and short paths, globe layers paired with explanations; ideas only, no code, assets or audio reused",
+  ],
+  [
+    "Ocean Gardens - interaction research and limitations",
+    "https://github.com/Andre1B/lunar-navigator-spaceapps-2026/blob/main/docs/WINNER-ROUND-OCEAN-GARDENS.md",
+    "Observed screens and explicit untested flows; award identity is not proof of comprehension",
+  ],
+  [
     "Spacebee — Moonquakes 2023",
     "https://github.com/spacebee-technologies/Moonquakes-SpaceApps2023",
     "Offline source-data pipeline and accessible exploration; ideas studied, no code reused",

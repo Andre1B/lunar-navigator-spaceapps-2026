@@ -5,7 +5,7 @@ export function createAmbientScore(context, initialVolume = 20) {
   output.gain.value = 0;
   const filter = context.createBiquadFilter();
   filter.type = "lowpass";
-  filter.frequency.value = 1100;
+  filter.frequency.value = 2400;
   filter.Q.value = 0.5;
   filter.connect(output);
   output.connect(context.destination);
@@ -15,7 +15,10 @@ export function createAmbientScore(context, initialVolume = 20) {
     [48, 55, 60, 64],
     [43, 50, 55, 59],
   ];
-  const motif = [0, 2, 1, 3, 2, 1, 0, 2];
+  // 80 bpm, eighth-note clock. A bass pulse, answering arpeggios and changing
+  // voicings add movement without drums or any link to scientific quantities.
+  const stepSeconds = 0.375;
+  const motif = [0, 2, 1, 3, 2, 1, 3, 2, 0, 3, 2, 1, 3, 2, 1, 2];
   const hz = (note) => 440 * 2 ** ((note - 69) / 12);
   const pads = chords[0].map((note, i) => {
     const oscillator = context.createOscillator(),
@@ -47,17 +50,18 @@ export function createAmbientScore(context, initialVolume = 20) {
   }
   setVolume(initialVolume);
   function tick() {
-    if (disposed || context.state !== "running") return;
+    if (disposed || !playing || context.state !== "running") return;
     const now = context.currentTime;
     // A throttled background tab must skip missed notes, not allocate minutes
     // of already-expired oscillators when its JavaScript timer resumes.
     if (nextAt < now - 0.2) {
-      beat += Math.ceil((now - nextAt) / 1.5);
+      beat += Math.ceil((now - nextAt) / stepSeconds);
       nextAt = now + 0.08;
     }
     let budget = 2;
     while (nextAt < now + 0.2 && budget-- > 0) {
-      const chordIndex = Math.floor(beat / 8) % chords.length;
+      const chordIndex = Math.floor(beat / 16) % chords.length;
+      const step = beat % 16;
       if (chordIndex !== lastChord) {
         pads.forEach(({ oscillator }, i) => {
           oscillator.frequency.cancelScheduledValues(nextAt);
@@ -67,25 +71,44 @@ export function createAmbientScore(context, initialVolume = 20) {
           );
           oscillator.frequency.exponentialRampToValueAtTime(
             hz(chords[chordIndex][i]),
-            nextAt + 2,
+            nextAt + 1.2,
           );
         });
         lastChord = chordIndex;
       }
-      if (notes.size >= 6) {
+      // Space in the phrase, plus a strict live-voice ceiling. A background
+      // scheduler stall never turns into a burst of catch-up notes.
+      if (notes.size >= 6 || step === 7 || step === 15) {
         beat++;
-        nextAt += 1.5;
+        nextAt += stepSeconds;
         continue;
       }
       const oscillator = context.createOscillator(),
         gain = context.createGain();
-      oscillator.type = "sine";
+      const bass = step === 0 || step === 8;
+      const answer = Math.floor(beat / 64) % 2;
+      oscillator.type = bass
+        ? "triangle"
+        : step % 4 === 2
+          ? "triangle"
+          : "sine";
       oscillator.frequency.value = hz(
-        chords[chordIndex][motif[beat % motif.length]] + 12,
+        bass
+          ? chords[chordIndex][0] - 12
+          : chords[chordIndex][motif[step]] +
+              12 +
+              (answer && step % 4 === 0 ? 12 : 0),
       );
+      const duration = bass ? 0.66 : step % 4 === 0 ? 1.05 : 0.52;
       gain.gain.setValueAtTime(0, nextAt);
-      gain.gain.linearRampToValueAtTime(0.025, nextAt + 0.14);
-      gain.gain.exponentialRampToValueAtTime(0.0001, nextAt + 2.6);
+      gain.gain.linearRampToValueAtTime(bass ? 0.055 : 0.038, nextAt + 0.018);
+      gain.gain.exponentialRampToValueAtTime(0.0001, nextAt + duration);
+      // Gentle breathing in the harmonic bed follows the phrase, not the clock
+      // or illumination values of the simulator.
+      pads.forEach(({ gain: padGain }, j) => {
+        const base = [0.085, 0.055, 0.04, 0.03][j];
+        padGain.gain.setTargetAtTime(base * (bass ? 0.78 : 1), nextAt, 0.12);
+      });
       oscillator.connect(gain);
       gain.connect(filter);
       const voice = { oscillator, gain };
@@ -96,9 +119,9 @@ export function createAmbientScore(context, initialVolume = 20) {
         notes.delete(voice);
       };
       oscillator.start(nextAt);
-      oscillator.stop(nextAt + 2.7);
+      oscillator.stop(nextAt + duration + 0.04);
       beat++;
-      nextAt += 1.5;
+      nextAt += stepSeconds;
     }
   }
   function clearNotes() {

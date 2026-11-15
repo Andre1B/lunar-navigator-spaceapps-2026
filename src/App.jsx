@@ -9,6 +9,7 @@ import {
 } from "react";
 import SpaceOpening from "./components/SpaceOpening.jsx";
 import AmbientMusic from "./components/AmbientMusic.jsx";
+import ArrivalCalendar from "./components/ArrivalCalendar.jsx";
 import { usePageMotion } from "./lib/usePageMotion.js";
 import { useDataset } from "./lib/useDataset.js";
 import {
@@ -249,13 +250,12 @@ function Setup({
           : ""}
       </p>
       <label htmlFor="arrival">Arrival date · UTC</label>
-      <input
+      <ArrivalCalendar
         id="arrival"
-        type="date"
         min={manifest.period.startUtc.slice(0, 10)}
         max={manifest.period.endUtc.slice(0, 10)}
         value={date}
-        onChange={(e) => setDate(e.target.value)}
+        onChange={setDate}
       />
       <label htmlFor="days">Length of stay</label>
       <select
@@ -832,10 +832,17 @@ function Credits() {
           materials retain their own terms.
         </p>
         <p>
-          Optional background music is an original procedural ambient composition,
-          synthesized with the browser’s Web Audio API. No recordings or music
-          samples from other projects are used. It is atmosphere, not scientific
-          sonification. <a href="https://github.com/Andre1B/lunar-navigator-spaceapps-2026/blob/main/src/lib/ambientScore.mjs" target="_blank" rel="noreferrer">Read the score and synthesis code ↗</a>
+          Optional background music is an original procedural ambient
+          composition, synthesized with the browser’s Web Audio API. No
+          recordings or music samples from other projects are used. It is
+          atmosphere, not scientific sonification.{" "}
+          <a
+            href="https://github.com/Andre1B/lunar-navigator-spaceapps-2026/blob/main/src/lib/ambientScore.mjs"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Read the score and synthesis code ↗
+          </a>
         </p>
         <a
           className="button"
