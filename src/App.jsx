@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import SpaceOpening from "./components/SpaceOpening.jsx";
+import AmbientMusic from "./components/AmbientMusic.jsx";
 import { usePageMotion } from "./lib/usePageMotion.js";
 import { useDataset } from "./lib/useDataset.js";
 import {
@@ -79,9 +80,12 @@ function Header({ route, mode, onTour }) {
           </a>
         ))}
       </nav>
-      <button className="header-tour" data-tour-start onClick={onTour}>
-        Take a tour
-      </button>
+      <div className="header-tools">
+        <AmbientMusic />
+        <button className="header-tour" data-tour-start onClick={onTour}>
+          Take a tour
+        </button>
+      </div>
     </header>
   );
 }
@@ -827,6 +831,12 @@ function Credits() {
           public evidence trail. The original code is Apache-2.0; third-party
           materials retain their own terms.
         </p>
+        <p>
+          Optional background music is an original procedural ambient composition,
+          synthesized with the browser’s Web Audio API. No recordings or music
+          samples from other projects are used. It is atmosphere, not scientific
+          sonification. <a href="https://github.com/Andre1B/lunar-navigator-spaceapps-2026/blob/main/src/lib/ambientScore.mjs" target="_blank" rel="noreferrer">Read the score and synthesis code ↗</a>
+        </p>
         <a
           className="button"
           href="https://github.com/Andre1B/lunar-navigator-spaceapps-2026"
@@ -943,8 +953,7 @@ export default function App() {
   const closeOpening = useCallback(() => {
     setOpening(false);
     window.getSelection()?.removeAllRanges();
-    // Honor incoming deep links; the Home opening leads to the moving explorer.
-    if (routeNow() === "home") go("simulator");
+    // Preserve Home as the first explanation, and honor all incoming deep links.
     requestAnimationFrame(() =>
       document.getElementById("main")?.focus({ preventScroll: true }),
     );

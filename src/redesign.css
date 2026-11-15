@@ -3199,6 +3199,130 @@ details[open] > :not(summary) {
   background: #122437;
 }
 /* Programmatic landmark focus is retained without selecting a whole page. */
+.header-tools,
+.ambient-music {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.header-tools {
+  flex-shrink: 0;
+}
+.ambient-music {
+  position: relative;
+}
+.music-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  min-height: 38px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+.music-toggle[aria-pressed="true"] {
+  color: #fff0c7;
+  border-color: #caab68;
+  background: #332b1c;
+}
+.music-toggle span {
+  font-size: 12px;
+}
+.music-settings summary {
+  list-style: none;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  border: 1px solid #415c77;
+  border-radius: 4px;
+  width: 32px;
+  min-height: 38px;
+  color: #b9d8f2;
+}
+.music-settings summary::-webkit-details-marker {
+  display: none;
+}
+.music-settings > div {
+  position: fixed;
+  z-index: 80;
+  top: 78px;
+  right: 16px;
+  width: min(280px, calc(100vw - 32px));
+  background: #101e2e;
+  border: 1px solid #688cae;
+  border-radius: 7px;
+  box-shadow: 0 12px 36px #0008;
+  padding: 18px;
+}
+.music-settings label {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+.music-settings p {
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 12px 0 8px;
+}
+.music-settings a {
+  font-size: 13px;
+}
+.music-error {
+  position: fixed;
+  z-index: 81;
+  top: 80px;
+  right: 16px;
+  width: min(320px, calc(100vw - 32px));
+  padding: 15px;
+  background: #172b40;
+  border: 1px solid #86b2d4;
+  font-size: 13px;
+}
+@media (max-width: 1280px) {
+  .header {
+    flex-wrap: wrap;
+  }
+  .header nav {
+    order: 3;
+    width: 100%;
+    margin: 0;
+    flex-wrap: wrap;
+  }
+  .header-tools {
+    margin-left: auto;
+  }
+}
+@media (max-width: 720px) {
+  .header {
+    gap: 8px;
+  }
+  .brand {
+    font-size: 14px;
+    gap: 6px;
+  }
+  .header-tools,
+  .ambient-music {
+    gap: 5px;
+  }
+  .music-toggle {
+    font-size: 12px;
+    padding: 7px 8px;
+    min-height: 36px;
+  }
+  .music-toggle svg {
+    display: none;
+  }
+  .music-settings summary {
+    width: 28px;
+    min-height: 36px;
+  }
+  .header-tools .header-tour {
+    font-size: 11px;
+    padding: 8px;
+    min-height: 36px;
+  }
+}
 main:focus {
   outline: none;
 }
