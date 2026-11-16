@@ -399,6 +399,7 @@ function Compare({
 }) {
   const { manifest, sites } = dataset;
   const [limit, setLimit] = useState(72);
+  const [seriesOpen, setSeriesOpen] = useState(false);
   const rows = useMemo(
     () => comparisonRows(dataset, settings),
     [dataset, settings],
@@ -666,8 +667,13 @@ function Compare({
                 onInspect({ id: settings.siteId, bounds: { start: i } });
               }}
             />
-            <details className="comparison-details">
+            <details
+              className="comparison-details"
+              onToggle={(e) => e.currentTarget.open && setSeriesOpen(true)}
+            >
               <summary>Compare every possible arrival date</summary>
+              {/* Thousands of nodes: built only once the panel is opened. */}
+              {seriesOpen ? (
               <ArrivalSeries
                 siteData={sites[settings.siteId]}
                 siteName={
@@ -679,6 +685,7 @@ function Compare({
                 selectedDate={settings.date}
                 onSelect={setters.setDate}
               />
+              ) : null}
             </details>
           </div>
         </div>

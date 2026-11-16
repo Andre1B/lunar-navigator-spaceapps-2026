@@ -31,6 +31,11 @@ export default function SimulatorV2({
   tourActive = false,
 }) {
   const { manifest, sky, sites, planets } = dataset;
+  // The 3D view is the only consumer of the sky and planet ephemerides.
+  const { loadSky } = dataset;
+  useEffect(() => {
+    loadSky?.();
+  }, [loadSky]);
   const [view, setView] = useState(() => (inspecting ? "sky" : "overview")),
     [immersive, setImmersive] = useState(false),
     [playing, setPlaying] = useState(

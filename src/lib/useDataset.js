@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 export function useDataset() {
   const [state, setState] = useState({
     status: "loading",
@@ -10,6 +10,24 @@ export function useDataset() {
     integrity: null,
     error: null,
   });
+  // Sky and planet ephemerides (about 7 MB) feed only the 3D view, so they
+  // load when it asks (loadSky), not with the comparison data every page needs.
+  const reader = useRef(null),
+    skyRequest = useRef(null);
+  const loadSky = useCallback(() => {
+    if (skyRequest.current || !reader.current) return;
+    const read = reader.current;
+    skyRequest.current = Promise.all([
+      read("sky.json"),
+      read("planets.json").catch(() => null),
+    ])
+      .then(([sky, planets]) => setState((s) => ({ ...s, sky, planets })))
+      .catch((error) => {
+        skyRequest.current = null;
+        if (error?.name !== "AbortError")
+          setState((s) => ({ ...s, skyError: error.message }));
+      });
+  }, []);
   useEffect(() => {
     const ac = new AbortController();
     let version = "";
@@ -40,14 +58,12 @@ export function useDataset() {
         )
           throw Error("Unsupported dataset schema");
         version = manifest.generatedAtUtc;
-        const [sky, validation, planets, integrity, ...sites] =
-          await Promise.all([
-            read("sky.json"),
-            read(manifest.validation.file),
-            read("planets.json").catch(() => null),
-            read("integrity.json").catch(() => null),
-            ...manifest.sites.map((s) => read(s.file)),
-          ]);
+        reader.current = read;
+        const [validation, integrity, ...sites] = await Promise.all([
+          read(manifest.validation.file),
+          read("integrity.json").catch(() => null),
+          ...manifest.sites.map((s) => read(s.file)),
+        ]);
         if (
           sites.some((site) =>
             manifest.observerHeightsM.some((height) => {
@@ -66,22 +82,31 @@ export function useDataset() {
             "Dataset files do not match the declared heights or period. Reload to obtain a consistent release.",
           );
         if (!ac.signal.aborted)
-          setState({
+          setState((s) => ({
+            ...s,
             status: "ready",
             manifest,
-            sky,
-            planets,
             validation,
             integrity,
             sites: Object.fromEntries(sites.map((s) => [s.siteId, s])),
             error: null,
-          });
+          }));
+        if (wantSky.current) loadSky();
       } catch (error) {
         if (!ac.signal.aborted)
           setState((s) => ({ ...s, status: "error", error: error.message }));
       }
     })();
     return () => ac.abort();
-  }, []);
-  return state;
+  }, [loadSky]);
+  // A request made before the manifest arrives is honoured once it does.
+  const wantSky = useRef(false);
+  const requestSky = useCallback(() => {
+    wantSky.current = true;
+    loadSky();
+  }, [loadSky]);
+  return useMemo(
+    () => ({ ...state, loadSky: requestSky }),
+    [state, requestSky],
+  );
 }
