@@ -316,13 +316,21 @@ export default function SpaceSceneV2({
       const upload = () => {
         if (disposed) return;
         const texture = textures[next++];
-        if (texture?.image) renderer.initTexture(texture);
-        if (next < textures.length) uploadFrame = requestAnimationFrame(upload);
-        else {
-          imageryReady = true;
-          if (globeReady) setStatus("");
-          schedule();
-        }
+        // Decode the JPEG off the main thread first, so the frame only pays
+        // for the GPU upload.
+        Promise.resolve(texture?.image?.decode?.())
+          .catch(() => {})
+          .then(() => {
+            if (disposed) return;
+            if (texture?.image) renderer.initTexture(texture);
+            if (next < textures.length)
+              uploadFrame = requestAnimationFrame(upload);
+            else {
+              imageryReady = true;
+              if (globeReady) setStatus("");
+              schedule();
+            }
+          });
       };
       uploadFrame = requestAnimationFrame(upload);
     };
@@ -801,9 +809,10 @@ export default function SpaceSceneV2({
       })
       .then((grid) => {
         if (disposed) return;
-        const install = (g) => {
+        const install = (g, far) => {
           if (disposed) {
             g.dispose();
+            far?.dispose();
             return;
           }
           moon.geometry.dispose();
@@ -813,7 +822,7 @@ export default function SpaceSceneV2({
           // visibility never uses this mesh.
           globeDetail = g;
           globeFar?.dispose();
-          globeFar = displacedGlobe(grid, 240);
+          globeFar = far ?? displacedGlobe(grid, 240);
           globeReady = true;
           if (imageryReady) setStatus("");
           schedule();
@@ -833,19 +842,19 @@ export default function SpaceSceneV2({
               fallback();
               return;
             }
-            const g = new THREE.BufferGeometry();
-            g.setAttribute(
-              "position",
-              new THREE.BufferAttribute(data.position, 3),
-            );
-            g.setAttribute("normal", new THREE.BufferAttribute(data.normal, 3));
-            g.setAttribute("uv", new THREE.BufferAttribute(data.uv, 2));
-            g.setIndex(new THREE.BufferAttribute(data.index, 1));
-            g.boundingSphere = new THREE.Sphere(
-              new THREE.Vector3().fromArray(data.sphere.center),
-              data.sphere.radius,
-            );
-            install(g);
+            const [detail, far] = data.meshes.map((m) => {
+              const g = new THREE.BufferGeometry();
+              g.setAttribute("position", new THREE.BufferAttribute(m.position, 3));
+              g.setAttribute("normal", new THREE.BufferAttribute(m.normal, 3));
+              g.setAttribute("uv", new THREE.BufferAttribute(m.uv, 2));
+              g.setIndex(new THREE.BufferAttribute(m.index, 1));
+              g.boundingSphere = new THREE.Sphere(
+                new THREE.Vector3().fromArray(m.sphere.center),
+                m.sphere.radius,
+              );
+              return g;
+            });
+            install(detail, far);
           };
           globeWorker.onerror = () => {
             globeWorker?.terminate();
@@ -858,7 +867,7 @@ export default function SpaceSceneV2({
               buffer,
               width: grid.width,
               height: grid.height,
-              segments: mobile ? 360 : 720,
+              segments: [mobile ? 360 : 720, 240],
             },
             [buffer],
           );
