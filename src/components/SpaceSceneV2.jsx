@@ -31,7 +31,7 @@ const PLANET_NOTES = {
     "Jupiter: banded cloud tops, the Great Red Spot. Its four large moons, Io, Europa, Ganymede and Callisto, are not drawn here because their positions are not in this dataset (NASA: science.nasa.gov/jupiter/jupiter-moons).",
   saturn:
     "Saturn: main rings drawn from 1.24 to 2.27 Saturn radii in its equatorial plane; the ring tilt shown is illustrative.",
-  sun: "Sun: surface texture is illustrative; rotation uses the 25.4-day sidereal period.",
+  sun: "Sun: surface texture and the glowing corona are illustrative, not photometry; the disc keeps its true size. Rotation uses the 25.4-day sidereal period.",
   earth:
     "Earth: daytime imagery with an illustrative, slowly drifting cloud layer, not current weather.",
 };
@@ -490,6 +490,52 @@ export default function SpaceSceneV2({
       }),
     );
     scene.add(glare);
+    // Illustrative corona: a separate soft layer of streamers around the disc.
+    // It never changes the Sun's disc, angular size or the visibility maths,
+    // and its brightness is not photometric (the real corona is far fainter
+    // than the disc and varies with the solar cycle).
+    const coronaCanvas = document.createElement("canvas");
+    coronaCanvas.width = coronaCanvas.height = 256;
+    {
+      const c = coronaCanvas.getContext("2d");
+      const base = c.createRadialGradient(128, 128, 36, 128, 128, 128);
+      base.addColorStop(0, "rgba(255,236,190,0.55)");
+      base.addColorStop(0.35, "rgba(255,214,140,0.16)");
+      base.addColorStop(1, "rgba(255,200,120,0)");
+      c.fillStyle = base;
+      c.fillRect(0, 0, 256, 256);
+      // Streamers at fixed pseudo-random angles (deterministic drawing).
+      for (let j = 0; j < 28; j++) {
+        const a = j * 2.39996,
+          len = 70 + ((j * 37) % 53),
+          w = 2 + ((j * 13) % 5);
+        c.save();
+        c.translate(128, 128);
+        c.rotate(a);
+        const g = c.createLinearGradient(36, 0, 36 + len, 0);
+        g.addColorStop(0, "rgba(255,240,205,0.22)");
+        g.addColorStop(1, "rgba(255,230,180,0)");
+        c.fillStyle = g;
+        c.beginPath();
+        c.moveTo(36, -w);
+        c.lineTo(36 + len, 0);
+        c.lineTo(36, w);
+        c.fill();
+        c.restore();
+      }
+    }
+    const coronaTexture = new THREE.CanvasTexture(coronaCanvas);
+    const corona = new THREE.Sprite(
+      new THREE.SpriteMaterial({
+        map: coronaTexture,
+        transparent: true,
+        depthWrite: false,
+        depthTest: true,
+        blending: THREE.AdditiveBlending,
+        toneMapped: false,
+      }),
+    );
+    scene.add(corona);
     const terrain = new THREE.Mesh(new THREE.BufferGeometry(), lunarMaterial);
     terrain.layers.set(1);
     terrain.castShadow = true;
@@ -1621,6 +1667,19 @@ export default function SpaceSceneV2({
       );
       glare.visible =
         p.opticalGlare && (p.view !== "sky" || currentObservation?.sun > 0);
+      // Corona about 3.2 solar radii across its streamers. In the Sun close
+      // view it slowly turns and breathes in real time (static with reduced
+      // motion); elsewhere it stays still.
+      corona.position.copy(sun.position);
+      const sunClose = trackedBody === "sun" && p.view !== "sky";
+      const breathe =
+        sunClose && !reduced ? 1 + 0.06 * Math.sin((2 * Math.PI * now) / 7000) : 1;
+      corona.scale.setScalar(sun.scale.x * 3.2 * breathe);
+      corona.material.rotation =
+        sunClose && !reduced ? (2 * Math.PI * now) / 240000 : 0;
+      corona.material.opacity = sunClose ? 1 : 0.6;
+      corona.visible = p.view !== "sky" && sun.visible !== false;
+      if (sunClose && !reduced) wantsFrame = true;
       scene.position.copy(camera.position).negate();
       renderCamera.copy(camera, false);
       renderCamera.position.set(0, 0, 0);
@@ -1999,6 +2058,8 @@ export default function SpaceSceneV2({
       cloudMap.dispose();
       starsMap.dispose();
       glareTexture.dispose();
+      coronaTexture.dispose();
+      corona.material.dispose();
       surface.horizon.dispose();
       globeDetail?.dispose();
       globeFar?.dispose();
@@ -2010,6 +2071,12 @@ export default function SpaceSceneV2({
       el.replaceChildren();
       engine.current = null;
     };
+  }, []);
+  // "Explore other celestial bodies" in the setup panel asks for a close view.
+  useEffect(() => {
+    const inspect = (e) => engine.current?.inspect(e.detail);
+    window.addEventListener("lunacline:inspect", inspect);
+    return () => window.removeEventListener("lunacline:inspect", inspect);
   }, []);
   useEffect(() => {
     engine.current?.schedule();
@@ -2117,11 +2184,8 @@ export default function SpaceSceneV2({
             ) : null}
           </>
         ) : null}
-        <span className="inspect-label" aria-hidden="true">
-          Inspect individual planets
-        </span>
         <select
-          aria-label="Inspect individual planets: close view of a body"
+          aria-label="Look at a body: close view"
           defaultValue=""
           onChange={(e) => {
             engine.current?.inspect(e.target.value);

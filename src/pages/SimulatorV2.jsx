@@ -274,6 +274,27 @@ export default function SimulatorV2({
               </button>
             ))}
           </div>
+          <div className="explore-bodies">
+            <h3>Explore other celestial bodies</h3>
+            <p>A close view of each body at its computed position.</p>
+            <div>
+              {[
+                ["sun", "Sun"],
+                ...(planets?.planets ?? []).map((p) => [p.id, p.name]),
+              ].map(([id, label]) => (
+                <button
+                  key={id}
+                  onClick={() =>
+                    window.dispatchEvent(
+                      new CustomEvent("lunacline:inspect", { detail: id }),
+                    )
+                  }
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
           <details className="explorer-help">
             <summary>What are these locations?</summary>
             <p>

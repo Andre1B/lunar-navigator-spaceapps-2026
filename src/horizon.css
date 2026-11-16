@@ -1274,3 +1274,27 @@ input[type="range"] {
 * + .caption {
   margin-top: 12px;
 }
+
+/* 3D setup: close views of the Sun and planets. */
+.explore-bodies {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+}
+.explore-bodies h3 {
+  margin: 0;
+}
+.explore-bodies p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.explore-bodies > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.explore-bodies button {
+  font-size: 13px;
+  padding: 6px 10px;
+}
