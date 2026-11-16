@@ -61,7 +61,7 @@
     "captions": "/demo/lunar-navigator-demo.en.srt",
     "label": "AI-assisted demo (visible on screen)",
     "composition": "EffectCraft 0.24.1 (MIT OR Apache-2.0)",
-    "voice": "Synthetic generic preset am_michael, Kokoro-82M (Apache-2.0); no cloned or real voice",
+    "voice": "Synthetic generic preset am_puck, Kokoro-82M (Apache-2.0); no cloned or real voice (v4, 16 November 2026; the earlier version used am_michael)",
     "audioBed": "Original synthesized by project script; no third-party audio",
     "visuals": "Captures of the public app and its exported PDF; no generated imagery, people or NASA logos",
     "numbers": "Computed by the app from the current dataset"

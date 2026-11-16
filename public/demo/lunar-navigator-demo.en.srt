@@ -1,52 +1,44 @@
 1
-00:00:00,300 --> 00:00:02,400
-A Moon landing slips by one week.
+00:00:00,300 --> 00:00:01,950
+Your Moon landing slips a week.
 
 2
-00:00:02,500 --> 00:00:04,150
-What changes on the ground?
+00:00:01,960 --> 00:00:03,430
+Is your spot still in the sunlight?
 
 3
-00:00:04,280 --> 00:00:06,620
-Compare three arrivals with the same stay:
+00:00:03,580 --> 00:00:05,450
+Lunacline compares three arrivals:
 
 4
-00:00:06,740 --> 00:00:09,050
-original, delayed, and another point.
+00:00:05,460 --> 00:00:08,500
+the original plan, the same place later, and another place.
 
 5
-00:00:09,180 --> 00:00:12,120
-At Shackleton rim, the Sun is in view all week.
+00:00:08,650 --> 00:00:11,800
+Shackleton rim, arriving 9 February: 0 hours without direct sunlight.
 
 6
-00:00:12,240 --> 00:00:13,620
-Arrive a week later:
+00:00:11,820 --> 00:00:15,820
+A week later: 140 hours.
 
 7
-00:00:13,660 --> 00:00:16,400
-140 hours without direct sunlight.
+00:00:15,970 --> 00:00:18,850
+The real terrain horizon shows why: the Sun slides behind the ridge.
 
 8
-00:00:16,500 --> 00:00:18,720
-NASA elevation data shows why:
-
-9
-00:00:18,800 --> 00:00:20,620
-the ridge line hides the Sun.
-
-10
-00:00:20,700 --> 00:00:22,720
+00:00:18,860 --> 00:00:21,610
 Connecting ridge stays sunlit.
 
+9
+00:00:21,760 --> 00:00:23,600
+Check any hour in 3D.
+
+10
+00:00:23,610 --> 00:00:26,400
+Every result downloads with its NASA data sources.
+
 11
-00:00:22,780 --> 00:00:24,140
-And every number is sourced,
-
-12
-00:00:24,160 --> 00:00:25,950
-in a downloadable report.
-
-13
-00:00:26,050 --> 00:00:29,000
-Lunar Navigator. Explore the trade-offs.
+00:00:26,550 --> 00:00:28,800
+Lunacline. Compare your arrival.
 
