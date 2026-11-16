@@ -1113,6 +1113,12 @@ input[type="range"] {
 .chart-interactive {
   touch-action: pan-y;
   cursor: crosshair;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.chart-interactive * {
+  -webkit-user-select: none;
+  user-select: none;
 }
 .chart-interactive.dragging {
   cursor: grabbing;

@@ -243,6 +243,10 @@ function HorizonPanel({ site, height, rows, period, compact }) {
           }
         }}
         onPointerDown={(e) => {
+          if (e.pointerType === "mouse" && e.button === 0) {
+            e.preventDefault();
+            e.currentTarget.focus({ preventScroll: true });
+          }
           if (!zoomed) return;
           e.currentTarget.setPointerCapture?.(e.pointerId);
           setDrag({ x: e.clientX, a: vlo, b: vhi });
@@ -668,6 +672,10 @@ function ClearanceChart({ dataset, rows, height, names, onInspect }) {
         onKeyDown={onKey}
         ref={plot}
         onPointerDown={(e) => {
+          if (e.pointerType === "mouse" && e.button === 0) {
+            e.preventDefault();
+            e.currentTarget.focus({ preventScroll: true });
+          }
           e.currentTarget.setPointerCapture?.(e.pointerId);
           setDrag({ x: e.clientX, k0, k1, moved: false });
         }}
