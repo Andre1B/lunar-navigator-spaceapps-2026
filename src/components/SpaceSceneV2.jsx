@@ -436,13 +436,29 @@ export default function SpaceSceneV2({
     };
     const sun = new THREE.Mesh(
       new THREE.SphereGeometry(1, 48, 24),
-      new THREE.MeshBasicMaterial({
-        color: "#fff0bd",
-        map: skin("sun"),
-        toneMapped: false,
-      }),
+      new THREE.MeshBasicMaterial({ color: "#fff0bd", toneMapped: false }),
     );
     scene.add(sun);
+    // Surface maps are uploaded only when a body is followed or inspected:
+    // from afar the Sun and planets are a few pixels and a map is invisible,
+    // and nine uploads at start-up were a large share of the 3D load time.
+    const dressed = new Set();
+    function dress(id) {
+      if (dressed.has(id)) return;
+      const mesh = id === "sun" ? sun : planetMeshes.get(id);
+      if (!mesh || (id !== "sun" && !ROTATION_H[id])) return;
+      dressed.add(id);
+      mesh.material.map = skin(id);
+      mesh.material.color.set(id === "sun" ? "#fff0bd" : "#ffffff");
+      mesh.material.needsUpdate = true;
+      const rings = mesh.userData.rings;
+      if (rings) {
+        const ringMap = appearance.load("/assets/planets/saturn-ring.png");
+        ringMap.colorSpace = THREE.SRGBColorSpace;
+        rings.material.map = ringMap;
+        rings.material.needsUpdate = true;
+      }
+    }
     // Sidereal rotation periods in hours (IAU WGCCRE; negative = retrograde).
     // Rotation follows simulation time; the spin axis is illustrative.
     const ROTATION_H = {
@@ -1062,8 +1078,7 @@ export default function SpaceSceneV2({
             const mesh = new THREE.Mesh(
               new THREE.SphereGeometry(1, 48, 24),
               new THREE.MeshStandardMaterial({
-                color: ROTATION_H[b.id] ? "#ffffff" : b.color,
-                map: ROTATION_H[b.id] ? skin(b.id) : null,
+                color: b.color,
                 roughness: 0.9,
               }),
             );
@@ -1078,12 +1093,11 @@ export default function SpaceSceneV2({
                 const r = Math.hypot(pos.getX(k), pos.getY(k));
                 uv.setXY(k, (r - inner) / (outer - inner), 0.5);
               }
-              const ringMap = appearance.load("/assets/planets/saturn-ring.png");
-              ringMap.colorSpace = THREE.SRGBColorSpace;
               const rings = new THREE.Mesh(
                 ring,
                 new THREE.MeshStandardMaterial({
-                  map: ringMap,
+                  color: "#d8c9a6",
+                  opacity: 0.6,
                   transparent: true,
                   side: THREE.DoubleSide,
                   roughness: 1,
@@ -1092,6 +1106,7 @@ export default function SpaceSceneV2({
               );
               rings.rotation.x = -Math.PI / 2;
               mesh.add(rings);
+              mesh.userData.rings = rings;
             }
             planetMeshes.set(b.id, mesh);
             scene.add(mesh);
@@ -1670,6 +1685,7 @@ export default function SpaceSceneV2({
       // Corona about 3.2 solar radii across its streamers. In the Sun close
       // view it slowly turns and breathes in real time (static with reduced
       // motion); elsewhere it stays still.
+      if (trackedBody && trackedBody !== "moon") dress(trackedBody);
       corona.position.copy(sun.position);
       const sunClose = trackedBody === "sun" && p.view !== "sky";
       const breathe =
