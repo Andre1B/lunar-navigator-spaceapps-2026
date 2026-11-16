@@ -1304,6 +1304,12 @@ export default function App() {
           Skip to content
         </a>
         <Header route={route} mode={mode} onTour={startTour} />
+        {/* These pages show their own loading placeholders; a failed point
+            they need must still be reported, not left loading. */}
+        {routeDataset.status === "error" &&
+        ["home", "review", "learn"].includes(route) ? (
+          <DataStatus dataset={routeDataset} />
+        ) : null}
         {route === "home" ? (
           <HomeV2
             dataset={routeDataset}
