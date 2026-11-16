@@ -1298,3 +1298,10 @@ input[type="range"] {
   font-size: 13px;
   padding: 6px 10px;
 }
+
+/* 3D labels are positioned with a per-frame transform (no layout). */
+.world-label {
+  left: 0;
+  top: 0;
+  will-change: transform;
+}

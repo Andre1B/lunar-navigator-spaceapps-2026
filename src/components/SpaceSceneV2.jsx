@@ -1628,6 +1628,11 @@ export default function SpaceSceneV2({
           ...Object.fromEntries(planetMeshes),
         };
         camera.updateMatrixWorld();
+        // Read the size once and move labels with transforms: per-label
+        // left/top writes interleaved with size reads forced a layout per
+        // label on every frame.
+        const labelW = el.clientWidth,
+          labelH = el.clientHeight;
         for (const [name, obj] of Object.entries(objects)) {
           const node = labels.current[name];
           if (!node) continue;
@@ -1668,11 +1673,9 @@ export default function SpaceSceneV2({
             (!exact ||
               ((name === "earth" || name === "sun") &&
                 currentObservation?.[name] > 0));
-          node.hidden = !show;
-          if (show) {
-            node.style.left = (pos.x * 0.5 + 0.5) * el.clientWidth + "px";
-            node.style.top = (-pos.y * 0.5 + 0.5) * el.clientHeight + "px";
-          }
+          if (node.hidden === show) node.hidden = !show;
+          if (show)
+            node.style.transform = `translate(${((pos.x * 0.5 + 0.5) * labelW).toFixed(1)}px, ${((-pos.y * 0.5 + 0.5) * labelH).toFixed(1)}px) translate(9px, -50%)`;
         }
       }
       // Camera-relative render origin preserves precision even when inspecting Neptune.
