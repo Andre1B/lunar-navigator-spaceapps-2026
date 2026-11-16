@@ -21,7 +21,7 @@ import {
 import { percent, hours, timeAt, delayParts, formatDelay } from "./lib/analysis.mjs";
 import ArrivalComparison from "./components/ArrivalComparison.jsx";
 import ComparisonAnswer from "./components/ComparisonAnswer.jsx";
-import { LedgerFigures } from "./components/HorizonLedger.jsx";
+import { LedgerFigures, exampleSettings } from "./components/HorizonLedger.jsx";
 import { comparisonHash, readComparisonHash } from "./lib/shareLink.mjs";
 import ExportComparison from "./components/ExportComparison.jsx";
 import CoverageNotice from "./components/CoverageNotice.jsx";
@@ -1231,6 +1231,48 @@ export default function App() {
       setDays,
       setDelay,
     };
+  // Study-point files the current page needs. A page renders its loading
+  // state until all of them are present, so no partial result is shown.
+  const neededSites = (() => {
+    const m = dataset.manifest;
+    if (!m) return [];
+    if (route === "home") {
+      const ex = exampleSettings(m);
+      return [ex.siteId, ex.alternative];
+    }
+    if (route === "learn") return ["malapert-massif"];
+    if (route === "simulator" || route === "mission")
+      return [inspectedSiteId ?? siteId];
+    if (route === "compare" || route === "review") return [siteId, alternative];
+    return [];
+  })().filter(Boolean);
+  const neededKey = neededSites.join(",");
+  const { requireSites } = dataset;
+  useEffect(() => {
+    if (neededKey) requireSites(neededKey.split(","));
+  }, [neededKey, requireSites]);
+  // Other points are fetched after the first interaction or a quiet spell, so
+  // switching place later is immediate.
+  useEffect(() => {
+    if (!dataset.manifest) return;
+    const all = () => requireSites(dataset.manifest.sites.map((x) => x.id));
+    const timer = setTimeout(all, 15000);
+    window.addEventListener("pointerdown", all, { once: true });
+    window.addEventListener("keydown", all, { once: true });
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("pointerdown", all);
+      window.removeEventListener("keydown", all);
+    };
+  }, [dataset.manifest, requireSites]);
+  const routeReady = neededSites.every((id) => dataset.sites[id]);
+  const routeDataset = useMemo(
+    () =>
+      routeReady || dataset.status !== "ready"
+        ? dataset
+        : { ...dataset, status: "loading", manifest: null },
+    [dataset, routeReady],
+  );
   return (
     <>
       <div className="app-shell" inert={opening ? true : undefined}>
@@ -1247,7 +1289,7 @@ export default function App() {
         <Header route={route} mode={mode} onTour={startTour} />
         {route === "home" ? (
           <HomeV2
-            dataset={dataset}
+            dataset={routeDataset}
             onExperiment={(example) => {
               setSiteId(example.siteId);
               setAlternative(example.alternative);
@@ -1273,7 +1315,7 @@ export default function App() {
               </main>
             }
           >
-            <Review dataset={dataset} settings={settings} />
+            <Review dataset={routeDataset} settings={settings} />
           </Suspense>
         ) : route === "learn" ? (
           <Suspense
@@ -1283,7 +1325,7 @@ export default function App() {
               </main>
             }
           >
-            <Learn onStartTour={startTour} onOpen={go} dataset={dataset} />
+            <Learn onStartTour={startTour} onOpen={go} dataset={routeDataset} />
           </Suspense>
         ) : route === "mission" ? (
           <Mission
@@ -1297,7 +1339,7 @@ export default function App() {
           <SimulatorV2
             tourActive={tourStep !== null}
             onTour={startTour}
-            dataset={dataset}
+            dataset={routeDataset}
             index={index}
             setIndex={setIndex}
             mode={mode}
@@ -1322,7 +1364,7 @@ export default function App() {
               go("simulator");
             }}
             tourActive={tourStep !== null}
-            dataset={dataset}
+            dataset={routeDataset}
             settings={settings}
             setters={setters}
             sharedNotice={sharedNotice}
@@ -1331,7 +1373,7 @@ export default function App() {
             mode={mode}
           />
         ) : route === "evidence" ? (
-          <Evidence dataset={dataset} />
+          <Evidence dataset={routeDataset} />
         ) : route === "credits" ? (
           <Credits />
         ) : (
