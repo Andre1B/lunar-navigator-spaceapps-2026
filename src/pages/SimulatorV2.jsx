@@ -32,10 +32,25 @@ export default function SimulatorV2({
 }) {
   const { manifest, sky, sites, planets } = dataset;
   // The 3D view is the only consumer of the sky and planet ephemerides.
-  const { loadSky } = dataset;
+  const { loadSky, loadPlanets } = dataset;
   useEffect(() => {
     loadSky?.();
   }, [loadSky]);
+  // Planets: on the first interaction, a planet request, or after 15 s.
+  useEffect(() => {
+    if (!loadPlanets) return;
+    const go = () => loadPlanets();
+    const timer = setTimeout(go, 15000);
+    window.addEventListener("pointerdown", go, { once: true });
+    window.addEventListener("keydown", go, { once: true });
+    window.addEventListener("lunacline:inspect", go);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("pointerdown", go);
+      window.removeEventListener("keydown", go);
+      window.removeEventListener("lunacline:inspect", go);
+    };
+  }, [loadPlanets]);
   const [view, setView] = useState(() => (inspecting ? "sky" : "overview")),
     [immersive, setImmersive] = useState(false),
     [playing, setPlaying] = useState(

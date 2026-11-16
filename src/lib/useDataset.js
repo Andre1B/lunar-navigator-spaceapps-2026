@@ -57,19 +57,28 @@ export function useDataset() {
   // Sky and planet ephemerides (about 7 MB) feed only the 3D view, so they
   // load when it asks (loadSky), not with the comparison data every page needs.
   const reader = useRef(null),
-    skyRequest = useRef(null);
+    skyRequest = useRef(null),
+    planetsRequest = useRef(null),
+    wantPlanets = useRef(false);
   const loadSky = useCallback(() => {
     if (skyRequest.current || !reader.current) return;
-    const read = reader.current;
-    skyRequest.current = Promise.all([
-      read("sky.json"),
-      read("planets.json").catch(() => null),
-    ])
-      .then(([sky, planets]) => setState((s) => ({ ...s, sky, planets })))
+    skyRequest.current = reader.current("sky.json")
+      .then((sky) => setState((s) => ({ ...s, sky })))
       .catch((error) => {
         skyRequest.current = null;
         if (error?.name !== "AbortError")
           setState((s) => ({ ...s, skyError: error.message }));
+      });
+  }, []);
+  // Planet ephemerides (4.7 MB) are drawn only as dots until a planet or the
+  // Solar System view is wanted; they load on that request.
+  const loadPlanets = useCallback(() => {
+    wantPlanets.current = true;
+    if (planetsRequest.current || !reader.current) return;
+    planetsRequest.current = reader.current("planets.json")
+      .then((planets) => setState((s) => ({ ...s, planets })))
+      .catch(() => {
+        planetsRequest.current = null;
       });
   }, []);
   useEffect(() => {
@@ -118,6 +127,7 @@ export function useDataset() {
             error: null,
           }));
         if (wantSky.current) loadSky();
+        if (wantPlanets.current) loadPlanets();
         // Sites requested before the manifest arrived.
         requestSites([...pendingSites.current]);
       } catch (error) {
@@ -126,7 +136,7 @@ export function useDataset() {
       }
     })();
     return () => ac.abort();
-  }, [loadSky]);
+  }, [loadSky, loadPlanets]);
   // A request made before the manifest arrives is honoured once it does.
   const wantSky = useRef(false);
   const requestSky = useCallback(() => {
@@ -134,7 +144,12 @@ export function useDataset() {
     loadSky();
   }, [loadSky]);
   return useMemo(
-    () => ({ ...state, loadSky: requestSky, requireSites: requestSites }),
-    [state, requestSky, requestSites],
+    () => ({
+      ...state,
+      loadSky: requestSky,
+      loadPlanets,
+      requireSites: requestSites,
+    }),
+    [state, requestSky, loadPlanets, requestSites],
   );
 }
