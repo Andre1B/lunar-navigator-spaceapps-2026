@@ -1,6 +1,6 @@
 // AI-assisted component. Shows precomputed terrain-horizon events; no prediction is made here.
 import { useMemo } from "react";
-import { nextEvents, EVENT_METHOD } from "../lib/nextEvents.mjs";
+import { createNextEventsReader, EVENT_METHOD } from "../lib/nextEvents.mjs";
 
 const NAMES = {
   sunrise: "Sun comes into view",
@@ -16,10 +16,11 @@ export default function NextEvents({
   height,
   onInspect,
 }) {
-  const result = useMemo(
-    () => nextEvents(siteData, period, index, height),
-    [siteData, period, index, height],
+  const readEvents = useMemo(
+    () => createNextEventsReader(siteData, period, height),
+    [siteData, period, height],
   );
+  const result = useMemo(() => readEvents(index), [readEvents, index]);
   return (
     <section className="next-events" aria-labelledby="next-events-title">
       <h3 id="next-events-title" className="next-events-title">

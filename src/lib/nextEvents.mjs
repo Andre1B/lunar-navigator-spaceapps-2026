@@ -14,7 +14,7 @@ const NO_TRANSITION = "No transition in the computed period";
  * @param {object} siteData  sites/<id>.json (needs .events)
  * @param {object} period    manifest.period {startUtc, stepMinutes, sampleCount}
  * @param {number} index     displayed sample index; may be fractional
- * @param {number|string} height observer height in metres (1 or 5)
+ * @param {number|string} height a modelled observer height in metres
  * @returns {{status:'ok', nowUtc:string, periodEndUtc:string, height:number,
  *            events:Array<{type:string, utc:string|null, hoursUntil:number|null,
  *                          resolutionMin:number|null, label:string}>}
@@ -43,8 +43,17 @@ const INVALID = {
 };
 
 export function nextEvents(siteData, period, index, height) {
+  return createNextEventsReader(siteData, period, height)(index);
+}
+
+/**
+ * Prepare a reader for one immutable dataset/period/height. React can retain it
+ * while the clock advances, instead of parsing and sorting all events per tick.
+ * No global cache: replacing the dataset or changing height creates a new reader.
+ * The one-shot nextEvents API above still observes fresh inputs on every call.
+ */
+export function createNextEventsReader(siteData, period, height) {
   const h = toFiniteNumber(height);
-  const i = toFiniteNumber(index);
   const stepMin = toFiniteNumber(period?.stepMinutes);
   const count = toFiniteNumber(period?.sampleCount);
   const start =
@@ -55,80 +64,99 @@ export function nextEvents(siteData, period, index, height) {
     !(stepMin > 0) ||
     !Number.isInteger(count) ||
     count < 1 ||
-    !Number.isFinite(h) ||
-    !Number.isFinite(i)
+    !Number.isFinite(h)
   )
-    return INVALID;
+    return () => INVALID;
   if (!modelledHeights(siteData).has(h))
-    return {
-      status: "invalid",
-      reason: `No data were computed for a ${h} m observer height.`,
-    };
-  if (i < 0 || i > count - 1)
-    return {
-      status: "out-of-coverage",
-      reason: "The displayed time is outside the computed period.",
+    return (index) => {
+      if (!Number.isFinite(toFiniteNumber(index))) return INVALID;
+      return {
+        status: "invalid",
+        reason: `No data were computed for a ${h} m observer height.`,
+      };
     };
 
   const step = stepMin * 60000;
-  const now = start + i * step;
   const end = start + (count - 1) * step;
-  // Keep every Date within the valid range (±8.64e15 ms) so toISOString cannot throw.
-  if (
-    !Number.isFinite(now) ||
-    !Number.isFinite(end) ||
-    Math.abs(now) > 8.64e15 ||
-    Math.abs(end) > 8.64e15
-  )
-    return INVALID;
-
-  // A modelled height with no events in the period yields "No transition" for every type.
-  const candidates = siteData.events
-    .filter((e) => e && e.heightM === h)
-    .map((e) => ({
-      ...e,
+  const byType = Object.fromEntries(EVENT_TYPES.map((type) => [type, []]));
+  for (const e of siteData.events) {
+    if (!e || e.heightM !== h) continue;
+    const type =
+      e.type === "eclipseDarknessEnd"
+        ? "sunrise"
+        : e.type === "eclipseDarknessStart"
+          ? "sunset"
+          : e.type;
+    if (!EVENT_TYPES.includes(type)) continue;
+    const ms = Date.parse(e.utc);
+    if (!Number.isFinite(ms) || ms > end) continue;
+    byType[type].push({
+      ms,
       sourceType: e.type,
-      type:
-        e.type === "eclipseDarknessEnd"
-          ? "sunrise"
-          : e.type === "eclipseDarknessStart"
-            ? "sunset"
-            : e.type,
-    }))
-    .filter((e) => EVENT_TYPES.includes(e.type))
-    .map((e) => ({ ...e, ms: Date.parse(e.utc) }))
-    .filter((e) => Number.isFinite(e.ms) && e.ms > now && e.ms <= end)
-    .sort((a, b) => a.ms - b.ms);
+      cause: e.cause,
+      resolutionMin: e.resolutionMin,
+    });
+  }
+  for (const events of Object.values(byType))
+    events.sort((a, b) => a.ms - b.ms);
 
-  const events = EVENT_TYPES.map((type) => {
-    const next = candidates.find((e) => e.type === type);
-    if (!next)
+  return function nextEventsAtIndex(index) {
+    const i = toFiniteNumber(index);
+    if (!Number.isFinite(i)) return INVALID;
+    if (i < 0 || i > count - 1)
+      return {
+        status: "out-of-coverage",
+        reason: "The displayed time is outside the computed period.",
+      };
+    const now = start + i * step;
+    // Keep every Date within its valid range so toISOString cannot throw.
+    if (
+      !Number.isFinite(now) ||
+      !Number.isFinite(end) ||
+      Math.abs(now) > 8.64e15 ||
+      Math.abs(end) > 8.64e15
+    )
+      return INVALID;
+
+    const events = EVENT_TYPES.map((type) => {
+      const candidates = byType[type];
+      // Upper bound: an event exactly at now has passed, even after a backward seek.
+      let lo = 0;
+      let hi = candidates.length;
+      while (lo < hi) {
+        const mid = Math.floor((lo + hi) / 2);
+        if (candidates[mid].ms <= now) lo = mid + 1;
+        else hi = mid;
+      }
+      const next = candidates[lo];
+      if (!next)
+        return {
+          type,
+          utc: null,
+          hoursUntil: null,
+          resolutionMin: null,
+          label: NO_TRANSITION,
+        };
       return {
         type,
-        utc: null,
-        hoursUntil: null,
-        resolutionMin: null,
-        label: NO_TRANSITION,
+        utc: new Date(next.ms).toISOString().replace(".000Z", "Z"),
+        ...(next.cause === "earth-occultation"
+          ? { cause: next.cause, sourceType: next.sourceType }
+          : {}),
+        hoursUntil: (next.ms - now) / 3600000,
+        resolutionMin: Number.isFinite(next.resolutionMin)
+          ? next.resolutionMin
+          : null,
+        label: formatUntil((next.ms - now) / 3600000),
       };
+    });
     return {
-      type,
-      utc: new Date(next.ms).toISOString().replace(".000Z", "Z"),
-      ...(next.cause === "earth-occultation"
-        ? { cause: next.cause, sourceType: next.sourceType }
-        : {}),
-      hoursUntil: (next.ms - now) / 3600000,
-      resolutionMin: Number.isFinite(next.resolutionMin)
-        ? next.resolutionMin
-        : null,
-      label: formatUntil((next.ms - now) / 3600000),
+      status: "ok",
+      nowUtc: new Date(now).toISOString(),
+      periodEndUtc: new Date(end).toISOString(),
+      height: h,
+      events,
     };
-  });
-  return {
-    status: "ok",
-    nowUtc: new Date(now).toISOString(),
-    periodEndUtc: new Date(end).toISOString(),
-    height: h,
-    events,
   };
 }
 
