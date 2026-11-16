@@ -1305,3 +1305,7 @@ input[type="range"] {
   top: 0;
   will-change: transform;
 }
+.track-row canvas {
+  display: block;
+  min-width: 0;
+}

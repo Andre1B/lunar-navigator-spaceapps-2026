@@ -1,4 +1,4 @@
-import { memo, useMemo } from "react";
+import { memo, useEffect, useMemo, useRef } from "react";
 import { timeAt } from "../lib/analysis.mjs";
 const Track = memo(function Track({ label, values }) {
   // A rolling two-year dataset must not create tens of thousands of SVG nodes.
@@ -13,31 +13,35 @@ const Track = memo(function Track({ label, values }) {
       return sum / (end - start);
     });
   }, [values]);
+  // Drawn on a canvas (one bin per pixel column, stretched like the former
+  // SVG): the same picture without ~700 DOM nodes per track.
+  const canvas = useRef(null);
+  useEffect(() => {
+    const ctx = canvas.current?.getContext("2d");
+    if (!ctx) return;
+    ctx.fillStyle = "#1c1b18";
+    ctx.globalAlpha = 1;
+    ctx.fillRect(0, 0, bins.length, 28);
+    ctx.fillStyle = label === "Sunlight" ? "#f6c36f" : "#d8d1c2";
+    bins.forEach((v, i) => {
+      if (v <= 0) return;
+      ctx.globalAlpha = Math.max(0.12, v);
+      ctx.fillRect(i, 0, 1.1, 28);
+    });
+    ctx.globalAlpha = 1;
+  }, [bins, label]);
   return (
     <div className="track-row">
       <span>{label}</span>
-      <svg
-        viewBox={`0 0 ${bins.length} 28`}
-        preserveAspectRatio="none"
+      <canvas
+        ref={canvas}
+        width={bins.length}
+        height="28"
         role="img"
         aria-label={
           label + " timeline; brighter means more of the disc visible"
         }
-      >
-        <rect width={bins.length} height="28" fill="#1c1b18" />
-        {bins.map((v, i) =>
-          v > 0 ? (
-            <rect
-              key={i}
-              x={i}
-              width="1.1"
-              height="28"
-              fill={label === "Sunlight" ? "#f6c36f" : "#d8d1c2"}
-              opacity={Math.max(0.12, v)}
-            />
-          ) : null,
-        )}
-      </svg>
+      />
     </div>
   );
 });
@@ -91,7 +95,7 @@ export default function TimelineV2({
       <div className="between caption">
         <span>{period.startUtc.slice(0, 10)}</span>
         <span>
-          Gold: visible Sun · Cyan: visible Earth · display bins average hourly
+          Gold: visible Sun · Light: visible Earth · display bins average hourly
           samples
         </span>
         <span>{period.endUtc.slice(0, 10)}</span>
