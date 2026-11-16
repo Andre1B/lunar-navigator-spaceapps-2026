@@ -50,16 +50,21 @@ async function open(ctx,route,tag,wait=600){
 }
 async function load(page,url){
   await page.goto(url,{waitUntil:'networkidle'});
-  const opening=page.getByRole('dialog',{name:'Lunar Navigator'});
+  const opening=page.getByRole('dialog',{name:'Lunacline'});
   if(await opening.count())await opening.waitFor({state:'hidden',timeout:4500});
 }
 async function download(page){
-  const [dl]=await Promise.all([page.waitForEvent('download',{timeout:15000}),page.getByRole('button',{name:/Download comparison.*JSON/}).click()]);
+  const [dl]=await Promise.all([page.waitForEvent('download',{timeout:15000}),page.locator('.comparison-export').getByRole('button',{name:/Download comparison.*JSON/}).click()]);
+  const path=await dl.path();const text=readFileSync(path,'utf8');
+  return {name:dl.suggestedFilename(),text,json:JSON.parse(text)};
+}
+async function downloadAdvanced(page){
+  const [dl]=await Promise.all([page.waitForEvent('download',{timeout:15000}),page.locator('.comparison-details').getByRole('button',{name:/Download comparison.*JSON/}).click()]);
   const path=await dl.path();const text=readFileSync(path,'utf8');
   return {name:dl.suggestedFilename(),text,json:JSON.parse(text)};
 }
 async function downloadPdf(page){
-  const [dl]=await Promise.all([page.waitForEvent('download',{timeout:30000}),page.locator('.comparison-export').getByRole('button',{name:/Download comparison.*PDF/}).click()]);
+  const [dl]=await Promise.all([page.waitForEvent('download',{timeout:30000}),page.locator('.comparison-export').getByRole('button',{name:/PDF summary/}).click()]);
   const path=await dl.path(),bytes=readFileSync(path);
   return {name:dl.suggestedFilename(),bytes};
 }
@@ -71,23 +76,34 @@ console.log('browser',browser.version(),'base',BASE);
 const desktop=await browser.newContext({viewport:{width:1440,height:900},acceptDownloads:true});
 const mobile=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,acceptDownloads:true});
 
-await check('Compare presents a real PDF as its primary export and preserves the advanced JSON record',async()=>{
-  const page=await open(desktop,'compare','pdf-primary',500);
+await check('Compare makes JSON primary, retains the PDF summary and advanced JSON record',async()=>{
+  const page=await open(desktop,'compare','json-primary',500);
+  await page.selectOption('#delay','7');await page.selectOption('#delay-hours','5');
+  const delayStatus=(await page.locator('.setup').innerText()).replace(/\s+/g,' ');
+  expect(delayStatus.includes('Total delay: 7 days 5 h (173 h)'),`selected whole-hour offset is not explicit: ${delayStatus}`);
+  const cards=await page.locator('.answer-scenario').allTextContents();
+  expect(cards.length===3&&cards[1].includes('+7 days 5 h'),'Compare answer must retain the complete delayed-arrival label');
   const order=await page.evaluate(()=>{
     const pdf=document.querySelector('.comparison-export'),advanced=document.querySelector('.comparison-details');
-    return{pdf:!!pdf,advanced:!!advanced,primaryBeforeAdvanced:!!(pdf&&advanced&&(pdf.compareDocumentPosition(advanced)&Node.DOCUMENT_POSITION_FOLLOWING)),pdfLabel:pdf?.querySelector('button')?.innerText.trim(),jsonLabel:advanced?.querySelector('button')?.textContent.trim()};
+    return{pdf:!!pdf,advanced:!!advanced,primaryBeforeAdvanced:!!(pdf&&advanced&&(pdf.compareDocumentPosition(advanced)&Node.DOCUMENT_POSITION_FOLLOWING)),primaryJsonLabel:pdf?.querySelector('button')?.innerText.trim(),secondaryPdfLabel:pdf?.querySelectorAll('button')[1]?.innerText.trim(),advancedJsonLabel:advanced?.querySelector('button')?.textContent.trim()};
   });
-  expect(order.pdf&&order.advanced&&order.primaryBeforeAdvanced,'PDF must appear before the advanced JSON disclosure: '+JSON.stringify(order));
-  expect(/Download comparison.*PDF/.test(order.pdfLabel)&&/Download comparison.*JSON/.test(order.jsonLabel),'both export labels must name their file format: '+JSON.stringify(order));
-  await shot(page,'compare-pdf-primary');
+  expect(order.pdf&&order.advanced&&order.primaryBeforeAdvanced,'primary exports must precede the advanced JSON disclosure: '+JSON.stringify(order));
+  expect(/Download comparison.*JSON/.test(order.primaryJsonLabel)&&/PDF summary/.test(order.secondaryPdfLabel)&&/Download comparison.*JSON/.test(order.advancedJsonLabel),'JSON primary, PDF summary and advanced JSON labels must match the export contract: '+JSON.stringify(order));
+  await shot(page,'compare-json-primary');
+  const primaryJson=await download(page);
+  expect(/\.json$/i.test(primaryJson.name)&&primaryJson.json.reportType==='faithful-comparison','primary JSON download: '+primaryJson.name);
+  expect(Math.abs(Number(primaryJson.json.settings.delay)-(7+5/24))<1e-12,'primary JSON does not preserve the selected 7 d 5 h delay: '+JSON.stringify(primaryJson.json.settings));
   const pdf=await downloadPdf(page),pdfPath=join(OUT,pdf.name);writeFileSync(pdfPath,pdf.bytes);
-  expect(/\.pdf$/i.test(pdf.name),'primary export filename: '+pdf.name);
+  expect(/\.pdf$/i.test(pdf.name),'PDF summary filename: '+pdf.name);
   expect(pdf.bytes.subarray(0,5).toString('ascii')==='%PDF-','download is not a PDF byte stream');
   expect(pdf.bytes.length>50000&&pdf.bytes.length<2_000_000,'unexpected PDF size '+pdf.bytes.length);
   const detail=page.locator('details.comparison-details').first();if(await detail.getAttribute('open')===null)await detail.locator('summary').click();
-  const json=await download(page);
+  const json=await downloadAdvanced(page);
   expect(/\.json$/i.test(json.name)&&json.json.reportType==='faithful-comparison','advanced JSON download remains available: '+json.name);
-  await page.close();return `PDF ${pdf.name} (${pdf.bytes.length} bytes), valid %PDF header; advanced JSON ${json.name} still downloads`;
+  const withoutGenerationTime=(record)=>{const copy=JSON.parse(JSON.stringify(record));delete copy.generatedAtUtc;return copy;};
+  expect(json.name===primaryJson.name&&JSON.stringify(withoutGenerationTime(json.json))===JSON.stringify(withoutGenerationTime(primaryJson.json)),'primary and advanced JSON buttons must download the same report and filename');
+  expect(Math.abs(Number(json.json.settings.delay)-(7+5/24))<1e-12,'JSON does not preserve the selected 7 d 5 h delay: '+JSON.stringify(json.json.settings));
+  await page.close();return `primary and advanced JSON both download ${json.name}; PDF summary ${pdf.name} (${pdf.bytes.length} bytes) has a valid %PDF header`;
 });
 
 for(const [label,ctx] of [['desktop-1440',desktop],['mobile-390',mobile]])
@@ -267,20 +283,25 @@ await check('Free Mode never changes the exported comparison or the Review',asyn
   const page=await compareReady(desktop,'free-a');
   const before=(await download(page)).json;
   const reviewBefore=await (async()=>{const r=await open(desktop,'review','free-rev1',700);const t=await r.locator('main').innerText();await r.close();return t;})();
-  const sim=await open(desktop,'simulator','free-sim',1500);
-  await sim.getByRole('button',{name:/^Free Mode/}).first().click();
-  await sim.getByLabel(/Earth.s position/).check();
-  await sim.getByRole('button',{name:/Step \+1 h/}).click();await sim.getByRole('button',{name:/Step \+1 h/}).click();
-  await sim.evaluate(()=>{location.hash='#/compare';});
-  const detail=sim.locator('details.comparison-details').first();
+  // Keep the same app instance so the test isolates whether Free Mode mutates
+  // the shared comparison state, instead of comparing two default instances.
+  await page.evaluate(()=>{location.hash='#/simulator';});
+  await page.waitForFunction(()=>location.hash==='#/simulator',null,{timeout:10000});
+  await page.getByRole('button',{name:/^Free Mode/}).first().waitFor({timeout:15000});
+  await page.getByRole('button',{name:/^Free Mode/}).first().click();
+  await page.getByLabel(/Earth.s position/).check();
+  await page.getByRole('button',{name:/Step \+1 h/}).click();await page.getByRole('button',{name:/Step \+1 h/}).click();
+  await page.evaluate(()=>{location.hash='#/compare';});
+  await page.waitForFunction(()=>location.hash==='#/compare',null,{timeout:10000});
+  const detail=page.locator('details.comparison-details').first();
   if(await detail.getAttribute('open')===null)await detail.locator('summary').click();
   await detail.locator('table tbody tr').first().waitFor({timeout:20000});
-  const after=(await download(sim)).json;
+  const after=(await download(page)).json;
   const strip=(r)=>{const c=JSON.parse(JSON.stringify(r));delete c.generatedAtUtc;return c;};
   expect(JSON.stringify(strip(after))===JSON.stringify(strip(before)),'exported record changed after Free Mode experiments');
-  await sim.evaluate(()=>{location.hash='#/review';});await sim.waitForTimeout(800);
-  expect(await sim.locator('main').innerText()===reviewBefore,'Review text changed after Free Mode experiments');
-  await page.close();await sim.close();
+  await page.evaluate(()=>{location.hash='#/review';});await page.waitForFunction(()=>location.hash==='#/review',null,{timeout:10000});await page.waitForTimeout(800);
+  expect(await page.locator('main').innerText()===reviewBefore,'Review text changed after Free Mode experiments');
+  await page.close();
 });
 
 await check('method links open the specific explanation for each metric (solar, darkness, earth, earth-gap) without errors',async()=>{
@@ -306,7 +327,7 @@ await check('method links open the specific explanation for each metric (solar, 
 
 await check('mobile 390: Compare download button and Review CTA are usable (>= 36 px) and keyboard-activatable',async()=>{
   const page=await compareReady(mobile,'mobile-dl');
-  const b=page.getByRole('button',{name:/Download comparison.*JSON/});
+  const b=page.locator('.comparison-export').getByRole('button',{name:/Download comparison.*JSON/});
   const box=await b.boundingBox();expect(box.height>=36,`download button ${Math.round(box.height)} px high`);
   await b.focus();
   const [dl]=await Promise.all([page.waitForEvent('download',{timeout:15000}),page.keyboard.press('Enter')]);

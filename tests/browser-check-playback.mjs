@@ -60,7 +60,7 @@ async function openSimulator(browser,tag,motion='no-preference'){
   await context.addInitScript(()=>sessionStorage.setItem('lunar-opening-v1','seen'));
   const page=await context.newPage();watch(page,tag);
   await page.goto(`${BASE}/?qa=1#/simulator`,{waitUntil:'networkidle',timeout:60000});
-  const opening=page.getByRole('dialog',{name:'Lunar Navigator'});
+  const opening=page.getByRole('dialog',{name:'Lunacline'});
   if(await opening.count())await opening.waitFor({state:'hidden',timeout:4500});
   await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot,null,{timeout:30000});
   await page.locator(UI.slider).waitFor({timeout:20000});
@@ -303,7 +303,7 @@ await check('Guided tour and Compare inspection enter the simulator paused',asyn
   const tour=await browser.newContext({viewport:{width:1440,height:900}});
   const tp=await tour.newPage();watch(tp,'tour-entry-pause');
   await tp.goto(`${BASE}/?qa=tour#/home`,{waitUntil:'networkidle',timeout:60000});
-  const opening=tp.getByRole('dialog',{name:'Lunar Navigator'});if(await opening.isVisible().catch(()=>false))await opening.waitFor({state:'hidden',timeout:4500});
+  const opening=tp.getByRole('dialog',{name:'Lunacline'});if(await opening.isVisible().catch(()=>false))await opening.waitFor({state:'hidden',timeout:4500});
   await tp.getByRole('button',{name:/Show me how.*interactive tour/}).click();
   const card=tp.getByRole('dialog');await card.waitFor();
   await card.getByRole('button',{name:'Next',exact:true}).click();
@@ -316,7 +316,7 @@ await check('Guided tour and Compare inspection enter the simulator paused',asyn
   const inspect=await browser.newContext({viewport:{width:1440,height:900}});
   const ip=await inspect.newPage();watch(ip,'compare-inspection-entry-pause');
   await ip.goto(`${BASE}/?qa=inspection#/compare`,{waitUntil:'networkidle',timeout:60000});
-  const inspectOpening=ip.getByRole('dialog',{name:'Lunar Navigator'});if(await inspectOpening.isVisible().catch(()=>false))await inspectOpening.waitFor({state:'hidden',timeout:4500});
+  const inspectOpening=ip.getByRole('dialog',{name:'Lunacline'});if(await inspectOpening.isVisible().catch(()=>false))await inspectOpening.waitFor({state:'hidden',timeout:4500});
   const inspectButton=ip.getByRole('button',{name:'See this arrival in 3D',exact:true}).first();await inspectButton.waitFor({timeout:30000});await inspectButton.click();
   await ip.waitForFunction(()=>location.hash==='#/simulator'&&document.querySelector('canvas')?.lunarSnapshot?.().rendered?.ready===true,null,{timeout:30000});
   const ins=await snapshot(ip);
@@ -331,7 +331,7 @@ await check('Surface sky navigation guidance does not cover camera controls at 3
     const context=await browser.newContext({viewport:{width,height:900},isMobile:width===390,hasTouch:width===390,deviceScaleFactor:width===390?2:1,reducedMotion:'no-preference'});
     const page=await context.newPage();watch(page,`sky-guidance-${width}`);
     await page.goto(`${BASE}/?qa=1#/simulator`,{waitUntil:'networkidle',timeout:60000});
-    const opening=page.getByRole('dialog',{name:'Lunar Navigator'});if(await opening.isVisible().catch(()=>false))await page.keyboard.press('Escape');
+    const opening=page.getByRole('dialog',{name:'Lunacline'});if(await opening.isVisible().catch(()=>false))await page.keyboard.press('Escape');
     await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot,null,{timeout:30000});
     if(width===390){if(!await page.locator('#explorer-view').isVisible())await page.locator('.setup-toggle').click();await page.selectOption('#explorer-view','sky');}
     else await page.locator(UI.presetButtons).nth(PRESETS.indexOf('sky')).click();
@@ -353,7 +353,7 @@ await check('a tiny first-finger move does not jump Surface sky after a second t
   const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2});
   const page=await context.newPage();watch(page,'sky-two-touch');
   await page.goto(`${BASE}/?qa=1#/simulator`,{waitUntil:'networkidle',timeout:60000});
-  const opening=page.getByRole('dialog',{name:'Lunar Navigator'});
+  const opening=page.getByRole('dialog',{name:'Lunacline'});
   if(await opening.count())await opening.waitFor({state:'hidden',timeout:4500});
   await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot,null,{timeout:30000});
   if(!await page.locator('#explorer-view').isVisible())await page.locator('.setup-toggle').click();
@@ -419,7 +419,7 @@ await check('Play keeps Surface sky and Local terrain text mounted and readable 
     // The focused target is steady text during playback; intro timing is
     // covered separately. Explicitly dismiss it so the setup cannot time out
     // on a device/emulation whose motion preference disables auto-close.
-    const opening=page.getByRole('dialog',{name:'Lunar Navigator'});if(await opening.isVisible().catch(()=>false))await page.keyboard.press('Escape');
+    const opening=page.getByRole('dialog',{name:'Lunacline'});if(await opening.isVisible().catch(()=>false))await page.keyboard.press('Escape');
     await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot,null,{timeout:30000});
     if(!await visible(page,UI.pause))fail(`${width}x${height}: normal-motion Simulator entry did not autoplay`);
     await page.getByRole('button',{name:UI.pause,exact:true}).click();
@@ -523,7 +523,7 @@ await check('capture Home, Compare, Surface sky and Local terrain at desktop and
     const page=await context.newPage();watch(page,`capture-${label}`);
     for(const [route,name] of [['home','home'],['compare','compare']]){
       await page.goto(`${BASE}/#/${route}`,{waitUntil:'networkidle',timeout:60000});
-      const opening=page.getByRole('dialog',{name:'Lunar Navigator'});
+      const opening=page.getByRole('dialog',{name:'Lunacline'});
       if(await opening.count())await opening.waitFor({state:'hidden',timeout:4500});
       if(route==='home'&&await page.evaluate(()=>location.hash)!=='#/home'){
         await page.evaluate(()=>{location.hash='#/home';});await page.waitForFunction(()=>location.hash==='#/home');

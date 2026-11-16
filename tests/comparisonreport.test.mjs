@@ -110,7 +110,8 @@ test('assessDarkness: hand-built cases (uncensored/censored, above/below limit, 
 
 test('comparisonReport: structure, provenance, limitations, integrity, coverage',()=>{
   const rep=comparisonReport(dataset,settings,72);
-  assert.equal(rep.reportType,'faithful-comparison');assert.equal(rep.project,'Lunar Navigator');
+  assert.equal(rep.reportType,'faithful-comparison');assert.equal(rep.project,'Lunacline');
+  assert.equal(rep.aiAssistance,'Built with AI assistance (code and text); see /ai-use.json. Results are computed from the listed sources, not generated.');
   assert.match(rep.sourceCode,/github\.com\/Andre1B\/lunar-navigator-spaceapps-2026/);
   assert.equal(rep.build,null,'no build info defined in node');
   assert.ok(!Number.isNaN(Date.parse(rep.generatedAtUtc)));

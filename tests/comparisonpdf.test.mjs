@@ -23,7 +23,7 @@ const dataset={
 };
 
 test('rolling PDF is a styled, bounded report with explicit time/disc percentages and complete arrival dates',async()=>{
-  const settings={siteId:'connecting-ridge',alternative:'connecting-neighbor',height:1,date:asOfDate,days:arrivalDays,delay:7};
+  const settings={siteId:'connecting-ridge',alternative:'connecting-neighbor',height:1,date:asOfDate,days:arrivalDays,delay:7+5/24};
   const arrivalMs=Date.parse(`${settings.date}T00:00:00Z`),startMs=Date.parse(manifest.period.startUtc),endMs=Date.parse(manifest.period.endUtc);
   assert.ok(arrivalMs>=startMs&&arrivalMs+arrivalDays*DAY_MS<=endMs,`as-of arrival ${settings.date} must fit within published coverage`);
   // Node has no page base URL, so the font request fails locally and exercises
@@ -37,6 +37,8 @@ test('rolling PDF is a styled, bounded report with explicit time/disc percentage
   assert.match(text,/Mean Sun disc/,'mean visible Sun disc remains a separate quantity');
   assert.match(text,/Sun disc /,'Sun arrival-disc percentage is included');
   assert.match(text,/Earth disc /,'Earth arrival-disc percentage is included');
+  assert.match(text,/LUNACLINE/,'the PDF uses the current vector brand wordmark');
+  assert.match(text,/Delay \+7 days 5 h/,'the PDF prints the exact whole-day + whole-hour delay');
   assert.ok(text.includes(coverageStart),`appendix begins at rolling coverage start ${coverageStart}`);
   assert.ok(text.includes(lastArrivalDate),`appendix includes the last arrival whose ${arrivalDays}-day stay fits (${lastArrivalDate}; coverage ends ${coverageEnd})`);
   assert.match(text,/full computed eclipse/i,'eclipse contacts and scope are explained');

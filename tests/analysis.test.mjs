@@ -2,7 +2,7 @@
 // (analytic geometry / small hand-built series), not by re-implementing the functions.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {timeAt,indexAt,windowBounds,parseUtcDay,runs,summarize,eventSummary,visibleDiskFraction,horizonAt,percent,hours} from '../src/lib/analysis.mjs';
+import {timeAt,indexAt,windowBounds,parseUtcDay,delayParts,formatDelay,runs,summarize,eventSummary,visibleDiskFraction,horizonAt,percent,hours} from '../src/lib/analysis.mjs';
 
 const close=(a,b,eps=1e-9,msg='')=>assert.ok(Math.abs(a-b)<=eps,`${msg} expected ${b}, got ${a}`);
 const period={startUtc:'2027-03-01T00:00:00Z',stepMinutes:60,sampleCount:1393};
@@ -22,6 +22,17 @@ test('timeAt/indexAt are inverse and use UTC minutes',()=>{
   assert.equal(indexAt(period,'2027-03-01T00:30:00Z'),0.5);
   assert.equal(indexAt(period,'2027-02-28T23:00:00Z'),-1);
   assert.equal(indexAt({...period,stepMinutes:5},'2027-03-01T01:00:00Z'),12);
+});
+
+test('whole-hour delays format and map exactly onto the hourly UTC grid',()=>{
+  assert.deepEqual(delayParts(0),{days:0,hours:0,totalHours:0});
+  assert.deepEqual(delayParts(3/24),{days:0,hours:3,totalHours:3});
+  assert.deepEqual(delayParts(7+5/24),{days:7,hours:5,totalHours:173});
+  assert.equal(formatDelay(0),'0 h');
+  assert.equal(formatDelay(3/24),'3 h');
+  assert.equal(formatDelay(7+5/24),'7 days 5 h');
+  assert.deepEqual(windowBounds(period,'2027-03-01',1,24/24),windowBounds(period,'2027-03-02',1),'+24 h equals +1 day');
+  assert.deepEqual(windowBounds(period,'2027-03-01',1,1+2/24),{start:26,end:50},'+1 day 2 h is an exact 26-sample shift');
 });
 
 test('windowBounds: basic window, delay and exact coverage limits',()=>{

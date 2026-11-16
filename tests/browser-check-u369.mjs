@@ -12,7 +12,7 @@ import {arrivalSeries} from '../src/lib/arrivalSeries.mjs';
 
 const ROOT=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const BASE=(process.env.QA_URL||'http://localhost:5173').replace(/\/$/,'');
-const IS_DEV=/localhost|127\.0\.0\.1/.test(BASE);
+const IS_DEV=/:5173(?:\/|$)/.test(BASE);
 const OUT=process.env.QA_OUT?resolve(process.env.QA_OUT):resolve(ROOT,'..','tmp','lunar-qa-u369');
 mkdirSync(OUT,{recursive:true});
 const CHROME_EXE='C:/Program Files/Google/Chrome/Application/chrome.exe';
@@ -20,6 +20,7 @@ const data=(f)=>JSON.parse(readFileSync(join(ROOT,'public/data',f),'utf8'));
 const manifest=data('manifest.json');
 const sites=Object.fromEntries(manifest.sites.map(s=>[s.id,data(s.file)]));
 const T0=Date.parse(manifest.period.startUtc);
+const AS_OF_INDEX=(Date.parse(`${manifest.coveragePolicy.asOfUtcDate}T00:00:00Z`)-T0)/(manifest.period.stepMinutes*60000);
 const utcAt=(i)=>new Date(T0+i*3600000).toISOString();
 const results=[],issues={console:[],pageerror:[],http:[],requestfailed:[]};
 const expect=(c,m)=>{if(!c)throw new Error(m);};
@@ -48,13 +49,19 @@ function watch(page,tag,ignore){
 }
 const errCount=()=>issues.console.length+issues.pageerror.length;
 const fresh=(from)=>[...issues.console,...issues.pageerror].slice(from);
-async function settleOpening(page){const d=page.getByRole('dialog',{name:'Lunar Navigator'});if(await d.count())await d.waitFor({state:'hidden',timeout:4500});}
+async function settleOpening(page){const d=page.getByRole('dialog',{name:'Lunacline'});if(await d.count())await d.waitFor({state:'hidden',timeout:4500});}
 const shot=(page,name)=>page.screenshot({path:join(OUT,name+'.png')}).catch(()=>{}); // viewport shot: very tall pages break fullPage captures
 async function compare(ctx,tag){
   const page=await ctx.newPage();watch(page,tag);
   await page.goto(`${BASE}/#/compare`,{waitUntil:'networkidle'});
   await settleOpening(page);
-  await page.locator('table tbody tr').first().waitFor({timeout:20000});
+  const measurements=page.locator('details.comparison-details').filter({hasText:'Full measurements, methods and a darkness limit'});
+  if(await measurements.getAttribute('open')===null)await measurements.locator('summary').click();
+  await measurements.locator('table tbody tr').first().waitFor({timeout:20000});
+  // ArrivalSeries is intentionally lazy: thousands of rows are mounted only
+  // after the user opens its disclosure.
+  expect(await page.locator('.arrival-series').count()===0,'ArrivalSeries should not mount while its disclosure is closed');
+  await page.locator('details.comparison-details').filter({hasText:'Compare every possible arrival date'}).locator('summary').click();
   await page.locator('.arrival-series').waitFor({timeout:10000});
   return page;
 }
@@ -64,6 +71,20 @@ async function explore(ctx,tag){
   await settleOpening(page);
   await page.getByRole('button',{name:/Step \+1 h/}).waitFor({timeout:30000});
   await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot,null,{timeout:30000});
+  const setup=page.locator('.setup-toggle');
+  const picker=page.locator('#explorer-view');
+  if(!await picker.isVisible().catch(()=>false)&&await setup.isVisible().catch(()=>false)&&await setup.getAttribute('aria-expanded')==='false')await setup.click();
+  if(await picker.isVisible().catch(()=>false))await picker.selectOption('sky');
+  else {
+    const sky=page.locator('.camera-presets button').filter({hasText:'Surface sky'});
+    await sky.waitFor({state:'visible',timeout:8000});
+    await sky.click();
+  }
+  await page.waitForFunction(()=>{const s=document.querySelector('canvas')?.lunarSnapshot?.();return s?.view==='sky'&&s?.rendered?.ready;},null,{timeout:30000});
+  const pause=page.getByRole('button',{name:'Pause',exact:true});
+  if(await pause.isVisible().catch(()=>false))await pause.click();
+  await setSlider(page,AS_OF_INDEX);
+  await page.waitForFunction(i=>{const s=document.querySelector('canvas')?.lunarSnapshot?.();return s?.rendered?.ready&&Math.abs(s.index-i)<0.01&&Math.abs(s.rendered.presentedIndex-i)<0.02&&Math.abs(s.observation?.index-i)<0.01;},AS_OF_INDEX,{timeout:20000});
   await page.locator('.sky-description').waitFor({timeout:10000});
   return page;
 }
@@ -85,12 +106,12 @@ await check('U3: series sits after the A/B comparison, one day per arrival date,
   const page=await compare(desktop,'u3-basic');
   expect(await page.evaluate(()=>{const a=document.querySelector('.arrival-comparison'),b=document.querySelector('.arrival-series');return !!a&&!!b&&!!(a.compareDocumentPosition(b)&Node.DOCUMENT_POSITION_FOLLOWING);}),'series comes after ArrivalComparison');
   const expected=arrivalSeries(sites['connecting-ridge'],manifest.period,1,7);
-  expect(expected.length===52,'sanity: 52 dates');
-  expect(await page.locator('.arrival-series-day').count()===52,'52 day groups: '+await page.locator('.arrival-series-day').count());
+  expect(expected.length>0,'sanity: current coverage has valid arrival dates');
+  expect(await page.locator('.arrival-series-day').count()===expected.length,`${expected.length} day groups: `+await page.locator('.arrival-series-day').count());
   expect(await page.locator('.arrival-series-day.is-selected').count()===1,'exactly one selected day');
   expect(await page.locator('.arrival-series-dark.is-censored').count()===expected.filter(e=>e.summary.dark.censored).length,'censored bars match the data');
   const svg=page.locator('svg.arrival-series-chart');
-  expect(await svg.getAttribute('role')==='img'&&/52 arrival dates/.test(await svg.getAttribute('aria-label'))&&/table follows/i.test(await svg.getAttribute('aria-label')),'chart is a labelled image: '+await svg.getAttribute('aria-label'));
+  expect(await svg.getAttribute('role')==='img'&&new RegExp(`${expected.length} arrival dates`).test(await svg.getAttribute('aria-label'))&&/table follows/i.test(await svg.getAttribute('aria-label')),'chart is a labelled image: '+await svg.getAttribute('aria-label'));
   const text=await page.locator('.arrival-series').innerText();
   expect(/lower bound/i.test(text)&&/does not rank dates/i.test(text),'legend explains lower bounds and no ranking');
   expect(!/\b(best|optimal|recommended)\b/i.test(text),'no ranking language: '+(text.match(/\b(best|optimal|recommended)\b/i)||[''])[0]);
@@ -105,10 +126,10 @@ await check('U3: table lists every date with the Compare numbers; "Use as arriva
   const expected=arrivalSeries(sites['connecting-ridge'],manifest.period,1,7);
   await page.locator('.arrival-series-table summary').click();
   const rows=page.locator('.arrival-series-table tbody tr');
-  expect(await rows.count()===52,'52 table rows');
+  expect(await rows.count()===expected.length,`${expected.length} table rows, got ${await rows.count()}`);
   expect(await page.locator('.arrival-series-table tbody tr[aria-current=true]').count()===1,'one aria-current row');
-  expect(/2027-03-01/.test(await page.locator('.arrival-series-table tbody tr[aria-current=true]').innerText()),'current row is the selected date');
-  expect(await rows.nth(0).getByRole('button',{name:'Use as arrival'}).isDisabled(),'selected date button disabled');
+  expect((await page.locator('.arrival-series-table tbody tr[aria-current=true]').innerText()).includes(manifest.coveragePolicy.asOfUtcDate),'current row is the selected as-of date');
+  expect(await page.locator('.arrival-series-table tbody tr[aria-current=true]').getByRole('button',{name:'Use as arrival'}).isDisabled(),'selected date button disabled');
   // numbers shown in the table equal the series numbers
   for(const k of [0,13,30,51]){
     const cells=await rows.nth(k).locator('td').allInnerTexts();const e=expected[k];
@@ -117,17 +138,18 @@ await check('U3: table lists every date with the Compare numbers; "Use as arriva
     expect(cells[2]===pct(e.summary.earthFraction),`row ${k} earth: ${cells[2]}`);
     expect(await rows.nth(k).locator('th').innerText()===e.date,`row ${k} date`);
   }
-  // choose 2027-03-15
+  // Choose a valid date relative to the rolling period, not a fixed calendar fixture.
+  const chosenDate=expected[14].date;
   await rows.nth(14).getByRole('button',{name:'Use as arrival'}).click();
-  expect(await page.inputValue('#arrival')==='2027-03-15','arrival input updated');
+  expect(await page.inputValue('#arrival')===chosenDate,`arrival input updated to ${chosenDate}`);
   expect(await page.locator('.arrival-series-day.is-selected').count()===1,'one marker after the change');
   const marker=await page.evaluate(()=>[...document.querySelectorAll('.arrival-series-day')].findIndex(g=>g.classList.contains('is-selected')));
   expect(marker===14,'marker moved to index 14: '+marker);
-  expect(/2027-03-15/.test(await page.locator('.arrival-series-table tbody tr[aria-current=true]').innerText()),'aria-current moved');
+  expect((await page.locator('.arrival-series-table tbody tr[aria-current=true]').innerText()).includes(chosenDate),'aria-current moved');
   // the main comparison table's original arrival row shows the same values as the series row
   const main=(await page.locator('table').first().locator('tbody tr').first().innerText()).replace(/\s+/g,' ');
   expect(main.includes(pct(expected[14].summary.meanSun))&&main.includes(hrs(expected[14].summary.dark).replace('≥ ','≥ '))&&main.includes(pct(expected[14].summary.earthFraction)),`main table row does not equal the series row: ${main.slice(0,160)}`);
-  expect(/2027-03-15/.test(main),'main table row shows the selected date');
+  expect(main.includes(chosenDate),'main table row shows the selected date');
   // the A/B comparison follows the same date
   expect(await page.locator('.arrival-time time').first().getAttribute('datetime')===utcAt(14*24),'A/B instant follows the chosen arrival');
   await page.close();
@@ -136,15 +158,19 @@ await check('U3: follows window length, observer height and point; unavailable a
   const from=errCount();
   const page=await compare(desktop,'u3-follow');
   const count=async()=>page.locator('.arrival-series-day').count();
-  for(const [days,n] of [['3',56],['14',45],['28',31],['7',52]]){
+  for(const days of ['3','14','28','7']){
     await page.selectOption('#days',days);await page.waitForTimeout(250);
+    const n=arrivalSeries(sites['connecting-ridge'],manifest.period,1,Number(days)).length;
     expect(await count()===n,`days=${days}: ${await count()} groups, expected ${n}`);
     expect(new RegExp(`${n} arrival dates`).test(await page.locator('svg.arrival-series-chart').getAttribute('aria-label')),'aria-label count');
   }
   await page.locator('.arrival-series-table summary').click();
-  const head1=(await page.locator('.arrival-series-table tbody tr').first().innerText());
+  const atOne=arrivalSeries(sites['connecting-ridge'],manifest.period,1,7),atFive=arrivalSeries(sites['connecting-ridge'],manifest.period,5,7);
+  const changedRow=atOne.findIndex((item,i)=>pct(item.summary.meanSun)!==pct(atFive[i].summary.meanSun)||hrs(item.summary.dark)!==hrs(atFive[i].summary.dark)||pct(item.summary.earthFraction)!==pct(atFive[i].summary.earthFraction));
+  expect(changedRow>=0,'the current coverage contains a date whose visible metrics differ by observer height');
+  const head1=(await page.locator('.arrival-series-table tbody tr').nth(changedRow).innerText());
   await page.selectOption('#height','5');await page.waitForTimeout(250);
-  expect((await page.locator('.arrival-series-table tbody tr').first().innerText())!==head1,'height changes the numbers');
+  expect((await page.locator('.arrival-series-table tbody tr').nth(changedRow).innerText())!==head1,'height changes the numbers');
   expect(/5 m/.test(await page.locator('.arrival-series > p').first().innerText()),'description mentions 5 m');
   await page.selectOption('#height','1');
   await page.selectOption('#site','shackleton-rim');await page.waitForTimeout(250);
@@ -153,24 +179,26 @@ await check('U3: follows window length, observer height and point; unavailable a
   expect(first[0]===pct(exp[0].summary.meanSun)&&first[1]===hrs(exp[0].summary.dark),'point change: '+first.join('|'));
   expect(/Shackleton/.test(await page.locator('.arrival-series > p').first().innerText()),'description names the point');
   // an arrival date with no calculable window: series stays, no selected marker, no crash
-  await page.fill('#arrival','2027-04-27');await page.waitForTimeout(250);
-  expect(await count()===52&&await page.locator('.arrival-series-day.is-selected').count()===0,'no marker when the arrival date has no window');
+  await page.fill('#arrival',manifest.period.endUtc.slice(0,10));await page.waitForTimeout(250);
+  expect(await count()===arrivalSeries(sites['shackleton-rim'],manifest.period,1,7).length&&await page.locator('.arrival-series-day.is-selected').count()===0,'no marker when the arrival date has no full window');
   await page.fill('#arrival','');await page.waitForTimeout(250);
-  expect(await count()===52&&await page.locator('.arrival-series-day.is-selected').count()===0,'empty date safe');
+  expect(await count()===arrivalSeries(sites['shackleton-rim'],manifest.period,1,7).length&&await page.locator('.arrival-series-day.is-selected').count()===0,'empty date safe');
   expect(fresh(from).length===0,'console errors: '+JSON.stringify(fresh(from).slice(0,2)));
   await page.close();
 });
 await check('U3: keyboard (summary, Use as arrival via Enter/Space) and mobile 390 layout without overflow',async()=>{
   const page=await compare(mobile,'u3-mobile');
+  const mobileDates=arrivalSeries(sites['connecting-ridge'],manifest.period,1,7);
+  const expectedDate=(i)=>mobileDates[i].date;
   await page.locator('.arrival-series-table summary').scrollIntoViewIfNeeded();
   await page.locator('.arrival-series-table summary').focus();await page.keyboard.press('Enter');
   expect(await page.locator('.arrival-series-table').evaluate(d=>d.open),'details opens with the keyboard');
   const btn=page.locator('.arrival-series-table tbody tr').nth(5).getByRole('button',{name:'Use as arrival'});
   await btn.scrollIntoViewIfNeeded();await btn.focus();await page.keyboard.press('Enter');
-  expect(await page.inputValue('#arrival')==='2027-03-06','Enter selects the date');
+  expect(await page.inputValue('#arrival')===expectedDate(5),'Enter selects the date');
   const btn2=page.locator('.arrival-series-table tbody tr').nth(9).getByRole('button',{name:'Use as arrival'});
   await btn2.focus();await page.keyboard.press('Space');
-  expect(await page.inputValue('#arrival')==='2027-03-10','Space selects the date');
+  expect(await page.inputValue('#arrival')===expectedDate(9),'Space selects the date');
   const o=await page.evaluate(()=>{const vw=document.documentElement.clientWidth;const skip=e=>e.closest('.table-wrap,svg');return {sw:document.documentElement.scrollWidth,vw,off:[...document.querySelectorAll('.arrival-series *')].filter(e=>{const b=e.getBoundingClientRect();return b.width>0&&(b.right>vw+1||b.left<-1)&&!skip(e);}).length,svgW:document.querySelector('svg.arrival-series-chart').getBoundingClientRect().width,tableInWrap:!!document.querySelector('.arrival-series-table .table-wrap table')};});
   expect(o.sw<=o.vw+1&&o.off===0&&o.svgW<=o.vw&&o.tableInWrap,'mobile overflow '+JSON.stringify(o));
   const small=await page.$$eval('.arrival-series button',els=>els.filter(e=>{const b=e.getBoundingClientRect();return b.width>0&&b.height<24;}).length);
@@ -197,7 +225,7 @@ await check('U6: worked example shows the real Malapert metrics (1 m vs 5 m) fro
   const rows=await w.locator('tbody tr').all();
   expect(rows.length===4,'4 rows');
   for(let i=0;i<4;i++){const cells=await rows[i].locator('td').allInnerTexts();expect(cells[0]===exp[i][0]&&cells[1]===exp[i][1],`row ${i}: ${cells.join('|')} vs ${exp[i].join('|')}`);}
-  expect(exp[0].join('|')==='289 h|144 h'&&exp[1].join('|')==='32%|68%','sanity: the documented 289→144 h, 32%→68%');
+  expect(exp.flat().every(value=>/^(?:≥ )?\d+(?:\.\d+)? h$|^\d+%$/.test(value)),'dataset-derived worked-example metrics must be finite and formatted: '+JSON.stringify(exp));
   const t=await w.innerText();
   expect(/Geometry only/i.test(t)&&/not a selected landing site/i.test(t)&&/5-minute/i.test(t),'caveats present');
   expect(!/NaN|undefined/.test(t),'no NaN');
@@ -213,7 +241,7 @@ await check('U6: without the Malapert file the example waits politely (status, n
   const worked=await page.locator('.learn-worked').count();
   const status=await page.locator('main [role=status]').allInnerTexts();
   expect(worked===0||/wait|loading|unavailable|not available/i.test(await page.locator('.learn-worked').innerText()+status.join(' ')),'a waiting/unavailable status is shown instead of invented numbers');
-  expect(!/289 h|144 h/.test(await page.locator('main').innerText().then(t=>worked?t.replace(/\s+/g,' '):'')),'no numbers shown without data');
+  if(worked)expect(await page.locator('.learn-worked tbody tr').count()===0,'worked-example metric rows must not appear without the source data');
   expect(await page.locator('input[type=range]').count()>=1,'cartoon widgets still work');
   expect(local.length===0,'page errors: '+local.slice(0,2).join(' | '));
   await ctx.close();
@@ -263,16 +291,20 @@ await check('U9: Faithful shows the labelled live region below NextEvents; the t
   expect(fresh(from).length===0,'console errors: '+JSON.stringify(fresh(from).slice(0,2)));
   await page.close();
 });
-await check('U9: follows point, observer height and fractional time (807.49 at Malapert 1 m = 35% / HUD 34.8%)',async()=>{
+await check('U9: follows point, observer height and fractional time with the dataset and truthful HUD formatting',async()=>{
   const page=await explore(desktop,'u9-follow');
   await page.selectOption('#explorer-site','malapert-massif');await page.selectOption('#explorer-height','1');
-  await setSlider(page,807.49);
+  const samples=sites['malapert-massif'].sun.visibleFraction['1'];
+  const base=samples.findIndex((value,i)=>i+1<samples.length&&value>0.05&&value<0.95&&samples[i+1]>0.05&&samples[i+1]<0.95&&Math.abs(samples[i+1]-value)>0.08);
+  expect(base>=0,'dataset has an adjacent pair with a measurable partial solar-disc change');
+  const target=base+0.49;
+  await setSlider(page,target);
   await page.waitForFunction(()=>/Malapert/.test(document.querySelector('.sky-description p[aria-live]').textContent),null,{timeout:8000});
   const text=await desc(page);const s=await snap(page);
-  expect(Math.abs(s.index-807.49)<0.011,'index '+s.index);
+  expect(Math.abs(s.index-target)<0.011,'index '+s.index+' vs '+target);
   expect(text.startsWith(utcAt(s.index).slice(0,16).replace('T',' ')+' UTC, Malapert'),'lead: '+text.slice(0,70));
-  expect(Math.abs(s.observation.sun-0.348)<0.02,'observation sun '+s.observation.sun);
-  expect(text.includes('35% of the disc above the terrain horizon'),'Sun phrase: '+text);
+  expect(s.observation.sun>0&&s.observation.sun<1,`fractional sample should represent a partial Sun disc: ${s.observation.sun}`);
+  expect(text.includes('Sun at azimuth')&&!/Sun: not available/.test(text),'technical Sun detail missing: '+text);
   const hud=(await page.locator('.world-reading span').allInnerTexts()).map(t=>t.replace(/\s+/g,' ').trim()).join(' | ');
   expect(hud.includes(`Sun in view ${percent(s.observation.sun)}`),`HUD agrees with current fraction ${s.observation.sun}: ${hud}`);
   await page.selectOption('#explorer-height','5');
@@ -313,9 +345,9 @@ await check('U9: short Sun/Earth in-view text precedes the detailed sky values a
     const plain=document.querySelector('.sky-description-plain'),detail=document.querySelector('.sky-description p[aria-live]');
     return !!plain&&!!detail&&!!(plain.compareDocumentPosition(detail)&Node.DOCUMENT_POSITION_FOLLOWING);
   });
-  const sun=s.observation.sun>0?'The Sun is in view.':'The Sun is hidden by the terrain.';
+  const sun=s.observation.sun>0?'The Sun is in view.':s.observation.sunDetail?.eclipse&&s.observation.sunDetail?.terrainFraction>0?'Earth blocks the Sun during a geometric eclipse.':'The Sun is hidden by the terrain.';
   const earth=s.observation.earth>0?'Earth is in view.':'Earth is hidden by the terrain.';
-  expect(observed.startsWith(`${sun} ${earth}`),`plain status does not match fractions: ${observed}`);
+  expect(observed.replace(/\s+/g,' ').startsWith(`${sun} ${earth}`),`plain status does not match fractions: ${observed}`);
   expect(order,'short text should precede the detailed live region');
   expect(!/azimuth|relative to the local horizontal/i.test(observed),'plain summary should be short and precede geometry values');
   await page.close();return observed;
@@ -348,15 +380,14 @@ await check('U9: Free Mode hides the section; returning to Faithful restores it;
 });
 await check('U9: mobile 390 - section readable, wraps, no overflow',async()=>{
   const page=await explore(mobile,'u9-mobile');
-  await page.waitForFunction(()=>/UTC, /.test(document.querySelector('.sky-description p[aria-live]').textContent),null,{timeout:10000});
   await page.locator('.sky-description').scrollIntoViewIfNeeded();
-  const o=await page.evaluate(()=>{const vw=document.documentElement.clientWidth;const el=document.querySelector('.sky-description');const p=el.querySelector('p[aria-live]');return {sw:document.documentElement.scrollWidth,vw,off:[...el.querySelectorAll('*')].filter(e=>{const b=e.getBoundingClientRect();return b.width>0&&(b.right>vw+1||b.left<-1);}).length,fs:parseFloat(getComputedStyle(p).fontSize),h:p.getBoundingClientRect().height};});
+  const o=await page.evaluate(()=>{const vw=document.documentElement.clientWidth;const el=document.querySelector('.sky-description'),p=el.querySelector('.sky-description-plain'),note=el.querySelector('.sky-description-note');return {sw:document.documentElement.scrollWidth,vw,off:[...el.querySelectorAll('*')].filter(e=>{const b=e.getBoundingClientRect();return b.width>0&&(b.right>vw+1||b.left<-1);}).length,fs:parseFloat(getComputedStyle(p).fontSize),h:p.getBoundingClientRect().height,note:note?.innerText};});
   expect(o.sw<=o.vw+1&&o.off===0,'mobile overflow '+JSON.stringify(o));
-  expect(o.fs>=12&&o.h>40,'readable '+JSON.stringify(o));
+  expect(o.fs>=12&&o.h>20&&/not a radio link/i.test(o.note),'visible summary and caveat remain readable '+JSON.stringify(o));
   await shot(page,'mobile-explore-description');await page.close();
 });
 await check('U9: describeObservation unit cases (imported from the dev server)',async()=>{
-  if(!IS_DEV)return 'skipped: needs the dev server to import src/components/SkyDescription.jsx';
+  if(!IS_DEV)return 'skipped: source-module import requires Vite dev at :5173; preview bundle is covered by browser behavior checks';
   const page=await browser.newContext().then(c=>c.newPage());await page.goto(`${BASE}/`,{waitUntil:'domcontentloaded'});
   const r=await page.evaluate(async()=>{
     const {describeObservation:d}=await import('/src/components/SkyDescription.jsx');

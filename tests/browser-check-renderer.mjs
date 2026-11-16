@@ -28,7 +28,7 @@ for(const target of targets){
   page.on('pageerror',e=>errors.push({viewport:`${target.width}x${target.height}`,kind:'page',text:String(e).slice(0,240)}));
   page.on('response',r=>{if(r.status()>=400)errors.push({viewport:`${target.width}x${target.height}`,kind:'http',status:r.status(),url:r.url()});});
   await page.goto(`${BASE}/?qa=1#/simulator`,{waitUntil:'networkidle',timeout:60000});
-  const opening=page.getByRole('dialog',{name:'Lunar Navigator'});if(await opening.count())await opening.waitFor({state:'hidden',timeout:5000});
+  const opening=page.getByRole('dialog',{name:'Lunacline'});if(await opening.count())await opening.waitFor({state:'hidden',timeout:5000});
   await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot?.(),null,{timeout:30000});
   if(await page.getByRole('button',{name:'Pause',exact:true}).isVisible())await page.getByRole('button',{name:'Pause',exact:true}).click();
   if(target.width<=720){
@@ -74,6 +74,20 @@ for(const target of targets){
   if(stats.fpsCap!==target.cap)errors.push({viewport:stats.viewport,kind:'wrong-fps-cap',expected:target.cap,actual:stats.fpsCap});
   if(stats.renderScale!==1||stats.terrainDetail!=='full')errors.push({viewport:stats.viewport,kind:'adaptive-quality-dropped-on-fast-hardware',renderScale:stats.renderScale,terrainDetail:stats.terrainDetail});
   if(!(stats.drawAverageHz>=target.cap*0.9&&stats.drawAverageHz<=target.cap*1.05))errors.push({viewport:stats.viewport,kind:'average-draw-rate-outside-target-band',measured:stats.drawAverageHz,medianIntervalRate:stats.drawRateHz,cap:target.cap});
+  // The 5 m near-field mesh is visual only. Its upload/morph must leave the
+  // observation at this exact paused sample unchanged from the 40 m terrain view.
+  const beforeNear=await page.evaluate(()=>{const s=document.querySelector('canvas')?.lunarSnapshot?.();return{index:s?.index,observation:s?.observation};});
+  if(target.width<=720){
+    if(!await page.locator('#explorer-view').isVisible())await page.locator('.setup-toggle').click();
+    await page.locator('#explorer-view').selectOption('sky');
+  }else await page.locator('.camera-presets button').filter({hasText:'Surface sky'}).click();
+  await page.waitForFunction(()=>{const c=document.querySelector('canvas')?.lunarSnapshot?.();return c?.rendered?.ready===true&&c.rendered.view==='sky'&&c.surface?.nearVisible===true&&c.surface?.terrainReady===true;},null,{timeout:45000});
+  const near=await page.evaluate(()=>{const c=document.querySelector('canvas')?.lunarSnapshot?.();return{index:c?.index,observation:c?.observation,nearVisible:c?.surface?.nearVisible,terrainReady:c?.surface?.terrainReady,nearAlignmentM:c?.surface?.nearAlignmentM,rendered:c?.rendered};});
+  if(!Number.isFinite(near.nearAlignmentM))errors.push({viewport:stats.viewport,kind:'near-field-alignment-not-finite',value:near.nearAlignmentM});
+  if(near.index!==beforeNear.index||JSON.stringify(near.observation)!==JSON.stringify(beforeNear.observation))errors.push({viewport:stats.viewport,kind:'near-field-changed-scientific-observation',before:{index:beforeNear.index,observation:beforeNear.observation},after:{index:near.index,observation:near.observation}});
+  await page.screenshot({path:join(OUT,`${target.width}x${target.height}-surface-sky-near.png`),fullPage:false});
+  stats.surfaceSky={nearVisible:near.nearVisible,terrainReady:near.terrainReady,nearAlignmentM:near.nearAlignmentM,index:near.index,scienceUnchanged:near.index===beforeNear.index&&JSON.stringify(near.observation)===JSON.stringify(beforeNear.observation)};
+  console.log('SURFACE-NEAR',JSON.stringify({viewport:stats.viewport,...stats.surfaceSky}));
   await context.close();
 }
 const report={base:BASE,browser:browser.version(),generatedAt:new Date().toISOString(),frameRateDefinitions:{raf:'requestAnimationFrame sampler callbacks',draw:'distinct rendered.serial samples measured by rendered.frameTimeMs'},reports,errors};

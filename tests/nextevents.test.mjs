@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {dirname,join} from 'node:path';
-import {nextEvents,formatUntil,EVENT_TYPES,EVENT_METHOD} from '../src/lib/nextEvents.mjs';
+import {nextEvents,createNextEventsReader,formatUntil,EVENT_TYPES,EVENT_METHOD} from '../src/lib/nextEvents.mjs';
 
 const DATA=join(dirname(fileURLToPath(import.meta.url)),'..','public','data');
 const json=(f)=>JSON.parse(readFileSync(join(DATA,f),'utf8'));
@@ -41,6 +41,43 @@ test('strictly after "now": an event exactly at the displayed instant is not nex
   const r=nextEvents(s2,period,10,1);
   assert.equal(by(r,'sunset').utc,'2027-03-01T10:00:01Z');close(by(r,'sunset').hoursUntil,1/3600,1e-12);
   assert.equal(by(r,'sunset').label,'in under 1 min');
+});
+
+test('prepared reader is stateless across forward/backward seeks, skips exact boundaries, and keeps eclipse cause',()=>{
+  const s=site([
+    ev('sunset','2027-03-01T10:00:00Z'),
+    ev('eclipseDarknessStart','2027-03-01T12:00:00Z',1,1,{cause:'earth-occultation'}),
+    ev('eclipseDarknessEnd','2027-03-01T18:00:00Z',1,1,{cause:'earth-occultation'}),
+    ev('sunrise','2027-03-05T03:00:00Z'),
+  ]);
+  const read=createNextEventsReader(s,period,1);
+  assert.equal(by(read(9),'sunset').utc,'2027-03-01T10:00:00Z');
+  const forward=read(10);
+  assert.equal(by(forward,'sunset').utc,'2027-03-01T12:00:00Z','an event exactly at the current instant is skipped');
+  assert.equal(by(forward,'sunset').cause,'earth-occultation');
+  assert.equal(by(forward,'sunset').sourceType,'eclipseDarknessStart');
+  assert.equal(by(forward,'sunrise').utc,'2027-03-01T18:00:00Z');
+  assert.equal(by(forward,'sunrise').cause,'earth-occultation');
+  assert.equal(by(forward,'sunrise').sourceType,'eclipseDarknessEnd');
+  assert.equal(by(read(0),'sunset').utc,'2027-03-01T10:00:00Z','seeking backward uses the same immutable timeline');
+  assert.equal(by(read(98.99),'sunrise').utc,'2027-03-05T03:00:00Z','event at the period endpoint remains available until that instant');
+  assert.equal(by(read(99),'sunrise').utc,null,'event exactly at the current endpoint is no longer next');
+  assert.equal(read(-0.01).status,'out-of-coverage');
+  assert.equal(read(NaN).status,'invalid');
+});
+
+test('readers snapshot their input; new data gets a new reader and one-shot calls see mutations without global cache',()=>{
+  const original=site([ev('sunset','2027-03-01T10:00:00Z')]);
+  const oldReader=createNextEventsReader(original,period,1);
+  assert.equal(by(oldReader(0),'sunset').utc,'2027-03-01T10:00:00Z');
+  original.events[0]=ev('sunset','2027-03-01T08:00:00Z');
+  const replacement=createNextEventsReader(original,period,1);
+  assert.equal(by(oldReader(0),'sunset').utc,'2027-03-01T10:00:00Z','prepared reader retains its creation-time snapshot');
+  assert.equal(by(replacement(0),'sunset').utc,'2027-03-01T08:00:00Z','a replacement reader sees the updated dataset');
+  assert.equal(by(nextEvents(original,period,0,1),'sunset').utc,'2027-03-01T08:00:00Z','one-shot API reparses mutable input on each call');
+  const other=createNextEventsReader(site([ev('sunset','2027-03-01T06:00:00Z')]),period,1);
+  assert.equal(by(other(0),'sunset').utc,'2027-03-01T06:00:00Z');
+  assert.equal(by(replacement(0),'sunset').utc,'2027-03-01T08:00:00Z','different site data does not contaminate an existing reader');
 });
 
 test('fractional timestamps: index 10.5 is 10:30, 807.49 is exact to the millisecond',()=>{

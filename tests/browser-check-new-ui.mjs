@@ -10,7 +10,7 @@ import {fileURLToPath} from 'node:url';
 import {Quaternion} from 'three';
 import {interpolateBodyQuaternion} from '../src/lib/sceneGeometry.mjs';
 import {comparisonRows} from '../src/lib/comparisonReport.mjs';
-import {percent,windowBounds} from '../src/lib/analysis.mjs';
+import {percent,windowBounds,formatDelay} from '../src/lib/analysis.mjs';
 
 const ROOT=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const BASE=(process.env.QA_URL||'http://localhost:5173').replace(/\/$/,'');
@@ -45,7 +45,7 @@ async function context(browser,tag,{viewport={width:1440,height:900},motion='no-
 }
 async function go(page,route){
   await page.goto(`${BASE}/?qa=1#/${route}`,{waitUntil:'networkidle',timeout:60000});
-  const opening=page.getByRole('dialog',{name:'Lunar Navigator'});
+  const opening=page.getByRole('dialog',{name:'Lunacline'});
   if(await opening.count())await opening.waitFor({state:'hidden',timeout:4500});
   await page.locator('#main').waitFor({timeout:20000});
 }
@@ -57,12 +57,19 @@ await check('every normal-motion document load opens once and dismissal preserve
   const {ctx,page}=await context(browser,'opening-normal');
   await ctx.addInitScript(()=>sessionStorage.setItem('lunar-opening-v1','seen'));
   await ctx.addInitScript(()=>{
+    localStorage.setItem('lunar-music-v1','off');
+    window.__qaOpeningChimes=[];window.__qaAudioContextCreations=0;
+    window.addEventListener('lunacline:chime',()=>window.__qaOpeningChimes.push(performance.now()));
+    const Native=window.AudioContext;
+    if(Native)window.AudioContext=new Proxy(Native,{construct(target,args,newTarget){window.__qaAudioContextCreations++;return Reflect.construct(target,args,newTarget);}});
+  });
+  await ctx.addInitScript(()=>{
     window.__qaOpeningSeen=false;
     const observer=new MutationObserver(()=>{if(document.querySelector('.space-opening[role="dialog"]')){window.__qaOpeningSeen=true;observer.disconnect();}});
     observer.observe(document,{childList:true,subtree:true});
   });
   await page.goto(`${BASE}/?qa=1#/compare`,{waitUntil:'commit',timeout:60000});
-  const dialog=page.getByRole('dialog',{name:'Lunar Navigator'});
+  const dialog=page.getByRole('dialog',{name:'Lunacline'});
   // A document-start MutationObserver can miss the initial insertion when
   // the browser attaches it before the document element exists. Observe the
   // actual modal as the primary assertion; keep the observer as supplemental
@@ -73,40 +80,55 @@ await check('every normal-motion document load opens once and dismissal preserve
     throw new Error(`full document load did not show the opening: ${JSON.stringify(actual)}; ${error.message.split('\n')[0]}`);
   }
   const observerRecorded=await page.evaluate(()=>window.__qaOpeningSeen);
-  const initial=await page.evaluate(()=>({inert:document.querySelector('.app-shell')?.hasAttribute('inert'),focus:document.activeElement?.className}));
-  if(!initial.inert||initial.focus!=='opening-skip')fail(`opening did not inert the app and focus Skip intro: ${JSON.stringify(initial)}`);
-  const openingText=await page.evaluate(()=>['.opening-composition h1','.opening-composition p'].map(s=>{const e=document.querySelector(s),c=getComputedStyle(e);return{selector:s,animation:c.animationName,opacity:c.opacity};}));
+  const initial=await page.evaluate(()=>({inert:document.querySelector('.app-shell')?.hasAttribute('inert'),skipFocused:document.activeElement?.classList.contains('opening-skip')}));
+  if(!initial.inert||!initial.skipFocused)fail(`opening did not inert the app and focus Skip intro: ${JSON.stringify(initial)}`);
+  const openingText=await page.evaluate(()=>['.lc-brand h1','.lc-descriptor','.lc-question'].map(s=>{const e=document.querySelector(s),c=getComputedStyle(e);return{selector:s,animation:c.animationName,opacity:c.opacity};}));
   if(openingText.some(x=>x.animation!=='none'||x.opacity!=='1'))fail(`opening identity text should remain sharp while illustration animates: ${JSON.stringify(openingText)}`);
   await page.keyboard.press('Shift+Tab');
-  if(await page.evaluate(()=>document.activeElement?.textContent?.trim())!=='Start exploring →')fail('Shift+Tab did not stay inside the opening dialog');
+  if(!await page.evaluate(()=>document.activeElement?.classList.contains('lc-enter')))fail('Shift+Tab did not stay inside the opening dialog');
   await page.keyboard.press('Tab');
-  if(await page.evaluate(()=>document.activeElement?.textContent?.trim())!=='Skip intro ↗')fail('Tab did not wrap within the opening dialog');
+  if(!await page.evaluate(()=>document.activeElement?.classList.contains('opening-skip')))fail('Tab did not wrap within the opening dialog');
   await page.keyboard.press('Escape');await dialog.waitFor({state:'hidden'});
-  await page.waitForFunction(()=>document.activeElement?.id==='main',null,{timeout:2000});
+  await page.waitForFunction(()=>document.activeElement?.id==='main',null,{timeout:1500});
   const afterEscape=await page.evaluate(()=>({inert:document.querySelector('.app-shell')?.hasAttribute('inert'),hash:location.hash,focus:document.activeElement?.id,outline:getComputedStyle(document.activeElement).outlineStyle,selection:getSelection()?.toString()}));
   if(afterEscape.inert||afterEscape.hash!=='#/compare'||afterEscape.focus!=='main'||afterEscape.outline!=='none'||afterEscape.selection)fail(`Escape did not preserve Compare and restore clean Main focus: ${JSON.stringify(afterEscape)}`);
+  await page.waitForTimeout(2150);
+  const escapedAudio=await page.evaluate(()=>({chimes:window.__qaOpeningChimes.length,contexts:window.__qaAudioContextCreations}));
+  if(escapedAudio.chimes!==0||escapedAudio.contexts!==0)fail(`Escape did not cancel the intro chime without creating audio: ${JSON.stringify(escapedAudio)}`);
+  await page.goto(`${BASE}/?qa=chime#/evidence`,{waitUntil:'commit',timeout:60000});
+  await page.waitForFunction(()=>document.querySelector('.space-opening[role="dialog"]')!==null,null,{timeout:8000});
+  const chimeDialog=page.getByRole('dialog',{name:'Lunacline'});await chimeDialog.waitFor({state:'visible'});
+  const chimeDialogAt=await page.evaluate(()=>performance.now());
+  await page.waitForFunction(()=>window.__qaOpeningChimes?.length===1,null,{timeout:4000});
+  const chime=await page.evaluate((visibleAt)=>({delay:window.__qaOpeningChimes[0]-visibleAt,contexts:window.__qaAudioContextCreations,preference:localStorage.getItem('lunar-music-v1')}),chimeDialogAt);
+  if(chime.delay<1750||chime.delay>2600||chime.contexts!==0||chime.preference!=='off')fail(`intro chime timing/off contract: ${JSON.stringify(chime)}`);
+  await page.getByRole('button',{name:/Skip intro/}).click();await chimeDialog.waitFor({state:'hidden'});
+  await page.waitForFunction(()=>document.activeElement?.id==='main',null,{timeout:1500});
   await page.getByRole('link',{name:'How it works',exact:true}).click();await page.waitForFunction(()=>location.hash==='#/learn',null,{timeout:5000});
-  if(await page.getByRole('dialog',{name:'Lunar Navigator'}).count())fail('SPA route change reopened the opening');
+  if(await page.getByRole('dialog',{name:'Lunacline'}).count())fail('SPA route change reopened the opening');
   // Change the query too: changing only the hash is an SPA/same-document
   // navigation and correctly does not replay the full-document opening.
   await page.goto(`${BASE}/?qa=2#/evidence`,{waitUntil:'commit',timeout:60000});
   await page.waitForFunction(()=>document.querySelector('.space-opening[role="dialog"]')!==null,null,{timeout:8000});
-  await page.getByRole('dialog',{name:'Lunar Navigator'}).waitFor({timeout:1200});
+  await page.getByRole('dialog',{name:'Lunacline'}).waitFor({timeout:1200});
   await page.getByRole('button',{name:/Skip intro/}).click();
-  await page.waitForFunction(()=>document.activeElement?.id==='main',null,{timeout:2000});
+  await page.waitForFunction(()=>document.activeElement?.id==='main',null,{timeout:1500});
   const afterSkip=await page.evaluate(()=>({hash:location.hash,focus:document.activeElement?.id,outline:getComputedStyle(document.activeElement).outlineStyle,selection:getSelection()?.toString()}));
   if(afterSkip.hash!=='#/evidence'||afterSkip.focus!=='main'||afterSkip.outline!=='none'||afterSkip.selection)fail(`Skip did not preserve Evidence and restore clean Main focus: ${JSON.stringify(afterSkip)}`);
   await page.goto(`${BASE}/?qa=3#/home`,{waitUntil:'commit',timeout:60000});
   await page.waitForFunction(()=>document.querySelector('.space-opening[role="dialog"]')!==null,null,{timeout:8000});
-  await page.getByRole('dialog',{name:'Lunar Navigator'}).waitFor({timeout:1200});
+  await page.getByRole('dialog',{name:'Lunacline'}).waitFor({timeout:1200});
+  const autoAt=await page.evaluate(()=>performance.now());
   await page.getByRole('dialog').waitFor({state:'hidden',timeout:4500});
+  const autoDuration=await page.evaluate((started)=>performance.now()-started,autoAt);
+  if(autoDuration<2600||autoDuration>3900)fail(`opening auto-close should be about 3 seconds: ${autoDuration.toFixed(0)} ms`);
   await page.waitForFunction(()=>location.hash==='#/home',null,{timeout:5000});
   await page.waitForFunction(()=>document.activeElement?.id==='main',null,{timeout:2000});
   const afterAuto=await page.evaluate(()=>({focus:document.activeElement?.id,outline:getComputedStyle(document.activeElement).outlineStyle,selection:getSelection()?.toString()}));
   if(afterAuto.focus!=='main'||afterAuto.outline!=='none'||afterAuto.selection)fail(`Home autoclose did not restore clean Main focus: ${JSON.stringify(afterAuto)}`);
-  await page.getByRole('button',{name:/Open the simulator/}).click();await page.waitForFunction(()=>location.hash==='#/simulator',null,{timeout:10000});
-  if(await page.getByRole('dialog',{name:'Lunar Navigator'}).count())fail('Home-to-Simulator SPA entry repeated the opening');
-  await ctx.close();return `same tab/storage: 3 full loads show intro; SPA route does not; Escape/Skip preserve deep link; Home autoclose stays Home; CTA enters Simulator; Main focus outline/selection clear; pre-mount observer=${observerRecorded?'saw opening':'missed (DOM visibility assertion passed)'}`;
+  await page.getByRole('button',{name:/View comparison in 3D/}).click();await page.waitForFunction(()=>location.hash==='#/simulator',null,{timeout:10000});
+  if(await page.getByRole('dialog',{name:'Lunacline'}).count())fail('Home-to-Simulator SPA entry repeated the opening');
+  await ctx.close();return `same tab/storage: 3 s opening; Escape cancels pending chime, Skip works; chime event fires at about 2.05 s while Music Off without creating AudioContext; focus trap/Main focus and deep links preserved; SPA route does not reopen; pre-mount observer=${observerRecorded?'saw opening':'missed (DOM visibility assertion passed)'}`;
 });
 
 await check('route motion uses one non-opacity animated ancestor and watches only child-list additions',async()=>{
@@ -138,14 +160,66 @@ await check('route motion uses one non-opacity animated ancestor and watches onl
 await check('reduced-motion suppresses automatic intro and Replay opening stays static',async()=>{
   const {ctx,page}=await context(browser,'opening-reduced',{motion:'reduce'});
   await page.goto(`${BASE}/?qa=1#/home`,{waitUntil:'networkidle',timeout:60000});
-  if(await page.getByRole('dialog',{name:'Lunar Navigator'}).count())fail('reduced-motion first visit auto-opened the intro');
+  if(await page.getByRole('dialog',{name:'Lunacline'}).count())fail('reduced-motion first visit auto-opened the intro');
   await page.getByRole('button',{name:'Replay the opening'}).click();
-  const dialog=page.getByRole('dialog',{name:'Lunar Navigator'});await dialog.waitFor();
-  const animation=await page.locator('.opening-craft').evaluate(e=>getComputedStyle(e).animationName);
-  if(animation!=='none')fail(`replay intro animates under reduced motion: ${animation}`);
+  const dialog=page.getByRole('dialog',{name:'Lunacline'});await dialog.waitFor();
+  const animations=await dialog.evaluate(e=>[...e.querySelectorAll('*')].flatMap(n=>n.getAnimations().filter(a=>a.playState==='running').map(a=>({tag:n.tagName,className:n.className?.baseVal??n.className,name:a.animationName}))));
+  if(animations.length)fail(`replay intro animates under reduced motion: ${JSON.stringify(animations)}`);
   await page.waitForTimeout(2700);if(!await dialog.isVisible())fail('reduced-motion replay auto-dismissed before the user chose');
   await page.keyboard.press('Escape');await dialog.waitFor({state:'hidden'});await ctx.close();
   return 'no automatic opening; replay remains static and user-dismissible';
+});
+
+await check('Lunacline opening brand and illustration fit desktop, portrait and landscape at first, middle and last frames',async()=>{
+  const reports=[];
+  for(const [width,height] of [[1440,900],[390,844],[844,390]]){
+    const {ctx,page}=await context(browser,`opening-layout-${width}`,{viewport:{width,height},touch:width!==1440});
+    await page.goto(`${BASE}/?opening-layout=${width}#/home`,{waitUntil:'commit',timeout:60000});
+    const dialog=page.getByRole('dialog',{name:'Lunacline'});await dialog.waitFor({state:'visible',timeout:8000});
+    const started=Date.now();
+    for(const [phase,at] of [['first',120],['middle',1100],['last',2250]]){
+      const remaining=at-(Date.now()-started);if(remaining>0)await page.waitForTimeout(remaining);
+      const state=await page.evaluate(()=>{
+        const rect=e=>{const r=e?.getBoundingClientRect();return r&&{x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height};};
+        const d=document.querySelector('.space-opening'),brand=d?.querySelector('.lc-brand'),scene=d?.querySelector('.lc-scene'),a=rect(brand),b=rect(scene);
+        const overlap=!!(a&&b&&Math.min(a.right,b.right)-Math.max(a.x,b.x)>2&&Math.min(a.bottom,b.bottom)-Math.max(a.y,b.y)>2);
+        const text=[...d.querySelectorAll('.lc-brand h1,.lc-descriptor,.lc-question')].map(e=>({text:e.textContent.trim(),opacity:getComputedStyle(e).opacity,animation:getComputedStyle(e).animationName}));
+        return{viewport:{w:innerWidth,h:innerHeight},scrollWidth:document.documentElement.scrollWidth,dialog:rect(d),brand:a,scene:b,overlap,text,visible:!!d&&!!brand&&!!scene};
+      });
+      if(!state.visible||state.scrollWidth>width+1||state.dialog.x<0||state.dialog.y<0||state.dialog.right>width+1||state.dialog.bottom>height+1||state.overlap)fail(`${width}x${height} ${phase}: opening/brand/illustration clipping or overlap: ${JSON.stringify(state)}`);
+      if(state.text.some(t=>t.opacity!=='1'||t.animation!=='none'))fail(`${width}x${height} ${phase}: brand copy fades/animates: ${JSON.stringify(state.text)}`);
+      await page.screenshot({path:join(OUT,`intro-${width}x${height}-${phase}.png`),fullPage:false});
+      reports.push(`${width}x${height} ${phase}: in bounds, no copy/illustration overlap`);
+    }
+    await ctx.close();
+  }
+  return reports.join('; ');
+});
+
+await check('Lunacline wordmark, navigation, keyboard focus and calendar use no blue or cyan interface colors',async()=>{
+  const {ctx,page}=await context(browser,'brand-palette-calendar');await go(page,'home');
+  const brand=await page.evaluate(async()=>{
+    const img=document.querySelector('header img[src="/icon.svg"]'),nav=[...document.querySelectorAll('header nav a')].map(a=>a.innerText.trim());
+    const svg=img?await (await fetch(img.src)).text():'';
+    return{loaded:!!img?.complete&&img.naturalWidth>0,svg:svg.includes('<svg'),wordmark:document.querySelector('header')?.innerText.includes('LUNACLINE'),nav,logoColors:(svg.match(/#[0-9a-f]{3,8}\b/gi)||[])};
+  });
+  if(!brand.loaded||!brand.svg||!brand.wordmark||brand.nav[0]!=='Compare arrival times'||brand.nav[1]!=='3D view')fail(`new brand/navigation did not load in the approved order: ${JSON.stringify(brand)}`);
+  const compare=page.getByRole('link',{name:'Compare arrival times',exact:true});await compare.focus();
+  const collect=()=>page.evaluate(()=>{
+    const hue=([r,g,b])=>{r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;if(!d)return {h:0,s:0};let h=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4;h=(h*60+360)%360;return{h,s:mx===0?0:d/mx};};
+    const parse=s=>{const m=s.match(/rgba?\(([^)]+)\)/);if(!m)return null;const n=m[1].split(/[ ,/]+/).filter(Boolean).map(Number);if(n.length<3||n[3]===0)return null;return n.slice(0,3);};
+    const candidates=[...document.querySelectorAll('header a,header button,main a,main button,main input,main select,main summary,.calendar-popover *')].filter(e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden');
+    const colors=[];for(const e of candidates){const c=getComputedStyle(e);for(const key of ['color','backgroundColor','borderTopColor','borderRightColor','borderBottomColor','borderLeftColor','outlineColor','fill','stroke']){const rgb=parse(c[key]);if(!rgb||Math.max(...rgb)<60)continue;const hs=hue(rgb);if(hs.s>.25&&hs.h>=175&&hs.h<=255)colors.push({tag:e.tagName,cls:String(e.className?.baseVal??e.className??'').slice(0,45),property:key,color:c[key]});}}
+    return{visibleControls:candidates.length,blueOrCyan:colors};
+  });
+  const focus=await compare.evaluate(e=>{const c=getComputedStyle(e);return{outlineStyle:c.outlineStyle,outlineWidth:c.outlineWidth,outlineColor:c.outlineColor,boxShadow:c.boxShadow};});
+  if((focus.outlineStyle==='none'||focus.outlineWidth==='0px')&&focus.boxShadow==='none')fail(`keyboard focus is not visible on the primary navigation: ${JSON.stringify(focus)}`);
+  if((await collect()).blueOrCyan.length)fail(`new header or page controls still use blue/cyan: ${JSON.stringify((await collect()).blueOrCyan.slice(0,8))}`);
+  await page.getByRole('link',{name:'Compare arrival times',exact:true}).click();await page.getByRole('button',{name:'Choose arrival date',exact:true}).click();
+  const calendar=page.getByRole('dialog');await calendar.waitFor();
+  const calendarColors=await collect();
+  if(calendarColors.blueOrCyan.length)fail(`calendar controls still use blue/cyan: ${JSON.stringify(calendarColors.blueOrCyan.slice(0,8))}`);
+  await ctx.close();return `SVG mark loaded; Compare-first nav; visible interface controls=${calendarColors.visibleControls}; no computed blue/cyan; visible primary-nav focus ${focus.outlineColor}`;
 });
 
 await check('current Guided analysis notes persist per chapter and across SPA routes without POSTs',async()=>{
@@ -158,7 +232,7 @@ await check('current Guided analysis notes persist per chapter and across SPA ro
   await note.fill('Chapter three observation');
   await page.locator('.chapter-list button').nth(0).click();
   if(await note.inputValue()!=='Prediction: a later arrival changes the exposed sky.'||!await explored.isChecked())fail('first chapter journal was lost when switching chapters');
-  await page.getByRole('link',{name:'Compare',exact:true}).click();await page.waitForFunction(()=>location.hash==='#/compare',null,{timeout:5000});
+  await page.getByRole('link',{name:'Compare arrival times',exact:true}).click();await page.waitForFunction(()=>location.hash==='#/compare',null,{timeout:5000});
   await page.getByRole('link',{name:'Guided analysis',exact:true}).click();await page.waitForFunction(()=>location.hash==='#/mission',null,{timeout:5000});
   if(await note.inputValue()!=='Prediction: a later arrival changes the exposed sky.'||!await explored.isChecked())fail('chapter journal was lost after an SPA route round-trip');
   if(await note.getAttribute('maxlength')!=='1000')fail('journal does not retain its 1000-character limit');
@@ -172,11 +246,11 @@ await check('keyboard can reach current navigation and immersive controls and Es
   if(!await skip.isVisible())fail('Skip to content is not visible when keyboard-focused');
   await page.keyboard.press('Enter');await page.waitForFunction(()=>document.activeElement?.id==='main',null,{timeout:3000});
   if(await page.evaluate(()=>location.hash)!=='#/home')fail('Skip to content changed the current route');
-  const compare=page.getByRole('link',{name:'Compare',exact:true});await compare.focus();
+  const compare=page.getByRole('link',{name:'Compare arrival times',exact:true});await compare.focus();
   const focused=await compare.evaluate(e=>{const s=getComputedStyle(e);return {active:document.activeElement===e,outline:s.outlineStyle,outlineWidth:s.outlineWidth,shadow:s.boxShadow};});
   if(!focused.active||((focused.outline==='none'||focused.outlineWidth==='0px')&&focused.shadow==='none'))fail(`focused navigation link has no visible focus indicator: ${JSON.stringify(focused)}`);
   await page.keyboard.press('Enter');await page.waitForFunction(()=>location.hash==='#/compare',null,{timeout:5000});
-  await page.getByRole('link',{name:'Simulator',exact:true}).focus();await page.keyboard.press('Enter');await page.waitForFunction(()=>location.hash==='#/simulator',null,{timeout:5000});
+  await page.getByRole('link',{name:'3D view',exact:true}).focus();await page.keyboard.press('Enter');await page.waitForFunction(()=>location.hash==='#/simulator',null,{timeout:5000});
   await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot,null,{timeout:30000});
   const enter=page.getByRole('button',{name:'Explore fullscreen',exact:true});await enter.focus();await page.keyboard.press('Enter');
   const back=page.getByRole('button',{name:/Return to workspace/});await back.waitFor();
@@ -255,7 +329,7 @@ await check('background music starts enabled, reports blocked autoplay as Ready,
   if(audio.pressed!=='true')fail(`music should be enabled by default: ${JSON.stringify(audio)}`);
   if(audio.playing!=='false'||audio.state!=='suspended'||audio.label!=='Music Ready')fail(`blocked autoplay must show truthful Ready, not On: ${JSON.stringify(audio)}`);
   if(audio.contexts!==1)fail(`automatic attempt should keep at most one suspended AudioContext, got ${JSON.stringify(audio)}`);
-  await page.getByRole('link',{name:'Compare',exact:true}).click();
+  await page.getByRole('link',{name:'Compare arrival times',exact:true}).click();
   await page.waitForFunction(()=>location.hash==='#/compare',null,{timeout:5000});
   await page.waitForFunction(()=>{const b=document.querySelector('.music-toggle'),c=window.__qaAudioContexts?.[0];return b?.getAttribute('data-playing')==='true'&&c?.state==='running';},null,{timeout:5000});
   audio=await page.evaluate(()=>({contexts:window.__qaAudioContexts?.length??0,state:window.__qaAudioContexts?.[0]?.state,pressed:document.querySelector('.music-toggle')?.getAttribute('aria-pressed'),playing:document.querySelector('.music-toggle')?.getAttribute('data-playing'),label:document.querySelector('.music-toggle')?.innerText?.trim().replace(/\s+/g,' ')}));
@@ -263,6 +337,8 @@ await check('background music starts enabled, reports blocked autoplay as Ready,
   const settings=page.locator('details.music-settings'),summary=page.getByLabel('Music volume and credits');
   await summary.click();if(!await settings.evaluate(e=>e.open))fail('volume and credits disclosure did not open');
   const volume=page.locator('#music-volume');
+  const defaultVolume=await volume.inputValue(),storedVolume=await page.evaluate(()=>localStorage.getItem('lunar-music-volume-v1'));
+  if(defaultVolume!=='50'||storedVolume!==null)fail(`a fresh visitor should start at 50% without a saved override: ${JSON.stringify({defaultVolume,storedVolume})}`);
   const setVolume=async(value)=>volume.evaluate((e,v)=>{Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(e,String(v));e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));},value);
   await setVolume(0);
   if((await page.locator('output[for="music-volume"]').innerText()).trim()!=='0%')fail('volume slider did not expose its muted value');
@@ -280,7 +356,10 @@ await check('background music starts enabled, reports blocked autoplay as Ready,
   await page.getByRole('button',{name:'Music Off',exact:true}).waitFor({timeout:5000});
   const reload=await page.evaluate(()=>({contexts:window.__qaAudioContexts?.length??0,pressed:document.querySelector('.music-toggle')?.getAttribute('aria-pressed'),playing:document.querySelector('.music-toggle')?.getAttribute('data-playing'),label:document.querySelector('.music-toggle')?.innerText?.trim().replace(/\s+/g,' '),preference:localStorage.getItem('lunar-music-v1')}));
   if(reload.contexts!==0||reload.pressed!=='false'||reload.playing!=='false'||reload.label!=='Music Off'||reload.preference!=='off')fail(`persisted Off did not survive a full reload without starting audio: ${JSON.stringify(reload)}`);
-  await ctx.close();return 'enabled default; simulated autoplay block is truthful Ready on one suspended context; first non-music gesture unlocks one running context; volume reaches 0%; Escape restores focus; Off suspends and persists across reload without a new context';
+  await page.getByLabel('Music volume and credits').click();
+  const persistedVolume=await page.locator('#music-volume').inputValue(),savedVolume=await page.evaluate(()=>localStorage.getItem('lunar-music-volume-v1'));
+  if(persistedVolume!=='35'||savedVolume!=='35')fail(`chosen volume did not persist after reload: ${JSON.stringify({persistedVolume,savedVolume})}`);
+  await ctx.close();return 'enabled default; fresh volume 50%; simulated autoplay block is truthful Ready on one suspended context; first non-music gesture unlocks one running context; volume reaches 0%, chosen 35% persists across reload; Escape restores focus; Off suspends and persists across reload without a new context';
 });
 
 await check('Learn walkthrough advances, pauses without advancing and its manual CTA navigates',async()=>{
@@ -315,18 +394,18 @@ await check('Home delay briefing recomputes two real rows and its CTA applies th
     if(await rows.count()!==2)fail(`+${delay} days produced ${await rows.count()} rows`);
     const values=await rows.allTextContents();if(values.some(t=>/Not calculated|Loading the real/i.test(t)))fail(`+${delay} days did not produce calculated data`);
     const expected=comparisonRows(dataset,{siteId:'shackleton-rim',alternative:'connecting-ridge',height:1,date,days:7,delay});
-    const rendered=await rows.evaluateAll(nodes=>nodes.map(n=>({heading:n.querySelector('h3')?.textContent.trim(),number:n.querySelector('.hl-num')?.textContent.trim(),metrics:n.querySelector('p:not(.hl-num)')?.textContent.replace(/\s+/g,' ').trim()})));
+    const rendered=await rows.evaluateAll(nodes=>nodes.map(n=>({heading:n.querySelector('h3')?.textContent.trim(),number:n.querySelector('.hl-num')?.textContent.trim(),facts:[...n.querySelectorAll('.hl-facts dd')].map(e=>e.textContent.trim())})));
     const fmtDay=(value)=>new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(`${value}T00:00:00Z`));
     for(const [i,r] of expected.slice(0,2).entries()){
       const wantNumber=r.summary.dark.hours.toFixed(1)+' h';
-      if(rendered[i].heading!==`Arrive ${fmtDay(i===0?date:new Date(Date.parse(`${date}T00:00:00Z`)+delay*86400000).toISOString().slice(0,10))}`&&i===0)fail(`base briefing row date differs from comparisonRows: ${JSON.stringify(rendered[i])}`);
-      if(i===1&&rendered[i].heading!==`Arrive ${delay} days later`)fail(`delayed briefing row heading is wrong: ${JSON.stringify(rendered[i])}`);
+      if(i===0&&!rendered[i].heading?.startsWith(`Arrive ${fmtDay(date)}`))fail(`base briefing row date differs from comparisonRows: ${JSON.stringify(rendered[i])}`);
+      if(i===1&&!rendered[i].heading?.startsWith(`Arrive ${delay} days later`))fail(`delayed briefing row heading is wrong: ${JSON.stringify(rendered[i])}`);
       if(!rendered[i].number?.includes(wantNumber))fail(`briefing row ${i} longest-dark value differs from comparisonRows: expected ${wantNumber}, got ${rendered[i].number}`);
-      const wantMetrics=`Sun visible ${percent(r.summary.sunlitFraction)} of the stay · Earth ${percent(r.summary.earthFraction)}`;
-      if(!rendered[i].metrics?.includes(wantMetrics))fail(`briefing row ${i} percentages differ from comparisonRows: expected ${wantMetrics}, got ${rendered[i].metrics}`);
+      const wantFacts=[`${percent(r.summary.sunlitFraction)} of the stay`,`${percent(r.summary.earthFraction)} of the stay`];
+      if(JSON.stringify(rendered[i].facts)!==JSON.stringify(wantFacts))fail(`briefing row ${i} percentages differ from comparisonRows: expected ${JSON.stringify(wantFacts)}, got ${JSON.stringify(rendered[i].facts)}`);
     }
     signatures.push(values.join('|'));
-    if(delay===14){await briefing.getByRole('button',{name:/Change the place, date or height/}).click();await page.waitForFunction(()=>location.hash==='#/compare',null,{timeout:10000});}
+    if(delay===14){await briefing.getByRole('button',{name:/Compare arrival times/}).click();await page.waitForFunction(()=>location.hash==='#/compare',null,{timeout:10000});}
   }
   if(new Set(signatures).size<2)fail('delay choices did not change the comparison rows');
   const applied={site:await page.locator('#site').inputValue(),alternative:await page.locator('#alternative').inputValue(),height:await page.locator('#height').inputValue(),date:await page.locator('#arrival').inputValue(),days:await page.locator('#days').inputValue(),delay:await page.locator('#delay').inputValue()};
@@ -342,14 +421,34 @@ await check('Home delay briefing recomputes two real rows and its CTA applies th
   await ctx.close();return `featured ${heading}; each Home row and all three Compare ledger rows match comparisonRows; Compare receives ${JSON.stringify(applied)}`;
 });
 
+await check('whole-hour delay controls keep Compare timestamps and rows aligned to the hourly grid',async()=>{
+  const {ctx,page}=await context(browser,'whole-hour-delay',{webglBlocked:true});await go(page,'compare');
+  await page.locator('#delay').selectOption('7');await page.locator('#delay-hours').selectOption('5');
+  const delay=7+5/24,total=(await page.locator('.setup').innerText()).replace(/\s+/g,' ');
+  if(!total.includes('Total delay: 7 days 5 h (173 h)'))fail(`delay summary does not report 7 d 5 h = 173 h: ${total}`);
+  const settings={siteId:await page.locator('#site').inputValue(),alternative:await page.locator('#alternative').inputValue(),height:Number(await page.locator('#height').inputValue()),date:await page.locator('#arrival').inputValue(),days:Number(await page.locator('#days').inputValue()),delay};
+  const expected=comparisonRows(dataset,settings),cards=await page.locator('.answer-scenario').allTextContents();
+  if(expected.length!==3||cards.length!==3)fail('the delayed-hour change did not preserve all three scenarios');
+  for(const [i,row] of expected.entries()){
+    const stamp=new Date(Date.parse(manifest.period.startUtc)+row.bounds.start*manifest.period.stepMinutes*60000).toISOString().slice(0,16).replace('T',' ');
+    if(!cards[i].includes(stamp))fail(`scenario ${i} arrival timestamp does not match its computed hourly index ${stamp}: ${cards[i]}`);
+  }
+  if(!cards[1].includes('+7 days 5 h'))fail(`delayed scenario does not label the full offset: ${cards[1]}`);
+  const details=page.locator('details.comparison-details').first();if(await details.getAttribute('open')===null)await details.locator('summary').click();
+  const reportPromise=page.waitForEvent('download');await page.getByRole('button',{name:/Download comparison.*JSON/}).click();
+  const download=await reportPromise,report=JSON.parse(readFileSync(await download.path(),'utf8'));
+  if(Math.abs(report.settings.delay-delay)>1e-12)fail(`JSON delay ${report.settings.delay} differs from the selected 173-hour offset`);
+  await ctx.close();return `selected 7 d 5 h (173 h); three card UTC starts match comparisonRows; JSON delay=${report.settings.delay} days; format=${formatDelay(delay)}`;
+});
+
 await check('comparison link copies six settings and restores the same computed cards in a fresh context',async()=>{
-  const settings={site:'nobile-rim-1',h:'2',arr:'2026-11-16',days:'14',delay:'3',alt:'connecting-neighbor'};
+  const settings={site:'nobile-rim-1',h:'2',arr:'2026-11-16',days:'14',delay:'7',alt:'connecting-neighbor',dh:'5'};
   const {ctx,page}=await context(browser,'share-link-copy',{webglBlocked:true});
   await ctx.grantPermissions(['clipboard-read','clipboard-write'],{origin:new URL(BASE).origin});
   await go(page,'compare');
   await page.locator('#site').selectOption(settings.site);await page.locator('#alternative').selectOption(settings.alt);
   await page.locator('#height').selectOption(settings.h);await page.locator('#arrival').fill(settings.arr);
-  await page.locator('#days').selectOption(settings.days);await page.locator('#delay').selectOption(settings.delay);
+  await page.locator('#days').selectOption(settings.days);await page.locator('#delay').selectOption(settings.delay);await page.locator('#delay-hours').selectOption(settings.dh);
   const copy=page.getByRole('button',{name:'Copy comparison link',exact:true});await copy.click();
   await page.getByRole('status').filter({hasText:'Link copied.'}).waitFor({timeout:3000});
   const link=await page.locator('.share-url input[readonly]').inputValue();
@@ -361,21 +460,21 @@ await check('comparison link copies six settings and restores the same computed 
   const {ctx:restoredCtx,page:restored}=await context(browser,'share-link-restore',{webglBlocked:true});
   await restored.goto(link,{waitUntil:'networkidle',timeout:60000});
   await restored.locator('#site').waitFor();await restored.getByRole('status').filter({hasText:'Settings restored from a link'}).waitFor({timeout:5000});
-  const restoredSettings={site:await restored.locator('#site').inputValue(),alt:await restored.locator('#alternative').inputValue(),h:await restored.locator('#height').inputValue(),arr:await restored.locator('#arrival').inputValue(),days:await restored.locator('#days').inputValue(),delay:await restored.locator('#delay').inputValue()};
-  const expected={site:settings.site,alt:settings.alt,h:settings.h,arr:settings.arr,days:settings.days,delay:settings.delay};
+  const restoredSettings={site:await restored.locator('#site').inputValue(),alt:await restored.locator('#alternative').inputValue(),h:await restored.locator('#height').inputValue(),arr:await restored.locator('#arrival').inputValue(),days:await restored.locator('#days').inputValue(),delay:await restored.locator('#delay').inputValue(),dh:await restored.locator('#delay-hours').inputValue()};
+  const expected={site:settings.site,alt:settings.alt,h:settings.h,arr:settings.arr,days:settings.days,delay:settings.delay,dh:settings.dh};
   if(JSON.stringify(restoredSettings)!==JSON.stringify(expected))fail(`new document did not restore all six fields: ${JSON.stringify({expected,restoredSettings})}`);
   const restoredCards=await restored.locator('.answer-scenario').allTextContents();
   if(original.join('\n')!==restoredCards.join('\n'))fail('fresh-context restored cards differ from the original computed comparison');
-  const expectedRows=comparisonRows(dataset,{siteId:settings.siteId??settings.site,alternative:settings.alternative??settings.alt,height:Number(settings.h),date:settings.date??settings.arr,days:Number(settings.days),delay:Number(settings.delay)});
-  const rendered=await restored.locator('.answer-scenario').evaluateAll(nodes=>nodes.map(n=>({sun:n.querySelector('.answer-sun-percent')?.textContent.trim(),earth:n.querySelector('.answer-earth-percent')?.textContent.trim(),dark:n.querySelector('dl div dd')?.textContent.trim()})));
+  const expectedRows=comparisonRows(dataset,{siteId:settings.siteId??settings.site,alternative:settings.alternative??settings.alt,height:Number(settings.h),date:settings.date??settings.arr,days:Number(settings.days),delay:Number(settings.delay)+Number(settings.dh??0)/24});
+  const rendered=await restored.locator('.answer-scenario').evaluateAll(nodes=>nodes.map(n=>({sun:n.querySelector('.answer-sun-percent')?.textContent.trim(),earth:n.querySelector('.answer-earth-percent')?.textContent.trim(),dark:n.querySelector('dl:not(.answer-context) dd')?.textContent.trim()})));
   for(const [i,row] of expectedRows.entries()){
     if(rendered[i].sun!==percent(row.summary.sunlitFraction)||rendered[i].earth!==percent(row.summary.earthFraction)||!rendered[i].dark.includes(row.summary.dark.hours.toFixed(1)))fail(`restored scenario ${i} differs from comparisonRows: ${JSON.stringify({actual:rendered[i],expected:{sun:percent(row.summary.sunlitFraction),earth:percent(row.summary.earthFraction),dark:row.summary.dark.hours}})}`);
   }
   const invalidCtx=await context(browser,'share-link-invalid',{webglBlocked:true});
-  await invalidCtx.page.goto(`${BASE}/?qa=1#/compare?site=unknown&h=999&arr=2027-02-31&days=9&delay=30&alt=unknown`,{waitUntil:'networkidle',timeout:60000});
+  await invalidCtx.page.goto(`${BASE}/?qa=1#/compare?site=unknown&h=999&arr=2027-02-31&days=9&delay=30&dh=24&alt=unknown`,{waitUntil:'networkidle',timeout:60000});
   await invalidCtx.page.getByRole('status').filter({hasText:'Settings restored from a link'}).waitFor({timeout:5000});
   const notice=await invalidCtx.page.locator('.share-restored').innerText();
-  if(!/ignored invalid site, alt, h, days, delay, arr/.test(notice))fail(`invalid fields are not identified in the restored-link status: ${notice}`);
+  if(!/ignored invalid site, alt, h, days, dh, delay, arr/.test(notice))fail(`invalid fields are not identified in the restored-link status: ${notice}`);
   if(await invalidCtx.page.locator('.answer-scenario').count()!==3)fail('invalid shared fields crashed or removed the comparison scenarios');
   for(const c of [ctx,restoredCtx,invalidCtx.ctx])await c.close();
   return `copy/read-only link roundtrip restored six settings and matching scientific values; invalid fields were ignored and announced`;
@@ -383,8 +482,8 @@ await check('comparison link copies six settings and restores the same computed 
 
 await check('Horizon Ledger Home and Compare stay within mobile widths and mono captions remain readable',async()=>{
   const reports=[];
-  for(const [width,height] of [[390,844],[844,390]]){
-    const {ctx,page}=await context(browser,`horizon-responsive-${width}`,{viewport:{width,height},touch:true,webglBlocked:true});
+  for(const [width,height,touch] of [[390,844,true],[844,390,true],[1440,900,false]]){
+    const {ctx,page}=await context(browser,`horizon-responsive-${width}`,{viewport:{width,height},touch,webglBlocked:true});
     await go(page,'home');await page.locator('.delay-briefing .hl-ledger svg').waitFor({timeout:15000});
     await page.evaluate(()=>document.fonts.ready);
     const read=()=>page.evaluate(()=>{
@@ -396,10 +495,16 @@ await check('Horizon Ledger Home and Compare stay within mobile widths and mono 
     });
     let home=await read();if(home.scrollWidth>width+1)fail(`${width}x${height}: Home overflows horizontally: ${JSON.stringify(home)}`);
     if(home.fontSize<11||home.fontSize>13||!home.fontFamily.includes('IBM Plex Mono')||!home.plexLoaded||home.contrast<4.5||!home.captionVisible||home.axisFontSize<10.5||home.axisFontSize>13||home.axisContrast<4.5||!home.axisVisible)fail(`${width}x${height}: Home ledger caption/axis labels are too small, low contrast or missing: ${JSON.stringify(home)}`);
-    await page.getByRole('link',{name:'Compare a landing delay'}).click();await page.waitForFunction(()=>location.hash==='#/compare',null,{timeout:10000});
+    await page.getByRole('link',{name:'Compare arrival times',exact:true}).click();await page.waitForFunction(()=>location.hash==='#/compare',null,{timeout:10000});
     await page.locator('.hl-compare .hl-ledger svg').waitFor({timeout:15000});await page.evaluate(()=>document.fonts.ready);
     const compare=await read();if(compare.scrollWidth>width+1)fail(`${width}x${height}: Compare overflows horizontally: ${JSON.stringify(compare)}`);
     if(compare.fontSize<11||compare.fontSize>13||compare.contrast<4.5||!compare.plexLoaded||!compare.captionVisible||compare.axisFontSize<10.5||compare.axisFontSize>13||compare.axisContrast<4.5||!compare.axisVisible)fail(`${width}x${height}: Compare ledger caption/axis labels are too small, low contrast or missing: ${JSON.stringify(compare)}`);
+    const endpoints=await page.locator('.hl-compare .hl-horizon .hl-start').allTextContents(),arrows=await page.locator('.hl-compare .hl-horizon .hl-arrow').count();
+    if(width>=900)for(const endpoint of ['A start','A end','B start','B end'])if(!endpoints.some(text=>text.startsWith(endpoint+' ')))fail(`${width}x${height}: horizon paths do not label ${endpoint} UTC`);
+    else if(!await page.locator('.hl-compare .hl-horizon .hl-legend').innerText().then(text=>/times UTC/.test(text)))fail(`${width}x${height}: compact horizon chart lost its UTC legend`);
+    if(arrows<2)fail(`${width}x${height}: A/B horizon paths are missing directional arrows (${arrows})`);
+    const clearance=page.locator('.hl-compare .hl-clearance'),clearanceTitle=(await clearance.locator('h3').innerText()).replace(/\s+/g,' '),clearanceLabel=await clearance.locator('svg[role="img"]').getAttribute('aria-label'),clearancePaths=await clearance.locator('.hl-curve').count();
+    if(!/Sun centre minus the terrain horizon/.test(clearanceTitle)||clearancePaths!==3||!clearanceLabel?.startsWith('A ')||!/[.] B /.test(clearanceLabel??'')||!/[.] C /.test(clearanceLabel??''))fail(`${width}x${height}: clearance chart is missing its terrain-horizon definition or A/B/C series: ${JSON.stringify({clearanceTitle,clearanceLabel,clearancePaths})}`);
     reports.push(`${width}x${height}: no horizontal overflow; legends ${home.fontSize}/${compare.fontSize} px (contrast ${home.contrast}/${compare.contrast}:1), SVG axes ${home.axisFontSize}/${compare.axisFontSize} px (contrast ${home.axisContrast}/${compare.axisContrast}:1)`);await ctx.close();
   }
   return reports.join('; ');
@@ -445,12 +550,12 @@ await check('Arrival calendar keyboard, bounds, invalid ISO text and export rema
     const invalidDates=['2027-02-31','2027-03-32','03/01/2027','2027-03','2027-03-01T00:00:00Z',''];
     for(const date of invalidDates){
       await input.fill(date);
-      await page.waitForFunction(v=>{const el=document.querySelector('#arrival'),cards=[...document.querySelectorAll('.answer-scenario')];return el?.value===v&&cards.length===3&&cards.every(c=>c.querySelector('dd')?.textContent.trim()==='Not calculated');},date,{timeout:5000});
+      await page.waitForFunction(v=>{const el=document.querySelector('#arrival'),cards=[...document.querySelectorAll('.answer-scenario')];return el?.value===v&&cards.length===3&&cards.every(c=>c.querySelector('dl:not(.answer-context) dd')?.textContent.trim()==='Not calculated');},date,{timeout:5000});
       if(date&&await input.getAttribute('aria-invalid')!=='true')fail(`${label}: invalid raw date ${JSON.stringify(date)} is not marked invalid`);
       if(await input.inputValue()!==date)fail(`${label}: invalid raw text ${JSON.stringify(date)} was not preserved for correction`);
     }
     await input.fill('2027-03-01');
-    await page.waitForFunction(()=>[...document.querySelectorAll('.answer-scenario')].length===3&&[...document.querySelectorAll('.answer-scenario')].every(c=>c.querySelector('dd')?.textContent.trim()!=='Not calculated'),null,{timeout:10000});
+    await page.waitForFunction(()=>[...document.querySelectorAll('.answer-scenario')].length===3&&[...document.querySelectorAll('.answer-scenario')].every(c=>c.querySelector('dl:not(.answer-context) dd')?.textContent.trim()!=='Not calculated'),null,{timeout:10000});
     await input.fill('2027-02-31');
     await page.getByText('Full measurements, methods and a darkness limit',{exact:true}).click();
     const downloadPromise=page.waitForEvent('download');await page.getByRole('button',{name:/Download comparison.*JSON/}).click();
@@ -593,6 +698,78 @@ await check('Surface sky modes, labels, options and direct sunlit-terrain path u
   await page.getByRole('button',{name:'See sunlit terrain',exact:true}).click();
   await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot?.().view==='terrain',null,{timeout:10000});await ctx.close();
   return 'horizon diagram/real terrain, 3 optional visual controls, direct terrain action';
+});
+
+await check('planet inspector loads textured Saturn and Sun, reports their limits, and advances while following a planet',async()=>{
+  const {ctx,page}=await context(browser,'planet-inspector');const planetAssets=[];
+  page.on('response',response=>{if(response.url().includes('/assets/planets/'))planetAssets.push({url:response.url(),status:response.status()});});
+  await go(page,'simulator');
+  await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot?.().rendered?.ready===true,null,{timeout:30000});
+  const picker=page.getByLabel('Look at a body: close view');await picker.waitFor();
+  const available=(await picker.locator('option').allTextContents()).join(' ');
+  if(!/Saturn/.test(available)||!/Sun/.test(available))fail(`individual planet inspector is missing key options: ${available}`);
+  const explore=page.locator('.explore-bodies');
+  if((await explore.locator('h3').innerText()).trim()!=='Explore other celestial bodies')fail('setup panel lacks the Explore other celestial bodies heading');
+  const bodyButtons=await explore.locator('button').allTextContents();
+  if(bodyButtons.length!==8||!bodyButtons.includes('Sun')||!bodyButtons.includes('Saturn'))fail(`close-view buttons should include the Sun and all seven planets: ${JSON.stringify(bodyButtons)}`);
+  await explore.getByRole('button',{name:'Sun',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot?.().trackedBody==='sun',null,{timeout:12000});
+  await picker.selectOption('saturn');
+  await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot?.().trackedBody==='saturn',null,{timeout:12000});
+  const saturnStart=await page.evaluate(()=>document.querySelector('canvas')?.lunarSnapshot?.());
+  if(!saturnStart?.bodies?.saturn?.visible)fail('Saturn was not visible after inspector selection');
+  const canvas=page.locator('.space-canvas canvas'),first=await canvas.screenshot();
+  await page.getByLabel('Speed').selectOption('24');
+  await page.waitForFunction(start=>document.querySelector('canvas')?.lunarSnapshot?.().rendered?.presentedIndex>=start+24,saturnStart.rendered.presentedIndex,{timeout:7000});
+  const saturnEnd=await page.evaluate(()=>document.querySelector('canvas')?.lunarSnapshot?.());
+  if(saturnEnd.trackedBody!=='saturn'||!saturnEnd.bodies?.saturn?.visible)fail('Saturn follow or visibility was lost during playback');
+  const rotated=await canvas.screenshot();
+  await page.locator('.camera-presets button').filter({hasText:'Surface sky'}).click();
+  await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot?.().rendered?.view==='sky',null,{timeout:10000});
+  await picker.selectOption('saturn');
+  await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot?.().skyTracking==='saturn'&&document.querySelector('.planet-note')?.textContent.includes('Saturn:'),null,{timeout:12000});
+  const saturnNote=(await page.locator('.planet-note').innerText()).trim();
+  if(!/rings drawn from 1\.24 to 2\.27 Saturn radii/.test(saturnNote)||!/tilt shown is illustrative/.test(saturnNote))fail(`Saturn note omits ring bounds or illustrative tilt: ${saturnNote}`);
+  await picker.selectOption('sun');
+  await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot?.().skyTracking==='sun'&&document.querySelector('.planet-note')?.textContent.includes('Sun:'),null,{timeout:12000});
+  const sunNote=(await page.locator('.planet-note').innerText()).trim();
+  if(!/illustrative/.test(sunNote)||!/sidereal period/.test(sunNote))fail(`Sun rotation note is missing its illustrative limit or sidereal period: ${sunNote}`);
+  const expectedAssets=['sun.jpg','mercury.jpg','venus.jpg','mars.jpg','jupiter.jpg','saturn.jpg','saturn-ring.png','uranus.jpg','neptune.jpg'];
+  await page.waitForFunction(files=>files.every(file=>performance.getEntriesByType('resource').some(e=>new URL(e.name).pathname.endsWith(`/assets/planets/${file}`))),expectedAssets,{timeout:15000});
+  const assetRequests=expectedAssets.map(file=>planetAssets.find(a=>new URL(a.url).pathname.endsWith(`/assets/planets/${file}`)));
+  if(assetRequests.some(a=>a?.status!==200))fail(`textured planet asset requests did not all return HTTP 200: ${JSON.stringify({expectedAssets,assetRequests})}`);
+  const report={available,assets:assetRequests,tracked:saturnEnd.trackedBody,indexAdvance:+(saturnEnd.rendered.presentedIndex-saturnStart.rendered.presentedIndex).toFixed(2),triangles:saturnEnd.rendered.triangles,renderScale:saturnEnd.rendered.renderScale,terrainDetail:saturnEnd.rendered.terrainDetail,canvasImageChanged:Buffer.compare(first,rotated)!==0,notes:{saturn:saturnNote,sun:sunNote}};
+  writeFileSync(join(OUT,'planet-inspector.json'),JSON.stringify(report,null,2));
+  await ctx.close();return `Saturn/Sun inspector notes visible; Saturn ring and Sun textures HTTP 200; Saturn remained tracked and visible through ${report.indexAdvance} h; ${report.triangles} triangles, scale ${report.renderScale}, ${report.terrainDetail} terrain detail`;
+});
+
+await check('Sun close-view corona animates without changing measured geometry and is static with reduced motion',async()=>{
+  const fields=(s)=>({index:s?.observation?.index,presentedIndex:s?.rendered?.presentedIndex,sunRadius:s?.bodies?.sun?.radius,angularRadiusDeg:s?.observation?.sunDetail?.angularRadiusDeg,sun:s?.observation?.sun,terrainFraction:s?.observation?.sunDetail?.terrainFraction,unobscuredFraction:s?.observation?.sunDetail?.unobscuredFraction,earth:s?.observation?.earth});
+  const {ctx,page}=await context(browser,'sun-corona-normal');await go(page,'simulator');
+  await page.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot?.().rendered?.ready===true,null,{timeout:30000});
+  if(await page.getByRole('button',{name:'Pause',exact:true}).isVisible())await page.getByRole('button',{name:'Pause',exact:true}).click();
+  const explore=page.locator('.explore-bodies');await explore.getByRole('button',{name:'Sun',exact:true}).click();
+  await page.waitForFunction(()=>{const s=document.querySelector('canvas')?.lunarSnapshot?.();return s?.trackedBody==='sun'&&s?.rendered?.view==='overview'&&!s?.transition;},null,{timeout:20000});
+  const canvas=page.locator('.space-canvas canvas'),start=await page.evaluate(()=>document.querySelector('canvas')?.lunarSnapshot?.()),startFields=fields(start),first=await canvas.screenshot();
+  await page.waitForTimeout(1000);
+  const end=await page.evaluate(()=>document.querySelector('canvas')?.lunarSnapshot?.()),endFields=fields(end),second=await canvas.screenshot();
+  if(Buffer.compare(first,second)===0)fail('normal-motion Sun close view did not animate its corona pixels');
+  for(const key of Object.keys(startFields))if(Math.abs(startFields[key]-endFields[key])>1e-10)fail(`Sun corona animation changed physical/display measurement ${key}: ${startFields[key]} -> ${endFields[key]}`);
+  await writeFileSync(join(OUT,'sun-corona-normal-start.png'),first);await writeFileSync(join(OUT,'sun-corona-normal-end.png'),second);
+  await ctx.close();
+
+  const {ctx:reducedCtx,page:reducedPage}=await context(browser,'sun-corona-reduced',{motion:'reduce'});await go(reducedPage,'simulator');
+  await reducedPage.waitForFunction(()=>document.querySelector('canvas')?.lunarSnapshot?.().rendered?.ready===true,null,{timeout:30000});
+  if(await reducedPage.getByRole('button',{name:'Pause',exact:true}).isVisible())fail('reduced-motion simulator unexpectedly started playing');
+  await reducedPage.locator('.explore-bodies').getByRole('button',{name:'Sun',exact:true}).click();
+  await reducedPage.waitForFunction(()=>{const s=document.querySelector('canvas')?.lunarSnapshot?.();return s?.trackedBody==='sun'&&s?.rendered?.view==='overview'&&!s?.transition;},null,{timeout:20000});
+  const reducedCanvas=reducedPage.locator('.space-canvas canvas'),reducedStart=await reducedPage.evaluate(()=>document.querySelector('canvas')?.lunarSnapshot?.()),reducedA=await reducedCanvas.screenshot();
+  await reducedPage.waitForTimeout(900);
+  const reducedEnd=await reducedPage.evaluate(()=>document.querySelector('canvas')?.lunarSnapshot?.()),reducedB=await reducedCanvas.screenshot();
+  if(Buffer.compare(reducedA,reducedB)!==0)fail('reduced-motion Sun corona changed pixels while paused');
+  for(const key of Object.keys(fields(reducedStart)))if(Math.abs(fields(reducedStart)[key]-fields(reducedEnd)[key])>1e-10)fail(`reduced-motion Sun measurements changed during static close view: ${key}`);
+  await writeFileSync(join(OUT,'sun-corona-reduced.png'),reducedB);await reducedCtx.close();
+  return `normal paused close view changed corona pixels while Sun radius/angular radius/visibility fractions/time stayed constant; reduced-motion paused view was pixel-identical over 900 ms`;
 });
 
 await check('Enhanced vision is off by default, adds illustrative outlines in three views, and leaves science unchanged',async()=>{
