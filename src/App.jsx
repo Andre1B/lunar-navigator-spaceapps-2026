@@ -1251,27 +1251,44 @@ export default function App() {
   useEffect(() => {
     if (neededKey) requireSites(neededKey.split(","));
   }, [neededKey, requireSites]);
-  // Other points are fetched after the first interaction or a quiet spell, so
-  // switching place later is immediate.
+  // Other points load one at a time in idle periods after 15 s, so switching
+  // place later is quick without parsing them during interaction. A failure
+  // there is recorded per point and never affects the current page.
   useEffect(() => {
     if (!dataset.manifest) return;
-    const all = () => requireSites(dataset.manifest.sites.map((x) => x.id));
-    const timer = setTimeout(all, 15000);
-    window.addEventListener("pointerdown", all, { once: true });
-    window.addEventListener("keydown", all, { once: true });
+    const ids = dataset.manifest.sites.map((x) => x.id);
+    let cancelled = false,
+      handle = null;
+    const idle = (fn) =>
+      window.requestIdleCallback
+        ? requestIdleCallback(fn, { timeout: 5000 })
+        : setTimeout(fn, 500);
+    const next = () => {
+      if (cancelled || !ids.length) return;
+      requireSites([ids.shift()]).finally(() => {
+        if (!cancelled) handle = idle(next);
+      });
+    };
+    const timer = setTimeout(() => (handle = idle(next)), 15000);
     return () => {
+      cancelled = true;
       clearTimeout(timer);
-      window.removeEventListener("pointerdown", all);
-      window.removeEventListener("keydown", all);
+      if (handle !== null)
+        (window.cancelIdleCallback ?? clearTimeout)(handle);
     };
   }, [dataset.manifest, requireSites]);
   const routeReady = neededSites.every((id) => dataset.sites[id]);
+  const routeError = neededSites
+    .map((id) => dataset.siteErrors?.[id])
+    .find(Boolean);
   const routeDataset = useMemo(
     () =>
       routeReady || dataset.status !== "ready"
         ? dataset
-        : { ...dataset, status: "loading", manifest: null },
-    [dataset, routeReady],
+        : routeError
+          ? { ...dataset, status: "error", error: routeError, manifest: null }
+          : { ...dataset, status: "loading", manifest: null },
+    [dataset, routeReady, routeError],
   );
   return (
     <>

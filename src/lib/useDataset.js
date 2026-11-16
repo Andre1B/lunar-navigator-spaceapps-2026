@@ -6,6 +6,7 @@ export function useDataset() {
     sky: null,
     planets: null,
     sites: {},
+    siteErrors: {},
     validation: null,
     integrity: null,
     error: null,
@@ -22,8 +23,12 @@ export function useDataset() {
       for (const id of ids) pendingSites.current.add(id);
       return;
     }
+    const started = [];
     for (const id of ids) {
-      if (siteRequests.current.has(id)) continue;
+      if (siteRequests.current.has(id)) {
+        started.push(siteRequests.current.get(id));
+        continue;
+      }
       const entry = manifest.sites.find((x) => x.id === id);
       if (!entry) continue; // unknown ids never load anything
       const request = read(entry.file)
@@ -44,15 +49,26 @@ export function useDataset() {
             throw Error(
               "Dataset files do not match the declared heights or period. Reload to obtain a consistent release.",
             );
-          setState((s) => ({ ...s, sites: { ...s.sites, [id]: site } }));
+          setState((s) => {
+            const siteErrors = { ...s.siteErrors };
+            delete siteErrors[id];
+            return { ...s, sites: { ...s.sites, [id]: site }, siteErrors };
+          });
         })
         .catch((error) => {
+          // A failure belongs to that point only; pages that need it show it,
+          // others are unaffected. A later request retries.
           siteRequests.current.delete(id);
           if (error?.name !== "AbortError")
-            setState((s) => ({ ...s, status: "error", error: error.message }));
+            setState((s) => ({
+              ...s,
+              siteErrors: { ...s.siteErrors, [id]: error.message },
+            }));
         });
       siteRequests.current.set(id, request);
+      started.push(request);
     }
+    return Promise.all(started);
   }, []);
   // Sky and planet ephemerides (about 7 MB) feed only the 3D view, so they
   // load when it asks (loadSky), not with the comparison data every page needs.
