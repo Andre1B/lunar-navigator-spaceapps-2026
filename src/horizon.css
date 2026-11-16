@@ -1266,3 +1266,11 @@ input[type="range"] {
 .review-charts .review-bars {
   margin: 0;
 }
+
+/* Small print stays legible and never sits glued to the controls above it. */
+.caption {
+  font-size: 13px;
+}
+* + .caption {
+  margin-top: 12px;
+}

@@ -94,15 +94,48 @@ function HorizonPanel({ site, height, rows, period, compact }) {
     eHi = Math.ceil(Math.max(...els) + 0.4);
   const pw = W - pad.l - pad.r,
     ph = H - pad.t - pad.b;
-  const X = (a) => pad.l + ((a - lo) / (hi - lo)) * pw,
+  // Visible azimuth window (zoom and pan); the data never change.
+  const [win, setWin] = useState(null),
+    [drag, setDrag] = useState(null);
+  const valid = win && win.lo === lo && win.hi === hi;
+  const vlo = valid ? win.a : lo,
+    vhi = valid ? win.b : hi;
+  const zoomed = vhi - vlo < hi - lo - 1e-9;
+  const setRange = (a, b) => {
+    const w = Math.min(hi - lo, Math.max(4, b - a));
+    const s = Math.min(Math.max(lo, a), hi - w);
+    setWin({ lo, hi, a: s, b: s + w });
+  };
+  const zoomAt = (f, at = (vlo + vhi) / 2) =>
+    setRange(at - (at - vlo) * f, at + (vhi - at) * f);
+  const panBy = (d) => setRange(vlo + d, vhi + d);
+  const azAtClient = (el, clientX) => {
+    const box = el.getBoundingClientRect();
+    return vlo + ((((clientX - box.left) / box.width) * W - pad.l) / pw) * (vhi - vlo);
+  };
+  const X = (a) => pad.l + ((a - vlo) / (vhi - vlo)) * pw,
     Y = (e) => pad.t + ((eHi - e) / (eHi - eLo)) * ph;
-  const exaggeration = ph / (eHi - eLo) / (pw / (hi - lo));
+  const exaggeration = ph / (eHi - eLo) / (pw / (vhi - vlo));
+  const plot = useRef(null),
+    onWheel = useRef(null);
+  onWheel.current = (e) => {
+    if (!zoomed && e.deltaY > 0) return;
+    e.preventDefault();
+    zoomAt(e.deltaY < 0 ? 0.8 : 1.25, azAtClient(plot.current, e.clientX));
+  };
+  useEffect(() => {
+    const el = plot.current;
+    if (!el) return;
+    const handler = (e) => onWheel.current(e);
+    el.addEventListener("wheel", handler, { passive: false });
+    return () => el.removeEventListener("wheel", handler);
+  }, []);
   const ridgePath = ridge
     .map(([a, e], i) => `${i ? "L" : "M"}${X(a).toFixed(1)},${Y(e).toFixed(1)}`)
     .join("");
   const azStep = compact ? 30 : 10;
   const azTicks = [];
-  for (let a = Math.ceil(lo / azStep) * azStep; a <= hi; a += azStep)
+  for (let a = Math.ceil(vlo / azStep) * azStep; a <= vhi; a += azStep)
     azTicks.push(a);
   const elTicks = [];
   for (let e = eLo; e <= eHi; e++) elTicks.push(e);
@@ -171,11 +204,63 @@ function HorizonPanel({ site, height, rows, period, compact }) {
     d1 = day(timeAt(period, rows[1].bounds.start));
   return (
     <figure className="hl-horizon">
+      <div className="chart-tools" role="group" aria-label="Sky path view">
+        <button type="button" onClick={() => zoomAt(0.5)} disabled={vhi - vlo <= 4}>
+          Zoom in
+        </button>
+        <button type="button" onClick={() => zoomAt(2)} disabled={!zoomed}>
+          Zoom out
+        </button>
+        <button type="button" onClick={() => setWin(null)} disabled={!zoomed}>
+          Reset
+        </button>
+        <span className="chart-window">
+          Azimuth {Math.round(((vlo % 360) + 360) % 360)}° to{" "}
+          {Math.round(((vhi % 360) + 360) % 360)}° · wheel or +/− to zoom, drag
+          or arrows to pan
+        </span>
+      </div>
       <svg
+        ref={plot}
         viewBox={`0 0 ${W} ${H}`}
         role="img"
-        aria-label={`Computed terrain horizon around ${rows[0].id.replace(/-/g, " ")} at ${height} m, azimuth ${lo} to ${hi} degrees, with the Sun's position every 3 hours during the stay arriving ${d0} and the stay arriving ${d1}.`}
+        tabIndex={0}
+        className={"chart-interactive" + (drag ? " dragging" : "")}
+        aria-label={`Computed terrain horizon around ${rows[0].id.replace(/-/g, " ")} at ${height} m, azimuth ${lo} to ${hi} degrees, with the Sun's position every 3 hours during the stay arriving ${d0} and the stay arriving ${d1}. Interactive: plus and minus zoom, left and right arrows pan, 0 resets.`}
+        onKeyDown={(e) => {
+          const step = (vhi - vlo) / 8;
+          const act = {
+            "+": () => zoomAt(0.5),
+            "=": () => zoomAt(0.5),
+            "-": () => zoomAt(2),
+            0: () => setWin(null),
+            ArrowLeft: () => panBy(-step),
+            ArrowRight: () => panBy(step),
+          }[e.key];
+          if (act) {
+            e.preventDefault();
+            act();
+          }
+        }}
+        onPointerDown={(e) => {
+          if (!zoomed) return;
+          e.currentTarget.setPointerCapture?.(e.pointerId);
+          setDrag({ x: e.clientX, a: vlo, b: vhi });
+        }}
+        onPointerMove={(e) => {
+          if (!drag) return;
+          const box = e.currentTarget.getBoundingClientRect();
+          const d = ((drag.x - e.clientX) / box.width) * (W / pw) * (drag.b - drag.a);
+          setRange(drag.a + d, drag.b + d);
+        }}
+        onPointerUp={() => setDrag(null)}
+        onPointerCancel={() => setDrag(null)}
       >
+        <defs>
+          <clipPath id="hl-horizon-plot">
+            <rect x={pad.l} y={0} width={pw} height={H} />
+          </clipPath>
+        </defs>
         {elTicks.map((e) => (
           <g key={e}>
             <line
@@ -191,6 +276,7 @@ function HorizonPanel({ site, height, rows, period, compact }) {
             </text>
           </g>
         ))}
+        <g clipPath="url(#hl-horizon-plot)">
         <path
           className="hl-terrain"
           d={`${ridgePath}L${X(hi)},${H - pad.b}L${X(lo)},${H - pad.b}Z`}
@@ -258,6 +344,7 @@ function HorizonPanel({ site, height, rows, period, compact }) {
             </g>
           );
         })}
+        </g>
       </svg>
       <figcaption className="hl-legend">
         <span>
