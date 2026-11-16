@@ -1,6 +1,6 @@
 # Lunacline — lunar arrival comparison
 
-*(formerly Lunar Navigator; the URLs and repository name are unchanged)*
+*(formerly Lunar Navigator; the app now lives at https://lunacline.pages.dev and the repository name is unchanged)*
 
 **If a lunar landing is delayed, does the original location still offer useful sunlight and direct Earth visibility?**
 
@@ -15,10 +15,10 @@ Team An0r4k’s NASA Space Apps 2026 educational prototype for [Lunar Landing Si
 - Faithful Mode: shared astronomical time.
 - Free Mode: independently freeze selected body positions/orientations; experimental configurations never supply mission recommendations.
 - Explore space: hide the surrounding interface; return with the visible control or Escape.
-- [Three-minute review](https://lunar-navigator-2026.pages.dev/#/review): question, current scenario results and executed evidence, with direct navigation to every tool.
+- [Three-minute review](https://lunacline.pages.dev/#/review): question, current scenario results and executed evidence, with direct navigation to every tool.
 - Compare: editable example darkness limit, lower-bound-aware feedback and a downloadable JSON recording the same results, provenance, derived-data hashes and build identity.
 
-Data covers six points on published polar terrain (two published region centroids and four points selected by us, including two nearby fixed-offset neighbors), 2027-03-01 through 2027-04-28, observer heights 1/5 m. Locations are **not selected/certified landing sites**. Window comparisons use visible solar fractions, darkness intervals and direct Earth visibility. Out-of-coverage windows are not calculated.
+Data covers six points on published polar terrain (two published region centroids and four points selected by us, including two nearby fixed-offset neighbors), a rolling period of one calendar year before and after the latest daily refresh (exact dates in data/manifest.json and on Compare), observer heights 0.5, 1, 2, 5 and 10 m. Locations are **not selected/certified landing sites**. Window comparisons use visible solar fractions, darkness intervals and direct Earth visibility. Out-of-coverage windows are not calculated.
 
 ## Run locally
 
@@ -58,8 +58,8 @@ AI-assisted research, code, explanatory text, documentation and verification are
 
 - [HTML summary](public/summary.html)
 - [Plain-text summary](public/summary.txt)
-- [Six-slide public demo](https://lunar-navigator-2026.pages.dev/demo/)
-- [29-second demo video](https://lunar-navigator-2026.pages.dev/demo/lunar-navigator-demo.mp4) with [English captions (SRT)](https://lunar-navigator-2026.pages.dev/demo/lunar-navigator-demo.en.srt)
+- [Six-slide public demo](https://lunacline.pages.dev/demo/)
+- [29-second demo video](https://lunacline.pages.dev/demo/lunar-navigator-demo.mp4) with [English captions (SRT)](https://lunacline.pages.dev/demo/lunar-navigator-demo.en.srt)
 - [Executed release verification](docs/VERIFICATION.md)
 - [Machine-readable release evidence](docs/release-evidence.json)
 - [Production checkpoint / ownership](docs/PROGRESS.md)

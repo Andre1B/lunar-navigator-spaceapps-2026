@@ -611,8 +611,8 @@ export async function createComparisonPdf(
     { size: 9 },
   );
   paragraph(
-    "Full sources, acknowledgements and AI disclosure: https://lunar-navigator-2026.pages.dev/#/credits",
-    { url: "https://lunar-navigator-2026.pages.dev/#/credits", size: 9 },
+    "Full sources, acknowledgements and AI disclosure: https://lunacline.pages.dev/#/credits",
+    { url: "https://lunacline.pages.dev/#/credits", size: 9 },
   );
   const total = doc.getNumberOfPages();
   for (let n = 1; n <= total; n++) {

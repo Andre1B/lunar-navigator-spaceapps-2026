@@ -4,12 +4,12 @@
 
 ## Read the project
 
-- [Plain-text summary](https://lunar-navigator-2026.pages.dev/summary.txt): scope, workflows, methods and limitations.
-- [HTML summary](https://lunar-navigator-2026.pages.dev/summary.html): human-readable project overview.
-- [Dataset manifest](https://lunar-navigator-2026.pages.dev/data/manifest.json): conventions, coverage, products and checksums.
-- [Validation](https://lunar-navigator-2026.pages.dev/data/validation.json): executed scientific checks and their caveats.
-- [Credits](https://lunar-navigator-2026.pages.dev/credits.json): third-party software inventory.
-- [AI assistance](https://lunar-navigator-2026.pages.dev/ai-use.json): factual assistance disclosure and unresolved interpretation of earlier ideation.
+- [Plain-text summary](https://lunacline.pages.dev/summary.txt): scope, workflows, methods and limitations.
+- [HTML summary](https://lunacline.pages.dev/summary.html): human-readable project overview.
+- [Dataset manifest](https://lunacline.pages.dev/data/manifest.json): conventions, coverage, products and checksums.
+- [Validation](https://lunacline.pages.dev/data/validation.json): executed scientific checks and their caveats.
+- [Credits](https://lunacline.pages.dev/credits.json): third-party software inventory.
+- [AI assistance](https://lunacline.pages.dev/ai-use.json): factual assistance disclosure and unresolved interpretation of earlier ideation.
 - [Source repository](https://github.com/Andre1B/lunar-navigator-spaceapps-2026): original Apache-2.0 code and third-party notices.
 
 Original code licensing does not relicense scientific datasets, images, official brand assets or third-party packages. Cite their original sources and preserve their applicable notices. Free Mode configurations are artificial and cannot support real mission recommendations. A visibility fraction is not a radio link or power budget. No NASA endorsement is claimed.
