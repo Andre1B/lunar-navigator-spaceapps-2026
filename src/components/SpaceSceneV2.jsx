@@ -148,10 +148,6 @@ export default function SpaceSceneV2({
       lastPublishedObservationKey = "",
       lastPublishedContext = "";
     const frameInterval = 1000 / (mobile ? 60 : 120);
-    // On phones, unattended playback (a slow time-lapse) is drawn at 30 fps,
-    // halving GPU and main-thread work; any drag or pinch restores 60 fps.
-    const playbackInterval = mobile ? 1000 / 30 : frameInterval;
-    let dragging = false;
     let terrainGrid = null,
       terrainTile = null,
       surfaceAnchorSite = "",
@@ -1019,11 +1015,7 @@ export default function SpaceSceneV2({
       if (Number.isFinite(lastFrameAt))
         frameCredit = Math.min(
           2,
-          frameCredit +
-            (now - lastFrameAt) /
-              (p.playing && !dragging && !transition
-                ? playbackInterval
-                : frameInterval),
+          frameCredit + (now - lastFrameAt) / frameInterval,
         );
       lastFrameAt = now;
       if (frameCredit < 0.98) {
@@ -1809,8 +1801,6 @@ export default function SpaceSceneV2({
       transition = null;
     };
     controls.addEventListener("start", cancelTransition);
-    controls.addEventListener("start", () => (dragging = true));
-    controls.addEventListener("end", () => (dragging = false));
     const resize = new ResizeObserver(() => {
       renderer.setSize(el.clientWidth, el.clientHeight, false);
       camera.aspect = el.clientWidth / Math.max(1, el.clientHeight);
