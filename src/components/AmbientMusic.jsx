@@ -105,7 +105,9 @@ export default function AmbientMusic() {
   }
   useEffect(() => {
     mounted.current = true;
-    requestPlayback();
+    // Before any user gesture the browser would refuse (and warn about) a new
+    // AudioContext; the unlock listeners below start it on the first one.
+    if (navigator.userActivation?.hasBeenActive !== false) requestPlayback();
     const unlock = (event) => {
       if (event.target?.closest?.(".music-toggle")) return;
       if (

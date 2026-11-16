@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { comparisonRows } from "../lib/comparisonReport.mjs";
 import { horizonAt, percent, timeAt, windowBounds } from "../lib/analysis.mjs";
 
@@ -534,6 +534,23 @@ function ClearanceChart({ dataset, rows, height, names }) {
           .replace("T", " ") + " UTC"
       : null;
   const zoomed = span < n;
+  // React registers wheel listeners as passive, so preventDefault would be
+  // ignored; attach a native non-passive one that always sees fresh state.
+  const plot = useRef(null),
+    onWheel = useRef(null);
+  onWheel.current = (e) => {
+    // Let the page scroll past an unzoomed chart when scrolling outward.
+    if (!zoomed && e.deltaY > 0) return;
+    e.preventDefault();
+    zoom(e.deltaY < 0 ? 0.8 : 1.25, toK(e));
+  };
+  useEffect(() => {
+    const el = plot.current;
+    if (!el) return;
+    const handler = (e) => onWheel.current(e);
+    el.addEventListener("wheel", handler, { passive: false });
+    return () => el.removeEventListener("wheel", handler);
+  }, []);
   return (
     <figure className="hl-clearance">
       <h3 className="hl-kicker">
@@ -562,11 +579,7 @@ function ClearanceChart({ dataset, rows, height, names }) {
         aria-label={`${summary.join(" ")} Interactive: left and right arrows move the readout by one hour (Shift: one day), plus and minus zoom, 0 resets.`}
         className={"chart-interactive" + (drag ? " dragging" : "")}
         onKeyDown={onKey}
-        onWheel={(e) => {
-          if (!e.ctrlKey && !e.altKey && !zoomed && e.deltaY > 0) return;
-          e.preventDefault();
-          zoom(e.deltaY < 0 ? 0.8 : 1.25, toK(e));
-        }}
+        ref={plot}
         onPointerDown={(e) => {
           e.currentTarget.setPointerCapture?.(e.pointerId);
           setDrag({ x: e.clientX, k0, k1, moved: false });
