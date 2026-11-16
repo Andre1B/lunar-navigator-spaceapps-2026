@@ -10,6 +10,8 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const BASE = (process.env.QA_URL || 'http://localhost:5173').replace(/\/$/, '');
 const OUT = process.env.QA_OUT ? resolve(process.env.QA_OUT) : resolve(ROOT, '..', 'tmp', 'surface-edge-capture');
 const SOURCE_REVISION = process.env.QA_REVISION || '9790e01 (working baseline before surfaceVisual edge patch)';
+const DPR = Number(process.env.QA_DPR || 1);
+const PLAY_MS = Math.max(0, Number(process.env.QA_PLAY_MS || 0));
 const EXE = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 mkdirSync(OUT, { recursive: true });
 
@@ -28,7 +30,7 @@ const errors = [];
 try {
   const context = await browser.newContext({
     viewport: { width: 1440, height: 900 },
-    deviceScaleFactor: 1,
+    deviceScaleFactor: DPR,
     reducedMotion: 'no-preference',
   });
   const page = await context.newPage();
@@ -95,12 +97,59 @@ try {
       snapshot,
     };
   });
-  if (state.viewport.width !== 1440 || state.viewport.dpr !== 1) throw new Error(`unexpected viewport/DPR: ${JSON.stringify(state.viewport)}`);
+  if (state.viewport.width !== 1440 || state.viewport.dpr !== DPR) throw new Error(`unexpected viewport/DPR: ${JSON.stringify(state.viewport)}`);
   if (state.selectedSite !== 'connecting-ridge' || state.selectedHeightM !== 1) throw new Error(`unexpected site/height: ${state.selectedSite}/${state.selectedHeightM}`);
   if (state.snapshot?.rendered?.view !== 'sky' || Math.abs(state.snapshot.index - 8765) >= 0.01) throw new Error(`unexpected scene state: ${JSON.stringify(state.snapshot?.rendered)}`);
 
   const screenshot = join(OUT, 'surface-sky-horizon-canvas.png');
-  await page.locator('.space-canvas canvas').screenshot({ path: screenshot, timeout: 15000 });
+  await page.locator('.space-canvas canvas').screenshot({ path: screenshot, scale: 'css', timeout: 15000 });
+  let playbackTrace = null;
+  if (PLAY_MS > 0) {
+    await page.getByRole('button', { name: 'Play', exact: true }).click();
+    playbackTrace = await page.evaluate(async (durationMs) => {
+      const canvas = document.querySelector('.space-canvas canvas') || document.querySelector('canvas');
+      const startMs = performance.now();
+      const samples = [];
+      const read = () => {
+        const snapshot = canvas?.lunarSnapshot?.();
+        const rendered = snapshot?.rendered;
+        if (rendered) {
+          samples.push({
+            elapsedMs: Math.round((performance.now() - startMs) * 10) / 10,
+            serial: rendered.serial,
+            frameTimeMs: rendered.frameTimeMs,
+            index: snapshot.index,
+            presentedIndex: rendered.presentedIndex,
+            renderScale: rendered.renderScale,
+            terrainDetail: rendered.terrainDetail,
+            fpsLimit: rendered.fpsLimit,
+          });
+        }
+      };
+      read();
+      while (performance.now() - startMs < durationMs) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        read();
+      }
+      const first = samples[0];
+      const last = samples.at(-1);
+      const gaps = samples.slice(1).map((entry, index) => entry.serial - samples[index].serial);
+      return {
+        durationMs: Math.round((performance.now() - startMs) * 10) / 10,
+        changedDraws: first && last ? last.serial - first.serial : 0,
+        measuredDrawFps: first && last && last.elapsedMs > first.elapsedMs
+          ? Math.round((last.serial - first.serial) * 10000 / (last.elapsedMs - first.elapsedMs)) / 10
+          : 0,
+        drawsPer100msMinMax: gaps.length ? [Math.min(...gaps), Math.max(...gaps)] : [],
+        renderScales: [...new Set(samples.map((entry) => entry.renderScale))],
+        terrainDetails: [...new Set(samples.map((entry) => entry.terrainDetail))],
+        indexRange: first && last ? [first.index, last.index] : [],
+        presentedIndexRange: first && last ? [first.presentedIndex, last.presentedIndex] : [],
+        samples,
+      };
+    }, PLAY_MS);
+    await page.getByRole('button', { name: 'Pause', exact: true }).click();
+  }
   const report = {
     capturedAt: new Date().toISOString(),
     sourceRevision: SOURCE_REVISION,
@@ -108,10 +157,11 @@ try {
     args: [],
     state,
     screenshot,
+    playbackTrace,
     errors,
   };
   writeFileSync(join(OUT, 'results.json'), `${JSON.stringify(report, null, 2)}\n`);
-  console.log(JSON.stringify({ browser: report.browser, sourceRevision: report.sourceRevision, webgl: state.webgl, site: state.selectedSite, heightM: state.selectedHeightM, view: state.snapshot?.rendered?.view, baseIndex: state.snapshot?.index, presentedIndex: state.snapshot?.rendered?.presentedIndex, screenshot, errors }));
+  console.log(JSON.stringify({ browser: report.browser, sourceRevision: report.sourceRevision, webgl: state.webgl, site: state.selectedSite, heightM: state.selectedHeightM, view: state.snapshot?.rendered?.view, baseIndex: state.snapshot?.index, presentedIndex: state.snapshot?.rendered?.presentedIndex, renderScale: state.snapshot?.rendered?.renderScale, screenshot, playbackTrace: playbackTrace && { durationMs: playbackTrace.durationMs, changedDraws: playbackTrace.changedDraws, measuredDrawFps: playbackTrace.measuredDrawFps, renderScales: playbackTrace.renderScales, terrainDetails: playbackTrace.terrainDetails, indexRange: playbackTrace.indexRange }, errors }));
   await context.close();
 } finally {
   await browser.close();
