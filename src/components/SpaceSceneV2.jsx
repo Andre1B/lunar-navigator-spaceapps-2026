@@ -164,7 +164,11 @@ export default function SpaceSceneV2({
       );
       return;
     }
-    const basePixelRatio = Math.min(devicePixelRatio, mobile ? 1.25 : 1.5);
+    // Supersample desktop edges, including the low Surface-sky horizon.
+    // Keep the mobile budget and the measured GPU fallback unchanged.
+    const basePixelRatio = mobile
+      ? Math.min(devicePixelRatio, 1.25)
+      : Math.min(2, Math.max(devicePixelRatio, 1.5));
     renderer.setPixelRatio(basePixelRatio);
     // Adaptive resolution: when the GPU cannot hold a smooth frame rate, draw
     // fewer pixels. Only sharpness changes; geometry, data, occlusion and the
