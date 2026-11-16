@@ -432,6 +432,7 @@ function Compare({
               dataset={dataset}
               rows={rows}
               height={Number(settings.height)}
+              onInspect={onInspect}
             />
             <ShareComparison
               settings={settings}

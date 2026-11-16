@@ -529,7 +529,7 @@ function Ledger({ dataset, rows, height, names }) {
 // horizon in its direction, hour by hour, for each scenario on a common
 // elapsed-time axis. Same site files and horizon as every other figure.
 // Zoom and pan change only the visible time window, never the values.
-function ClearanceChart({ dataset, rows, height, names }) {
+function ClearanceChart({ dataset, rows, height, names, onInspect }) {
   const compact = useCompact();
   const key = String(height),
     W = compact ? 400 : 1360,
@@ -739,6 +739,24 @@ function ClearanceChart({ dataset, rows, height, names }) {
               )
               .join(" · ") + ` (hour ${cursor} after arrival)`}
       </p>
+      {onInspect && cursor !== null ? (
+        <div className="chart-tools" role="group" aria-label="Inspect this instant in 3D">
+          <span className="chart-window">Inspect this instant in 3D:</span>
+          {rows.map((r, j) =>
+            cursor < series[j].length ? (
+              <button
+                key={j}
+                type="button"
+                onClick={() =>
+                  onInspect({ id: r.id, bounds: { start: r.bounds.start + cursor } })
+                }
+              >
+                {"ABC"[j]} · {utcAt(j, cursor)}
+              </button>
+            ) : null,
+          )}
+        </div>
+      ) : null}
       <figcaption className="hl-legend">
         <span><i className="hl-key line ontime" /> A · {names[0]}</span>
         <span><i className="hl-key line late" /> B · {names[1]}</span>
@@ -760,7 +778,7 @@ function ClearanceChart({ dataset, rows, height, names }) {
 }
 
 // The same two figures for any comparison (used by Compare).
-export function LedgerFigures({ dataset, rows, height }) {
+export function LedgerFigures({ dataset, rows, height, onInspect }) {
   const compact = useCompact();
   const manifest = dataset?.manifest;
   if (!manifest || rows.length !== 3 || !rows.every((r) => r.bounds && r.summary))
@@ -784,7 +802,7 @@ export function LedgerFigures({ dataset, rows, height }) {
         compact={compact}
       />
       <Ledger dataset={dataset} rows={rows} height={height} names={names} />
-      <ClearanceChart dataset={dataset} rows={rows} height={height} names={names} />
+      <ClearanceChart dataset={dataset} rows={rows} height={height} names={names} onInspect={onInspect} />
     </section>
   );
 }
