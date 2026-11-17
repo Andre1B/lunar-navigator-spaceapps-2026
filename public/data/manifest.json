@@ -1,9 +1,9 @@
 {
  "schemaVersion": "1.0.0",
- "generatedAtUtc": "2026-11-16T00:35:50Z",
+ "generatedAtUtc": "2026-11-17T12:33:35Z",
  "period": {
-  "startUtc": "2025-11-16T00:00:00Z",
-  "endUtc": "2027-11-16T00:00:00Z",
+  "startUtc": "2025-11-17T00:00:00Z",
+  "endUtc": "2027-11-17T00:00:00Z",
   "stepMinutes": 60,
   "sampleCount": 17521
  },
@@ -16,7 +16,7 @@
  ],
  "coveragePolicy": {
   "mode": "rolling-calendar-years",
-  "asOfUtcDate": "2026-11-16",
+  "asOfUtcDate": "2026-11-17",
   "calendarYearsBefore": 1,
   "calendarYearsAfter": 1,
   "boundaryConvention": "Both UTC midnight endpoints included in sample arrays; interval durations exclude the final endpoint.",
@@ -230,6 +230,7 @@
     "build_planets.py": "37b63f01880027a48a7583c0f8490df6223055f1c743a1ae586ac505d1dc88c8",
     "build_scenes.py": "8dc4071d9a85125569c065b819909d0d9de2d778353414b79f54716dcc060f4e",
     "build_starmap.py": "017fac48bd74cf16bab5fbc97d1d303a0bc6d8ee44273eab0ea35ffcaa264cf0",
+    "build_terrain_patches.py": "39ad95bb28f7ff131513e79f569e7aa56122b89e73436fe1679c10ff1a6f9d99",
     "build_terrain_tiles.py": "2eae289db152320beff3bec791df2a01685fba327607cdb9f8ea0905b55a82bb",
     "build_visual_assets.py": "1ca37d45d06b90af1859c768cba1f6ec0cd66499f136eee2ef7ec2284db7edc9",
     "coverage.py": "fe4f7f5d5405c8bf41d1d899e6210518b6e1e3aaaaa01fc5e0424f9faf71423b",
