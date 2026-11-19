@@ -1,58 +1,58 @@
 {
  "schemaVersion": "1.0.0",
  "purpose": "Identify the exact derived dataset used by the app and by downloaded comparison reports. Hashes cover the files' current bytes; input data hashes are in manifest.provenance.",
- "hashedAtUtc": "2026-11-18T12:21:19Z",
- "manifestGeneratedAtUtc": "2026-11-18T12:20:51Z",
+ "hashedAtUtc": "2026-11-19T12:15:02Z",
+ "manifestGeneratedAtUtc": "2026-11-19T12:14:34Z",
  "files": [
   {
    "file": "manifest.json",
    "bytes": 13784,
-   "sha256": "7db71a0472d46e99c61e17b47cf90061524be5a00ba91a3ab1933f5bd4b700fe"
+   "sha256": "1fd842164c98ed179e38ecc37ae4aafdebcd9aa88e3c8b48354fe24984a3e247"
   },
   {
    "file": "sky.json",
-   "bytes": 2697161,
-   "sha256": "11a3eb9e0e291c036e0c137eb4eedb7925ff822a20f3b028b6b09cf1a4035f6e"
+   "bytes": 2697221,
+   "sha256": "35f66afda044955c94affaf8f253e2f8c6c37bfd27a59b6eed803362e9d8b698"
   },
   {
    "file": "planets.json",
-   "bytes": 4724607,
-   "sha256": "1df6fcebaa50d216cd47fc8cf4f276553a2924491167f747ffb6db5366b7443f"
+   "bytes": 4724511,
+   "sha256": "d96750d061ad5330f937eb3b35670d931fd7c69658aa0432a4ba1209a8cfa69d"
   },
   {
    "file": "validation.json",
    "bytes": 15224,
-   "sha256": "ad4dfd9be91b6172f2925560162fecd4a02076bdfcf3243d38ae1e4f1d10d1ba"
+   "sha256": "1bb38921ce109abbb6bc1e652bab3687744222b40976a91e1384d7e184718e0b"
   },
   {
    "file": "sites/connecting-ridge.json",
-   "bytes": 2699965,
-   "sha256": "85c32c8430a0a1f58196e99ab0fb952096fb7dadf855eaeaa4afeaa34f9cc041"
+   "bytes": 2699924,
+   "sha256": "fb7b1affba4794cc4367b190cecbd17e05a7c485d84478cae71cc772cd98fb92"
   },
   {
    "file": "sites/shackleton-rim.json",
-   "bytes": 2735163,
-   "sha256": "27ec5cafb39b1cadfba48dd8f6a8f2e35e5f5d30053cdadd202c4795e33fd339"
+   "bytes": 2735449,
+   "sha256": "5315401c2a1b1dcd5c38d6dc49577b66a1c23776c7a73f9d7cdf0e862a628044"
   },
   {
    "file": "sites/nobile-rim-1.json",
-   "bytes": 2667187,
-   "sha256": "0ed404cbb19514cea925e6034650f1d577de85da17e3f21dcfd2019fba49d502"
+   "bytes": 2667140,
+   "sha256": "6422a3d1020b52e4dd8d5d757b052292471cfa36a02ef584dc9dd7455ddbbd19"
   },
   {
    "file": "sites/malapert-massif.json",
-   "bytes": 2685196,
-   "sha256": "addc1207c6a4003971f56fabfbc5d92bdb9ca097e46449fdac84e440f7864465"
+   "bytes": 2685045,
+   "sha256": "1b146d8a707098527164764a121986352afb9321ceb94647bbb83c56c385811a"
   },
   {
    "file": "sites/connecting-neighbor.json",
-   "bytes": 2677623,
-   "sha256": "167f5ab442fdec36df451eb9c17b915450ad4d7f55bf402950b67111d36a4edb"
+   "bytes": 2677743,
+   "sha256": "72f3cf27cf0797ff90ecf05282d1198957894532c0f92b8dc4069742f7591da5"
   },
   {
    "file": "sites/shackleton-neighbor.json",
-   "bytes": 2714600,
-   "sha256": "b061ec758dc9b6a4397e98ad019ab148eddc1deb0211e533c6f775836021a780"
+   "bytes": 2714255,
+   "sha256": "10eab89d7b4d68bef49351bfcaf2adcbcf96e62d0438d62711e4bbb6eb19744a"
   }
  ],
  "generator": "scientific/hash_dataset.py"
