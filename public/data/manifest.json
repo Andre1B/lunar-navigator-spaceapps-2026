@@ -1,9 +1,9 @@
 {
  "schemaVersion": "1.0.0",
- "generatedAtUtc": "2026-11-20T12:16:46Z",
+ "generatedAtUtc": "2026-11-21T11:51:55Z",
  "period": {
-  "startUtc": "2025-11-20T00:00:00Z",
-  "endUtc": "2027-11-20T00:00:00Z",
+  "startUtc": "2025-11-21T00:00:00Z",
+  "endUtc": "2027-11-21T00:00:00Z",
   "stepMinutes": 60,
   "sampleCount": 17521
  },
@@ -16,7 +16,7 @@
  ],
  "coveragePolicy": {
   "mode": "rolling-calendar-years",
-  "asOfUtcDate": "2026-11-20",
+  "asOfUtcDate": "2026-11-21",
   "calendarYearsBefore": 1,
   "calendarYearsAfter": 1,
   "boundaryConvention": "Both UTC midnight endpoints included in sample arrays; interval durations exclude the final endpoint.",
